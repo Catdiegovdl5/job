@@ -30,3 +30,17 @@ To run it:
 ```bash
 python3 src/proposal_generator.py --platform <platform> --description "<project_description>"
 ```
+
+## Global Sentinel (Automated Workflow)
+The system is equipped with a Global Sentinel (`sentinel.py`) that runs automatically via GitHub Actions every 15 minutes.
+
+### How it works:
+1. **GitHub Action:** Scans feeds and alerts (simulated in `sentinel.py`).
+2. **Jules (Gemini API):** Processes leads and generates proposals using the S-Tier Technical Arsenal.
+3. **Commit:** Results are saved to `leads_ready.json` in the repository.
+4. **Opal Dashboard:** You can connect your Opal Dashboard to the raw JSON URL of `leads_ready.json`:
+   `https://raw.githubusercontent.com/<USER>/<REPO>/main/leads_ready.json`
+
+### Setup:
+- Add your `GEMINI_API_KEY` to GitHub Repository Secrets.
+- Ensure the GitHub Action has write permissions to the repository.
