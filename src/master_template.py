@@ -10,6 +10,7 @@ def scrape_url(url, batch_mode=False):
     """
     Scrapes the content of the given URL.
     Attempts to be smart by looking for article/main tags, falling back to body.
+    Includes specific logic for Freelancer.com project descriptions.
     """
     try:
         headers = {
@@ -20,33 +21,58 @@ def scrape_url(url, batch_mode=False):
 
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Smart scraping logic
-        content_tags = soup.find_all(['article', 'main'])
+        # Selectors for Freelancer.com and generic fallbacks
+        selectors = [
+            '.PageProjectView-description',
+            '.project-description',
+            '#project-description',
+            '[class*="ProjectView-description"]',
+            'article',
+            'main'
+        ]
 
         text_content = ""
+        found_valid_content = False
 
-        if content_tags:
-            for tag in content_tags:
-                # Extract text from p tags within the main content areas
-                paragraphs = tag.find_all('p')
-                if paragraphs:
-                    text_content += " ".join([p.get_text(strip=True) for p in paragraphs])
-                else:
-                    text_content += tag.get_text(strip=True) + " "
-        else:
-            # Fallback to body but try to avoid nav/footer if possible
-            # A simple approach is just grabbing all p tags from body
+        for selector in selectors:
+            content_tags = soup.select(selector)
+            if content_tags:
+                temp_text = ""
+                for tag in content_tags:
+                    paragraphs = tag.find_all('p')
+                    if paragraphs:
+                        temp_text += " ".join([p.get_text(strip=True) for p in paragraphs])
+                    else:
+                        temp_text += tag.get_text(strip=True) + " "
+
+                # Anti-Boilerplate Validation
+                if "by skill" in temp_text.lower() or "search for freelancers" in temp_text.lower():
+                    continue # Reject and try next selector
+
+                text_content = temp_text.strip()
+                if text_content:
+                    found_valid_content = True
+                    break
+
+        # Absolute fallback to body if no specific selector worked
+        if not found_valid_content:
             paragraphs = soup.body.find_all('p')
             if paragraphs:
-                text_content = " ".join([p.get_text(strip=True) for p in paragraphs])
-            else:
-                # Absolute fallback
-                text_content = soup.body.get_text(strip=True)
+                temp_text = " ".join([p.get_text(strip=True) for p in paragraphs])
+                if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
+                    text_content = temp_text
 
-        # Try to extract title for filename if possible, returns tuple
-        title = ""
+            if not text_content:
+                temp_text = soup.body.get_text(strip=True)
+                if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
+                     text_content = temp_text
+
+        # Clean Title
+        title = "seu projeto"
         if soup.title:
-            title = soup.title.get_text(strip=True)
+            raw_title = soup.title.get_text(strip=True)
+            # Remove common suffixes
+            title = raw_title.split(" | ")[0].split(" - ")[0]
 
         return text_content.strip(), title
 
@@ -82,10 +108,11 @@ def determine_core(description):
         # Fallback to Tech as a default or could be General
         return 'Tech'
 
-def generate_proposal(core, description):
+def generate_proposal(core, description, title="seu projeto"):
     """
     Generates the proposal content based on the determined core.
     Tone: INTJ (Logical, direct, ROI-focused).
+    Uses dynamic title in the hook.
     """
 
     # Common structure placeholders
@@ -95,19 +122,19 @@ def generate_proposal(core, description):
     cta = ""
 
     if core == 'Data':
-        hook = "Analisei a descrição do seu projeto e identifiquei uma necessidade crítica de estruturação e precisão nos dados."
+        hook = f"Vi sua vaga para {title} e identifiquei uma necessidade crítica de estruturação e precisão nos dados."
         authority = "Em um projeto recente ('Fluxo de Caixa Inteligente'), implementei um sistema que garantiu 100% de precisão na reconciliação de grandes volumes financeiros."
         solution = "Minha proposta é implementar uma arquitetura de dados à prova de falhas, automatizando o processamento e eliminando erros manuais para garantir que suas decisões sejam baseadas em fatos, não em suposições."
         cta = "Se você valoriza dados precisos e estruturados para escalar, aguardo seu contato."
 
     elif core == 'Tech':
-        hook = "Sua descrição aponta para um desafio que exige código performático e escalável, não apenas uma solução temporária."
+        hook = f"Vi sua vaga para {title} e identifiquei que o desafio exige código performático e escalável, não apenas uma solução temporária."
         authority = "Desenvolvi o 'Turbo Core', uma refatoração crítica que aumentou a performance do sistema em +40%, impactando diretamente a experiência do usuário final."
         solution = "Vou aplicar as mesmas práticas de engenharia de software para entregar uma solução robusta, focada em automação e eficiência (Python/Stack Tecnológico), garantindo ROI através da tecnologia."
         cta = "Vamos elevar o padrão técnico do seu projeto. Estou à disposição."
 
     elif core == 'Marketing':
-        hook = "Seu objetivo de tráfego e vendas exige uma estratégia agressiva focada em conversão, não apenas em métricas de vaidade."
+        hook = f"Vi sua vaga para {title} e identifiquei que seu objetivo de tráfego e vendas exige uma estratégia agressiva focada em conversão."
         authority = "Com o 'Lead Rescue 10s', criei automações que recuperam leads em segundos, maximizando drasticamente as taxas de conversão de campanhas."
         solution = "Minha abordagem integra tráfego pago com automação de vendas para garantir que cada lead gerado tenha o máximo potencial de fechamento, otimizando seu orçamento de mídia."
         cta = "Se busca resultados mensuráveis e crescimento de receita, vamos conversar agora."
@@ -175,7 +202,7 @@ def process_batch(filepath):
             print(f"[DEBUG] Texto Extraído: {description[:200]}...")
 
             core = determine_core(description)
-            proposal = generate_proposal(core, description)
+            proposal = generate_proposal(core, description, title)
 
             # Generate filename
             if title:
@@ -213,14 +240,15 @@ def main():
         sys.exit(0)
 
     description = ""
+    title = "seu projeto"
 
     if args.description:
         description = args.description
         print("[INFO] Usando descrição fornecida manualmente.")
     elif args.url:
         print(f"[INFO] Iniciando Web Scraping da URL: {args.url}")
-        description, _ = scrape_url(args.url)
-        print("[INFO] Texto extraído com sucesso.")
+        description, title = scrape_url(args.url)
+        print(f"[INFO] Texto extraído com sucesso. Título: {title}")
     else:
         print("[ERROR] Você deve fornecer --description, --url ou --file.")
         parser.print_help()
@@ -234,7 +262,7 @@ def main():
     print(f"[INFO] Núcleo Determinado: {core}")
 
     # 2. Generate Proposal
-    proposal = generate_proposal(core, description)
+    proposal = generate_proposal(core, description, title)
 
     # 3. Output to Screen
     print(proposal)
