@@ -57,15 +57,17 @@ def determine_core(description):
     # Keywords definitions
     data_keywords = ['excel', 'dados', 'financeiro', 'planilha']
     tech_keywords = ['performance', 'android', 'automação', 'python', 'tech']
-    marketing_keywords = ['ads', 'tráfego', 'vendas', 'marketing']
+    marketing_keywords = ['ads', 'tráfego', 'vendas', 'marketing', 'facebook', 'meta', 'instagram', 'google ads', 'tiktok', 'anúncios']
 
-    # Logic to determine core
-    if any(k in description_lower for k in data_keywords):
-        return 'Data'
+    # Priority Implementation: Marketing -> Tech -> Data
+    # "Strong Match" for Marketing keywords (Tráfego, Ads, Anúncios) implied by check order and expanded list
+
+    if any(k in description_lower for k in marketing_keywords):
+        return 'Marketing'
     elif any(k in description_lower for k in tech_keywords):
         return 'Tech'
-    elif any(k in description_lower for k in marketing_keywords):
-        return 'Marketing'
+    elif any(k in description_lower for k in data_keywords):
+        return 'Data'
     else:
         # Fallback to Tech as a default or could be General
         return 'Tech'
@@ -146,6 +148,9 @@ def main():
         print("[ERROR] Você deve fornecer --description ou --url.")
         parser.print_help()
         sys.exit(1)
+
+    # Debug Output
+    print(f"[DEBUG] Texto Extraído: {description[:200]}...")
 
     # 1. Determine Core
     core = determine_core(description)
