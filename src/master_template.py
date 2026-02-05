@@ -1,6 +1,52 @@
 import argparse
 import sys
 import os
+import requests
+from bs4 import BeautifulSoup
+
+def scrape_url(url):
+    """
+    Scrapes the content of the given URL.
+    Attempts to be smart by looking for article/main tags, falling back to body.
+    """
+    try:
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+
+        soup = BeautifulSoup(response.text, 'html.parser')
+
+        # Smart scraping logic
+        content_tags = soup.find_all(['article', 'main'])
+
+        text_content = ""
+
+        if content_tags:
+            for tag in content_tags:
+                # Extract text from p tags within the main content areas
+                paragraphs = tag.find_all('p')
+                if paragraphs:
+                    text_content += " ".join([p.get_text(strip=True) for p in paragraphs])
+                else:
+                    text_content += tag.get_text(strip=True) + " "
+        else:
+            # Fallback to body but try to avoid nav/footer if possible
+            # A simple approach is just grabbing all p tags from body
+            paragraphs = soup.body.find_all('p')
+            if paragraphs:
+                text_content = " ".join([p.get_text(strip=True) for p in paragraphs])
+            else:
+                # Absolute fallback
+                text_content = soup.body.get_text(strip=True)
+
+        return text_content.strip()
+
+    except Exception as e:
+        print(f"\n[ERROR] Falha ao acessar a URL: {e}")
+        print("Por favor, rode o comando novamente usando a flag --description e cole o texto manualmente.")
+        sys.exit(1)
 
 def determine_core(description):
     """
@@ -82,11 +128,24 @@ def save_proposal(content, filename="ultima_proposta.txt"):
 
 def main():
     parser = argparse.ArgumentParser(description="Proposals Architect S-Tier - Master Template")
-    parser.add_argument("--description", required=True, help="Descrição da vaga/projeto")
+    parser.add_argument("--description", help="Descrição da vaga/projeto (Prioridade sobre URL)")
+    parser.add_argument("--url", help="URL da vaga para extração automática")
 
     args = parser.parse_args()
 
-    description = args.description
+    description = ""
+
+    if args.description:
+        description = args.description
+        print("[INFO] Usando descrição fornecida manualmente.")
+    elif args.url:
+        print(f"[INFO] Iniciando Web Scraping da URL: {args.url}")
+        description = scrape_url(args.url)
+        print("[INFO] Texto extraído com sucesso.")
+    else:
+        print("[ERROR] Você deve fornecer --description ou --url.")
+        parser.print_help()
+        sys.exit(1)
 
     # 1. Determine Core
     core = determine_core(description)
