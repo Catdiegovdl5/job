@@ -3,8 +3,10 @@ import sys
 import os
 import requests
 from bs4 import BeautifulSoup
+import re
+from datetime import datetime
 
-def scrape_url(url):
+def scrape_url(url, batch_mode=False):
     """
     Scrapes the content of the given URL.
     Attempts to be smart by looking for article/main tags, falling back to body.
@@ -41,12 +43,20 @@ def scrape_url(url):
                 # Absolute fallback
                 text_content = soup.body.get_text(strip=True)
 
-        return text_content.strip()
+        # Try to extract title for filename if possible, returns tuple
+        title = ""
+        if soup.title:
+            title = soup.title.get_text(strip=True)
+
+        return text_content.strip(), title
 
     except Exception as e:
         print(f"\n[ERROR] Falha ao acessar a URL: {e}")
-        print("Por favor, rode o comando novamente usando a flag --description e cole o texto manualmente.")
-        sys.exit(1)
+        if not batch_mode:
+            print("Por favor, rode o comando novamente usando a flag --description e cole o texto manualmente.")
+            sys.exit(1)
+        else:
+            return None, None
 
 def determine_core(description):
     """
@@ -128,12 +138,79 @@ def save_proposal(content, filename="ultima_proposta.txt"):
     except Exception as e:
         print(f"\n[ERROR] Falha ao salvar o arquivo: {e}")
 
+def sanitize_filename(name):
+    """Sanitizes the filename to be safe for file systems."""
+    # Remove invalid characters
+    name = re.sub(r'[\\/*?:"<>|]', "", name)
+    # Replace spaces with underscores
+    name = name.replace(" ", "_")
+    # Truncate if too long
+    return name[:50]
+
+def process_batch(filepath):
+    """
+    Processes a list of URLs from a file.
+    """
+    if not os.path.exists(filepath):
+        print(f"[ERROR] Arquivo não encontrado: {filepath}")
+        sys.exit(1)
+
+    output_dir = "propostas_geradas"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        print(f"[INFO] Pasta '{output_dir}' criada.")
+
+    with open(filepath, 'r', encoding='utf-8') as f:
+        urls = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
+
+    total_generated = 0
+    total_urls = len(urls)
+
+    for i, url in enumerate(urls, 1):
+        print(f"[INFO] Processando URL {i} de {total_urls}...")
+
+        description, title = scrape_url(url, batch_mode=True)
+
+        if description:
+            print(f"[DEBUG] Texto Extraído: {description[:200]}...")
+
+            core = determine_core(description)
+            proposal = generate_proposal(core, description)
+
+            # Generate filename
+            if title:
+                safe_title = sanitize_filename(title)
+                filename = f"proposta_{safe_title}.txt"
+            else:
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                filename = f"proposta_{timestamp}.txt"
+
+            full_path = os.path.join(output_dir, filename)
+
+            try:
+                with open(full_path, "w", encoding="utf-8") as f:
+                    f.write(proposal)
+                print(f"[INFO] Salvo em: {full_path}")
+                total_generated += 1
+            except Exception as e:
+                print(f"[ERROR] Falha ao salvar proposta: {e}")
+
+        print("-" * 30)
+
+    print(f"Total de propostas geradas: {total_generated}")
+
 def main():
     parser = argparse.ArgumentParser(description="Proposals Architect S-Tier - Master Template")
     parser.add_argument("--description", help="Descrição da vaga/projeto (Prioridade sobre URL)")
     parser.add_argument("--url", help="URL da vaga para extração automática")
+    parser.add_argument("--file", help="Arquivo .txt com lista de URLs para processamento em lote")
 
     args = parser.parse_args()
+
+    if args.file:
+        print(f"[INFO] Iniciando Modo Batch com arquivo: {args.file}")
+        process_batch(args.file)
+        sys.exit(0)
 
     description = ""
 
@@ -142,10 +219,10 @@ def main():
         print("[INFO] Usando descrição fornecida manualmente.")
     elif args.url:
         print(f"[INFO] Iniciando Web Scraping da URL: {args.url}")
-        description = scrape_url(args.url)
+        description, _ = scrape_url(args.url)
         print("[INFO] Texto extraído com sucesso.")
     else:
-        print("[ERROR] Você deve fornecer --description ou --url.")
+        print("[ERROR] Você deve fornecer --description, --url ou --file.")
         parser.print_help()
         sys.exit(1)
 
