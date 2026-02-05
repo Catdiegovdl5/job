@@ -1,123 +1,119 @@
 import argparse
 import sys
 import os
-import requests
 from bs4 import BeautifulSoup
 import re
 from datetime import datetime
+from playwright.sync_api import sync_playwright
 
-def scrape_url(url, batch_mode=False):
+def scrape_url(page, url):
     """
-    Scrapes the content of the given URL.
+    Scrapes the content of the given URL using Playwright.
     Attempts to be smart by looking for article/main tags, falling back to body.
     Includes specific logic for Freelancer.com project descriptions.
     """
     print(f"[DEBUG] Iniciando scrape_url para: {url}")
-    # Removed broad try-except to allow debugging traceback
-    headers = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    }
-    response = requests.get(url, headers=headers, timeout=10)
-    response.raise_for_status()
 
-    soup = BeautifulSoup(response.text, 'html.parser')
+    try:
+        page.goto(url, timeout=60000)
+        # Try to wait for the primary description selector
+        try:
+            page.wait_for_selector('.PageProjectView-description', timeout=5000)
+        except:
+            print("[DEBUG] Primary selector wait timed out, proceeding with checking list...")
 
-    # Clean Title
-    title = "seu projeto"
-    if soup.title:
-        raw_title = soup.title.get_text(strip=True)
-        # Remove common suffixes
-        title = raw_title.split(" | ")[0].split(" - ")[0]
-        print(f"[DEBUG] Título capturado: {title}")
+        # Clean Title
+        title = page.title()
+        if title:
+            # Remove common suffixes
+            title = title.split(" | ")[0].split(" - ")[0]
+            print(f"[DEBUG] Título capturado: {title}")
+        else:
+            title = "seu projeto"
 
-    # Selectors for Freelancer.com and generic fallbacks
-    selectors = [
-        '.PageProjectView-description',
-        '.project-description',
-        '#project-description',
-        '[class*="ProjectView-description"]',
-        'div.project-description',
-        'section.JobDescription',
-        'article',
-        'main'
-    ]
+        # Selectors for Freelancer.com and generic fallbacks
+        selectors = [
+            '.PageProjectView-description',
+            '.project-description',
+            '#project-description',
+            '[class*="ProjectView-description"]',
+            'div.project-description',
+            'section.JobDescription',
+            'article',
+            'main'
+        ]
 
-    text_content = ""
-    found_valid_content = False
+        text_content = ""
+        found_valid_content = False
 
-    for selector in selectors:
-        print(f"[DEBUG] Tentando seletor: {selector}")
-        content_tags = soup.select(selector)
+        for selector in selectors:
+            print(f"[DEBUG] Tentando seletor: {selector}")
+            # Use query_selector_all via locator logic
+            # To get text, we check if it exists
+            if page.locator(selector).count() > 0:
+                # Get inner text of the first match or iterate?
+                # Usually description is one block. Let's try first.
+                # If multiple, maybe join them.
+                # For safety, let's grab all matching elements text
 
-        if content_tags:
-            temp_text = ""
-            for tag in content_tags:
-                paragraphs = tag.find_all('p')
-                if paragraphs:
-                    temp_text += " ".join([p.get_text(strip=True) for p in paragraphs])
-                else:
-                    temp_text += tag.get_text(strip=True) + " "
+                elements = page.locator(selector).all()
+                temp_text = ""
+                for el in elements:
+                    temp_text += el.inner_text() + " "
 
-            temp_text = temp_text.strip()
-            print(f"[DEBUG] Texto encontrado (len={len(temp_text)}) com seletor '{selector}'.")
+                temp_text = temp_text.strip()
+                print(f"[DEBUG] Texto encontrado (len={len(temp_text)}) com seletor '{selector}'.")
 
-            # Anti-Boilerplate Validation
-            bad_phrases = ["by skill", "search for freelancers"]
-            found_bad = False
-            for phrase in bad_phrases:
-                if phrase in temp_text.lower():
-                    found_bad = True
-                    if len(temp_text) > 500:
-                        # Partial Cleaning Logic
-                         print(f"[DEBUG] Tentando limpar boilerplate '{phrase}' de texto longo...")
-                         # Simple cleaning: remove lines containing the phrase
-                         lines = temp_text.split('\n')
-                         cleaned_lines = [line for line in lines if phrase not in line.lower()]
-                         temp_text = "\n".join(cleaned_lines).strip()
-                         if not temp_text: # If empty after clean, reject
-                             print(f"[WARN] Texto vazio após limpeza de boilerplate '{phrase}'.")
-                             found_bad = True # Treat as bad to try next selector
-                         else:
-                             print(f"[DEBUG] Texto limpo com sucesso. Novo tamanho: {len(temp_text)}")
-                             found_bad = False # It's acceptable now
-                    else:
-                        print(f"[WARN] Rejeitado: Boilerplate '{phrase}' detectado em texto curto.")
+                # Anti-Boilerplate Validation
+                bad_phrases = ["by skill", "search for freelancers"]
+                found_bad = False
+                for phrase in bad_phrases:
+                    if phrase in temp_text.lower():
+                        found_bad = True
+                        if len(temp_text) > 500:
+                            # Partial Cleaning Logic
+                             print(f"[DEBUG] Tentando limpar boilerplate '{phrase}' de texto longo...")
+                             # Simple cleaning: remove lines containing the phrase
+                             lines = temp_text.split('\n')
+                             cleaned_lines = [line for line in lines if phrase not in line.lower()]
+                             temp_text = "\n".join(cleaned_lines).strip()
+                             if not temp_text: # If empty after clean, reject
+                                 print(f"[WARN] Texto vazio após limpeza de boilerplate '{phrase}'.")
+                                 found_bad = True # Treat as bad to try next selector
+                             else:
+                                 print(f"[DEBUG] Texto limpo com sucesso. Novo tamanho: {len(temp_text)}")
+                                 found_bad = False # It's acceptable now
+                        else:
+                            print(f"[WARN] Rejeitado: Boilerplate '{phrase}' detectado em texto curto.")
+                        break
+
+                if found_bad:
+                    continue # Try next selector
+
+                text_content = temp_text
+                if text_content:
+                    found_valid_content = True
                     break
 
-            if found_bad:
-                continue # Try next selector
-
-            text_content = temp_text
-            if text_content:
-                found_valid_content = True
-                break
-
-    # Absolute fallback to body if no specific selector worked
-    if not found_valid_content:
-        print("[DEBUG] Tentando seletor de fallback: body (filtrado)")
-        paragraphs = soup.body.find_all('p')
-        if paragraphs:
-            temp_text = " ".join([p.get_text(strip=True) for p in paragraphs])
+        # Absolute fallback to body if no specific selector worked
+        if not found_valid_content:
+            print("[DEBUG] Tentando seletor de fallback: body (filtrado)")
+            temp_text = page.locator("body").inner_text()
             # Basic check again
             if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
                 text_content = temp_text
                 print(f"[DEBUG] Texto encontrado no body (len={len(text_content)})")
 
         if not text_content:
-            # Last resort
-            temp_text = soup.body.get_text(strip=True)
-            # Very basic check
-            if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
-                 text_content = temp_text
-                 print(f"[DEBUG] Texto bruto do body usado (len={len(text_content)})")
-
-    if not text_content:
-         print(f"[WARN] Proposta ignorada. URL: {url} | Motivo: Nenhum conteúdo válido encontrado após tentar todos seletores.")
-         if batch_mode:
+             print(f"[WARN] Proposta ignorada. URL: {url} | Motivo: Nenhum conteúdo válido encontrado após tentar todos seletores.")
              return None, None
 
-    return text_content.strip(), title
+        return text_content.strip(), title
 
+    except Exception as e:
+        print(f"\n[ERROR] Falha ao acessar a URL com Playwright: {e}")
+        # Re-raise to show in logs if needed, or return None
+        raise e
 
 def determine_core(description):
     """
@@ -211,7 +207,7 @@ def sanitize_filename(name):
 
 def process_batch(filepath):
     """
-    Processes a list of URLs from a file.
+    Processes a list of URLs from a file using Playwright (reusing browser).
     """
     print(f"[DEBUG] Entrou em process_batch com arquivo: {filepath}")
 
@@ -232,48 +228,55 @@ def process_batch(filepath):
     total_generated = 0
     total_urls = len(urls)
 
-    for i, url in enumerate(urls, 1):
-        print(f"[INFO] Processando URL {i} de {total_urls}...")
+    with sync_playwright() as p:
+        # Launch browser once
+        # HEADLESS_MODE is False for the 7 link test as requested
+        browser = p.chromium.launch(headless=False)
 
-        try:
-             # Call scrape_url directly, let it crash if needed (removed broad try-except inside scrape_url)
-             # But here in loop, we might want to catch to continue batch?
-             # User said: "remove os try/except silenciosos". So I will catch specific ones or let it crash to see trace.
-             # To be safe for batch but verbose:
-            description, title = scrape_url(url, batch_mode=True)
+        for i, url in enumerate(urls, 1):
+            print(f"[INFO] Processando URL {i} de {total_urls}...")
 
-            if description:
-                print(f"[DEBUG] Texto Extraído: {description[:200]}...")
+            context = browser.new_context()
+            page = context.new_page()
 
-                core = determine_core(description)
-                proposal = generate_proposal(core, description, title)
+            try:
+                description, title = scrape_url(page, url)
 
-                # Generate filename
-                if title:
-                    safe_title = sanitize_filename(title)
-                    filename = f"proposta_{safe_title}.txt"
-                else:
-                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-                    filename = f"proposta_{timestamp}.txt"
+                if description:
+                    print(f"[DEBUG] Texto Extraído: {description[:200]}...")
 
-                full_path = os.path.join(output_dir, filename)
+                    core = determine_core(description)
+                    proposal = generate_proposal(core, description, title)
 
-                try:
-                    with open(full_path, "w", encoding="utf-8") as f:
-                        f.write(proposal)
-                    print(f"[INFO] Salvo em: {full_path}")
-                    total_generated += 1
-                except Exception as e:
-                    print(f"[ERROR] Falha ao salvar proposta: {e}")
+                    # Generate filename
+                    if title:
+                        safe_title = sanitize_filename(title)
+                        filename = f"proposta_{safe_title}.txt"
+                    else:
+                        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                        filename = f"proposta_{timestamp}.txt"
 
-        except Exception as e:
-            # Catching here to show the trace but continue the batch IF desired,
-            # or just print error loudly.
-            print(f"[CRITICAL ERROR] Falha ao processar URL {url}: {e}")
-            import traceback
-            traceback.print_exc()
+                    full_path = os.path.join(output_dir, filename)
 
-        print("-" * 30)
+                    try:
+                        with open(full_path, "w", encoding="utf-8") as f:
+                            f.write(proposal)
+                        print(f"[INFO] Salvo em: {full_path}")
+                        total_generated += 1
+                    except Exception as e:
+                        print(f"[ERROR] Falha ao salvar proposta: {e}")
+
+            except Exception as e:
+                print(f"[CRITICAL ERROR] Falha ao processar URL {url}: {e}")
+                import traceback
+                traceback.print_exc()
+            finally:
+                page.close()
+                context.close()
+
+            print("-" * 30)
+
+        browser.close()
 
     print(f"Total de propostas geradas: {total_generated}")
 
@@ -299,9 +302,18 @@ def main():
     elif args.url:
         # Also unprotected call here
         try:
-            print(f"[INFO] Iniciando Web Scraping da URL: {args.url}")
-            description, title = scrape_url(args.url)
-            print(f"[INFO] Texto extraído com sucesso. Título: {title}")
+            print(f"[INFO] Iniciando Web Scraping da URL (Single Mode with Playwright): {args.url}")
+            # Single mode needs its own browser logic
+            with sync_playwright() as p:
+                browser = p.chromium.launch(headless=False)
+                context = browser.new_context()
+                page = context.new_page()
+                try:
+                    description, title = scrape_url(page, args.url)
+                    print(f"[INFO] Texto extraído com sucesso. Título: {title}")
+                finally:
+                    browser.close()
+
         except Exception as e:
             print(f"[CRITICAL ERROR] Falha na execução principal: {e}")
             import traceback
@@ -314,20 +326,21 @@ def main():
         sys.exit(1)
 
     # Debug Output
-    print(f"[DEBUG] Texto Extraído: {description[:200]}...")
+    if description:
+        print(f"[DEBUG] Texto Extraído: {description[:200]}...")
 
-    # 1. Determine Core
-    core = determine_core(description)
-    print(f"[INFO] Núcleo Determinado: {core}")
+        # 1. Determine Core
+        core = determine_core(description)
+        print(f"[INFO] Núcleo Determinado: {core}")
 
-    # 2. Generate Proposal
-    proposal = generate_proposal(core, description, title)
+        # 2. Generate Proposal
+        proposal = generate_proposal(core, description, title)
 
-    # 3. Output to Screen
-    print(proposal)
+        # 3. Output to Screen
+        print(proposal)
 
-    # 4. Save to File
-    save_proposal(proposal)
+        # 4. Save to File
+        save_proposal(proposal)
 
 if __name__ == "__main__":
     main()
