@@ -5,6 +5,34 @@ from bs4 import BeautifulSoup
 import re
 from datetime import datetime
 from playwright.sync_api import sync_playwright
+import requests
+
+def send_telegram_notification(message):
+    """
+    Sends a notification to Telegram using environment variables.
+    """
+    token = os.environ.get("TELEGRAM_TOKEN")
+    chat_id = os.environ.get("TELEGRAM_CHAT_ID")
+
+    if not token or not chat_id:
+        print("[WARN] Telegram credentials not found. Skipping alert.")
+        return
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": message,
+        "parse_mode": "Markdown"
+    }
+
+    try:
+        response = requests.post(url, json=payload, timeout=10)
+        if response.status_code != 200:
+            print(f"[ERROR] Failed to send Telegram alert: {response.text}")
+        else:
+            print("[INFO] Telegram alert sent successfully.")
+    except Exception as e:
+        print(f"[ERROR] Exception sending Telegram alert: {e}")
 
 def scrape_url(page, url):
     """
@@ -128,6 +156,7 @@ def determine_core(description, title=""):
     Determines the core (Data, Tech, Marketing) based on weighted keywords in description and title.
     Formula: Score = (Body_Count * Weight) + (Title_Count * Weight * 3)
     Weights: Strong=2, General=1.
+    Returns: (winner_core, max_score)
     """
     description_lower = description.lower()
     title_lower = title.lower() if title else ""
@@ -170,6 +199,8 @@ def determine_core(description, title=""):
     # Log Scoreboard
     print(f"[DEBUG] Scores Finais: Data={scores['Data']}, Tech={scores['Tech']}, Marketing={scores['Marketing']}")
 
+    max_score = max(scores.values())
+
     # Determine Winner
     # Tie-Breaker: Marketing > Tech > Data
     if scores['Marketing'] >= scores['Tech'] and scores['Marketing'] >= scores['Data'] and scores['Marketing'] > 0:
@@ -182,8 +213,8 @@ def determine_core(description, title=""):
         # Default Fallback if all 0 (or Tech preference)
         winner = 'Tech'
 
-    print(f"[DEBUG] Vencedor: {winner}")
-    return winner
+    print(f"[DEBUG] Vencedor: {winner} (Score: {max_score})")
+    return winner, max_score
 
 def generate_proposal(core, description, title="seu projeto"):
     """
@@ -210,7 +241,10 @@ def generate_proposal(core, description, title="seu projeto"):
                         f"Minha abordagem integra tráfego pago com automação de vendas para garantir que cada lead gerado tenha o máximo potencial de fechamento, otimizando seu orçamento de mídia.\n\n" \
                         f"Se busca resultados mensuráveis e crescimento de receita, vamos conversar agora."
 
-    return f"--- PROPOSTA GERADA (Núcleo: {core}) ---\n\n{proposal_text}"
+    # Sniper Footer
+    footer = "Note: I am a Top-Rated specialist with focus on high-performance ROI and scalable architecture."
+
+    return f"--- PROPOSTA GERADA (Núcleo: {core}) ---\n\n{proposal_text}\n\n{footer}"
 
 def save_proposal(content, filename="ultima_proposta.txt"):
     try:
@@ -269,8 +303,14 @@ def process_batch(filepath, visual_mode=False):
                 if description:
                     print(f"[DEBUG] Texto Extraído: {description[:200]}...")
 
-                    core = determine_core(description, title)
+                    core, max_score = determine_core(description, title)
                     proposal = generate_proposal(core, description, title)
+
+                    # Sniper Alert Check (> 70)
+                    if max_score > 70:
+                        print(f"[SNIPER ALERT] High Value Opportunity Detected! Score: {max_score}")
+                        msg = f"🎯 *Sniper Alert*\nJob: {title}\nCore: {core}\nScore: {max_score}\nURL: {url}"
+                        send_telegram_notification(msg)
 
                     if title:
                         safe_title = sanitize_filename(title)
@@ -350,8 +390,8 @@ def main():
 
     if description:
         print(f"[DEBUG] Texto Extraído: {description[:200]}...")
-        core = determine_core(description, title)
-        print(f"[INFO] Núcleo Determinado: {core}")
+        core, max_score = determine_core(description, title)
+        print(f"[INFO] Núcleo Determinado: {core} (Score: {max_score})")
         proposal = generate_proposal(core, description, title)
         print(proposal)
         save_proposal(proposal)

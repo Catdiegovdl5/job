@@ -3,6 +3,7 @@ import subprocess
 import os
 import sys
 import argparse
+import re
 
 # Configuration
 LINKS_FILE = "links.txt"
@@ -35,6 +36,69 @@ def calculate_score(text):
             matched_words.append(f"{word}(1)")
 
     return score, matched_words
+
+def check_payment_verified(card_element):
+    """Checks if the job card has the 'Payment Verified' badge."""
+    try:
+        # Locator for payment verified status inside the card
+        # This selector depends on Freelancer.com's structure.
+        # Often it's a specific icon or text.
+        # Searching for text "Payment Verified" or specific class.
+        text = card_element.inner_text()
+        if "Payment verified" in text or "VERIFIED" in text.upper():
+            return True
+        # Specific check for icon class if text is hidden/icon-only
+        # This is a guess, usually text is present in the card footer
+        return False
+    except:
+        return False
+
+def check_rating(card_element):
+    """Checks if the client rating is >= 4.5. If no rating, returns True (new client)."""
+    try:
+        # Look for rating element. Usually text like "5.0" or stars
+        # Text search for rating pattern "X.X"
+        text = card_element.inner_text()
+        rating_match = re.search(r"(\d\.\d)", text)
+        if rating_match:
+            rating = float(rating_match.group(1))
+            if rating < 4.5:
+                return False
+        return True # No rating found or rating is high enough
+    except:
+        return True
+
+def check_budget(card_element):
+    """Checks if budget meets criteria: Hourly >= $25, Fixed >= $150."""
+    try:
+        text = card_element.inner_text()
+        # Find budget text. Typically "$10 - $30 USD / hr" or "$250 USD"
+        # Extract numbers
+
+        # Check Hourly
+        if "/ hr" in text or "Hourly" in text:
+            # Find max rate in range "$10 - $30" -> 30
+            # or single "$25" -> 25
+            matches = re.findall(r"\$(\d+)", text)
+            if matches:
+                rates = [int(m) for m in matches]
+                min_rate = min(rates) # User said "Mínimo de $25/hr". Usually means min offered? Or max?
+                # "Hourly: Mínimo de $25/hr" - I'll assume if the range *starts* or is fixed at >= 25.
+                # Actually, let's be safe: if max rate < 25, reject. If max >= 25, it's a potential.
+                max_rate = max(rates)
+                if max_rate < 25:
+                    return False
+        else:
+            # Fixed Price
+            matches = re.findall(r"\$(\d+)", text)
+            if matches:
+                amounts = [int(m) for m in matches]
+                max_amount = max(amounts)
+                if max_amount < 150:
+                    return False
+        return True
+    except:
+        return True # Default to keep if parsing fails
 
 def scout_jobs(visual_mode=False):
     """
@@ -70,28 +134,46 @@ def scout_jobs(visual_mode=False):
 
                 # Attempt to find job cards
                 try:
-                    page.wait_for_selector('a.JobSearchCard-primary-heading-link', timeout=5000)
-                    job_links = page.locator('a.JobSearchCard-primary-heading-link').all()
+                    page.wait_for_selector('div.JobSearchCard-item', timeout=5000)
+                    job_cards = page.locator('div.JobSearchCard-item').all()
                 except:
                     # Fallback or different layout
                     print("[WARN] Seletor específico não encontrado, tentando busca genérica de links de projetos...")
-                    job_links = page.locator('a[href^="/projects/"]').all()
+                    # This fallback might miss the card details for filtering, so strictly we need cards.
+                    # Try another common selector for project cards
+                    job_cards = page.locator('div.JobSearchCard-item-inner').all()
 
-                print(f"[INFO] Encontrados {len(job_links)} potenciais vagas para '{query}'. Analisando...")
+                print(f"[INFO] Encontrados {len(job_cards)} potenciais vagas para '{query}'. Analisando...")
 
-                for link in job_links:
+                for card in job_cards:
                     try:
-                        title = link.inner_text().strip()
-                        href = link.get_attribute('href')
+                        # Extract Link and Title first
+                        link_el = card.locator('a.JobSearchCard-primary-heading-link').first
+                        if link_el.count() == 0:
+                            continue
+
+                        title = link_el.inner_text().strip()
+                        href = link_el.get_attribute('href')
 
                         # Fix relative URLs
                         if href and not href.startswith('http'):
                             href = f"https://www.freelancer.com{href}"
 
-                        # Get full card text for better scoring
-                        card = link.locator("xpath=../..")
-                        full_card_text = card.inner_text()
+                        # Apply Sniper Filters
+                        if not check_payment_verified(card):
+                            print(f"[REJEITADO] Payment Not Verified: {title}")
+                            continue
 
+                        if not check_rating(card):
+                            print(f"[REJEITADO] Low Rating: {title}")
+                            continue
+
+                        if not check_budget(card):
+                            print(f"[REJEITADO] Low Budget: {title}")
+                            continue
+
+                        # Calculate Score
+                        full_card_text = card.inner_text()
                         score, matched_words = calculate_score(full_card_text)
                         keywords_str = ", ".join(matched_words)
 
