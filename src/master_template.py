@@ -1,7 +1,6 @@
 import argparse
 import sys
 import os
-from bs4 import BeautifulSoup
 import re
 from datetime import datetime
 from playwright.sync_api import sync_playwright
@@ -10,12 +9,13 @@ import requests
 def send_telegram_notification(message):
     """
     Sends a notification to Telegram using environment variables.
+    Requires TELEGRAM_TOKEN and TELEGRAM_CHAT_ID to be set in the environment.
     """
     token = os.environ.get("TELEGRAM_TOKEN")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID")
 
     if not token or not chat_id:
-        print("[WARN] Telegram credentials not found. Skipping alert.")
+        print("[WARN] Telegram credentials not found in environment (TELEGRAM_TOKEN, TELEGRAM_CHAT_ID). Skipping alert.")
         return
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"

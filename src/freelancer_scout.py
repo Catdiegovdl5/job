@@ -4,6 +4,7 @@ import os
 import sys
 import argparse
 import re
+import time
 
 # Configuration
 LINKS_FILE = "links.txt"
@@ -40,15 +41,9 @@ def calculate_score(text):
 def check_payment_verified(card_element):
     """Checks if the job card has the 'Payment Verified' badge."""
     try:
-        # Locator for payment verified status inside the card
-        # This selector depends on Freelancer.com's structure.
-        # Often it's a specific icon or text.
-        # Searching for text "Payment Verified" or specific class.
         text = card_element.inner_text()
         if "Payment verified" in text or "VERIFIED" in text.upper():
             return True
-        # Specific check for icon class if text is hidden/icon-only
-        # This is a guess, usually text is present in the card footer
         return False
     except:
         return False
@@ -56,8 +51,6 @@ def check_payment_verified(card_element):
 def check_rating(card_element):
     """Checks if the client rating is >= 4.5. If no rating, returns True (new client)."""
     try:
-        # Look for rating element. Usually text like "5.0" or stars
-        # Text search for rating pattern "X.X"
         text = card_element.inner_text()
         rating_match = re.search(r"(\d\.\d)", text)
         if rating_match:
@@ -68,33 +61,44 @@ def check_rating(card_element):
     except:
         return True
 
+def parse_budget_values(text):
+    """Parses budget values from text, handling commas and ranges."""
+    # Regex matches digits with commas (e.g., 1,500) that follow a $
+    matches = re.findall(r"\$([\d,]+)", text)
+    if not matches:
+        return []
+
+    values = []
+    for m in matches:
+        try:
+            # Remove comma and convert to int
+            val = int(m.replace(",", ""))
+            values.append(val)
+        except:
+            continue
+    return values
+
 def check_budget(card_element):
-    """Checks if budget meets criteria: Hourly >= $25, Fixed >= $150."""
+    """Checks if budget meets criteria: Hourly >= $30, Fixed >= $200."""
     try:
         text = card_element.inner_text()
-        # Find budget text. Typically "$10 - $30 USD / hr" or "$250 USD"
-        # Extract numbers
 
         # Check Hourly
         if "/ hr" in text or "Hourly" in text:
-            # Find max rate in range "$10 - $30" -> 30
-            # or single "$25" -> 25
-            matches = re.findall(r"\$(\d+)", text)
-            if matches:
-                rates = [int(m) for m in matches]
-                min_rate = min(rates) # User said "Mínimo de $25/hr". Usually means min offered? Or max?
-                # "Hourly: Mínimo de $25/hr" - I'll assume if the range *starts* or is fixed at >= 25.
-                # Actually, let's be safe: if max rate < 25, reject. If max >= 25, it's a potential.
+            rates = parse_budget_values(text)
+            if rates:
+                # Sniper Rule: Hourly >= $30/hr
+                # If range $10-$30, max is 30.
                 max_rate = max(rates)
-                if max_rate < 25:
+                if max_rate < 30:
                     return False
         else:
             # Fixed Price
-            matches = re.findall(r"\$(\d+)", text)
-            if matches:
-                amounts = [int(m) for m in matches]
+            amounts = parse_budget_values(text)
+            if amounts:
+                # Sniper Rule: Fixed Budget >= $200
                 max_amount = max(amounts)
-                if max_amount < 150:
+                if max_amount < 200:
                     return False
         return True
     except:
@@ -139,8 +143,6 @@ def scout_jobs(visual_mode=False):
                 except:
                     # Fallback or different layout
                     print("[WARN] Seletor específico não encontrado, tentando busca genérica de links de projetos...")
-                    # This fallback might miss the card details for filtering, so strictly we need cards.
-                    # Try another common selector for project cards
                     job_cards = page.locator('div.JobSearchCard-item-inner').all()
 
                 print(f"[INFO] Encontrados {len(job_cards)} potenciais vagas para '{query}'. Analisando...")
@@ -184,7 +186,6 @@ def scout_jobs(visual_mode=False):
                             print(f"[REJEITADO] Score {score} ({keywords_str}): {title}")
 
                     except Exception as e:
-                        # Ignore individual link errors
                         continue
 
             except Exception as e:
@@ -226,18 +227,28 @@ def main():
     parser.add_argument("--visual", action="store_true", help="Ativa o modo visível (Headless=False)")
     args = parser.parse_args()
 
-    # 1. Clear old links (optional, but good for a fresh run)
-    if os.path.exists(LINKS_FILE):
-        os.remove(LINKS_FILE)
+    # Infinite Loop for Continuous Scouting
+    while True:
+        print("\n" + "="*50)
+        print(f"[SNIPER LOOP] Iniciando nova rodada de caça: {time.strftime('%Y-%m-%d %H:%M:%S')}")
+        print("="*50 + "\n")
 
-    # 2. Scout Jobs
-    links = scout_jobs(visual_mode=args.visual)
+        # 1. Clear old links (optional, but good for a fresh run)
+        if os.path.exists(LINKS_FILE):
+            os.remove(LINKS_FILE)
 
-    # 3. Save Links
-    save_links(links)
+        # 2. Scout Jobs
+        links = scout_jobs(visual_mode=args.visual)
 
-    # 4. Run Master Template
-    run_master_template(visual_mode=args.visual)
+        # 3. Save Links
+        save_links(links)
+
+        # 4. Run Master Template
+        run_master_template(visual_mode=args.visual)
+
+        # Sleep for 5 minutes
+        print("\n[INFO] Ciclo concluído. Entrando em modo de espera por 5 minutos...")
+        time.sleep(300)
 
 if __name__ == "__main__":
     main()
