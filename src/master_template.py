@@ -49,13 +49,7 @@ def scrape_url(page, url):
         for selector in selectors:
             print(f"[DEBUG] Tentando seletor: {selector}")
             # Use query_selector_all via locator logic
-            # To get text, we check if it exists
             if page.locator(selector).count() > 0:
-                # Get inner text of the first match or iterate?
-                # Usually description is one block. Let's try first.
-                # If multiple, maybe join them.
-                # For safety, let's grab all matching elements text
-
                 elements = page.locator(selector).all()
                 temp_text = ""
                 for el in elements:
@@ -64,7 +58,18 @@ def scrape_url(page, url):
                 temp_text = temp_text.strip()
                 print(f"[DEBUG] Texto encontrado (len={len(temp_text)}) com seletor '{selector}'.")
 
-                # Anti-Boilerplate Validation
+                # Noise Removal: Filter out common menu/navigation phrases
+                noise_phrases = ["log in", "sign up", "post a project", "hire freelancers"]
+                lines = temp_text.split('\n')
+                cleaned_lines = []
+                for line in lines:
+                    line_lower = line.lower()
+                    if not any(noise in line_lower for noise in noise_phrases):
+                        cleaned_lines.append(line)
+
+                temp_text = "\n".join(cleaned_lines).strip()
+
+                # Anti-Boilerplate Validation (Checking for "By skill" leakage specifically)
                 bad_phrases = ["by skill", "search for freelancers"]
                 found_bad = False
                 for phrase in bad_phrases:
@@ -73,7 +78,6 @@ def scrape_url(page, url):
                         if len(temp_text) > 500:
                             # Partial Cleaning Logic
                              print(f"[DEBUG] Tentando limpar boilerplate '{phrase}' de texto longo...")
-                             # Simple cleaning: remove lines containing the phrase
                              lines = temp_text.split('\n')
                              cleaned_lines = [line for line in lines if phrase not in line.lower()]
                              temp_text = "\n".join(cleaned_lines).strip()
@@ -99,6 +103,16 @@ def scrape_url(page, url):
         if not found_valid_content:
             print("[DEBUG] Tentando seletor de fallback: body (filtrado)")
             temp_text = page.locator("body").inner_text()
+
+            # Noise Removal again for body
+            noise_phrases = ["log in", "sign up", "post a project", "hire freelancers"]
+            lines = temp_text.split('\n')
+            cleaned_lines = []
+            for line in lines:
+                 if not any(noise in line.lower() for noise in noise_phrases):
+                     cleaned_lines.append(line)
+            temp_text = "\n".join(cleaned_lines).strip()
+
             # Basic check again
             if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
                 text_content = temp_text
@@ -143,50 +157,30 @@ def generate_proposal(core, description, title="seu projeto"):
     """
     Generates the proposal content based on the determined core.
     Tone: INTJ (Logical, direct, ROI-focused).
-    Uses dynamic title in the hook.
+    Structure: Single fluid text block, <150 words.
     """
 
-    # Common structure placeholders
-    hook = ""
-    authority = ""
-    solution = ""
-    cta = ""
+    proposal_text = ""
 
     if core == 'Data':
-        hook = f"Vi sua vaga para {title} e identifiquei uma necessidade crítica de estruturação e precisão nos dados."
-        authority = "Em um projeto recente ('Fluxo de Caixa Inteligente'), implementei um sistema que garantiu 100% de precisão na reconciliação de grandes volumes financeiros."
-        solution = "Minha proposta é implementar uma arquitetura de dados à prova de falhas, automatizando o processamento e eliminando erros manuais para garantir que suas decisões sejam baseadas em fatos, não em suposições."
-        cta = "Se você valoriza dados precisos e estruturados para escalar, aguardo seu contato."
+        proposal_text = f"Vi sua vaga para {title} e identifiquei uma necessidade crítica de estruturação e precisão nos dados.\n\n" \
+                        f"Em um projeto recente ('PROCX'), implementei um sistema Microsoft que garantiu 100% de precisão na reconciliação de grandes volumes financeiros.\n\n" \
+                        f"Minha proposta é implementar uma arquitetura de dados à prova de falhas, automatizando o processamento e eliminando erros manuais para garantir que suas decisões sejam baseadas em fatos, não em suposições.\n\n" \
+                        f"Se você valoriza dados precisos e estruturados para escalar, aguardo seu contato."
 
     elif core == 'Tech':
-        hook = f"Vi sua vaga para {title} e identifiquei que o desafio exige código performático e escalável, não apenas uma solução temporária."
-        authority = "Desenvolvi o 'Turbo Core', uma refatoração crítica que aumentou a performance do sistema em +40%, impactando diretamente a experiência do usuário final."
-        solution = "Vou aplicar as mesmas práticas de engenharia de software para entregar uma solução robusta, focada em automação e eficiência (Python/Stack Tecnológico), garantindo ROI através da tecnologia."
-        cta = "Vamos elevar o padrão técnico do seu projeto. Estou à disposição."
+        proposal_text = f"Vi sua vaga para {title} e identifiquei que o desafio exige código performático e escalável, não apenas uma solução temporária.\n\n" \
+                        f"Desenvolvi o 'Turbo Core', uma refatoração de baixo nível (Kernel/Performance) que aumentou a eficiência do sistema em +40%, impactando diretamente a estabilidade e velocidade.\n\n" \
+                        f"Vou aplicar as mesmas práticas de engenharia de software para entregar uma solução robusta, focada em automação e eficiência (Python/Stack Tecnológico), garantindo ROI através da tecnologia.\n\n" \
+                        f"Vamos elevar o padrão técnico do seu projeto. Estou à disposição."
 
     elif core == 'Marketing':
-        hook = f"Vi sua vaga para {title} e identifiquei que seu objetivo de tráfego e vendas exige uma estratégia agressiva focada em conversão."
-        authority = "Com o 'Lead Rescue 10s', criei automações que recuperam leads em segundos, maximizando drasticamente as taxas de conversão de campanhas."
-        solution = "Minha abordagem integra tráfego pago com automação de vendas para garantir que cada lead gerado tenha o máximo potencial de fechamento, otimizando seu orçamento de mídia."
-        cta = "Se busca resultados mensuráveis e crescimento de receita, vamos conversar agora."
+        proposal_text = f"Vi sua vaga para {title} e identifiquei que seu objetivo de tráfego e vendas exige uma estratégia agressiva focada em conversão.\n\n" \
+                        f"Com o 'Lead Rescue 10s', criei automações que recuperam leads em segundos, maximizando drasticamente as taxas de conversão de campanhas e reduzindo o CAC.\n\n" \
+                        f"Minha abordagem integra tráfego pago com automação de vendas para garantir que cada lead gerado tenha o máximo potencial de fechamento, otimizando seu orçamento de mídia.\n\n" \
+                        f"Se busca resultados mensuráveis e crescimento de receita, vamos conversar agora."
 
-    # Constructing the full proposal
-    # Structure: 1. Gancho Inicial, 2. Prova de Autoridade, 3. Solução Proposta, 4. CTA
-    proposal_text = f"""--- PROPOSTA GERADA (Núcleo: {core}) ---
-
-1. Gancho Inicial
-{hook}
-
-2. Prova de Autoridade
-{authority}
-
-3. Solução Proposta
-{solution}
-
-4. Chamada para Ação (CTA)
-{cta}
-"""
-    return proposal_text
+    return f"--- PROPOSTA GERADA (Núcleo: {core}) ---\n\n{proposal_text}"
 
 def save_proposal(content, filename="ultima_proposta.txt"):
     try:
