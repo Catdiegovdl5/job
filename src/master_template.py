@@ -12,77 +12,112 @@ def scrape_url(url, batch_mode=False):
     Attempts to be smart by looking for article/main tags, falling back to body.
     Includes specific logic for Freelancer.com project descriptions.
     """
-    try:
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-        }
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
+    print(f"[DEBUG] Iniciando scrape_url para: {url}")
+    # Removed broad try-except to allow debugging traceback
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+    }
+    response = requests.get(url, headers=headers, timeout=10)
+    response.raise_for_status()
 
-        soup = BeautifulSoup(response.text, 'html.parser')
+    soup = BeautifulSoup(response.text, 'html.parser')
 
-        # Selectors for Freelancer.com and generic fallbacks
-        selectors = [
-            '.PageProjectView-description',
-            '.project-description',
-            '#project-description',
-            '[class*="ProjectView-description"]',
-            'article',
-            'main'
-        ]
+    # Clean Title
+    title = "seu projeto"
+    if soup.title:
+        raw_title = soup.title.get_text(strip=True)
+        # Remove common suffixes
+        title = raw_title.split(" | ")[0].split(" - ")[0]
+        print(f"[DEBUG] Título capturado: {title}")
 
-        text_content = ""
-        found_valid_content = False
+    # Selectors for Freelancer.com and generic fallbacks
+    selectors = [
+        '.PageProjectView-description',
+        '.project-description',
+        '#project-description',
+        '[class*="ProjectView-description"]',
+        'div.project-description',
+        'section.JobDescription',
+        'article',
+        'main'
+    ]
 
-        for selector in selectors:
-            content_tags = soup.select(selector)
-            if content_tags:
-                temp_text = ""
-                for tag in content_tags:
-                    paragraphs = tag.find_all('p')
-                    if paragraphs:
-                        temp_text += " ".join([p.get_text(strip=True) for p in paragraphs])
+    text_content = ""
+    found_valid_content = False
+
+    for selector in selectors:
+        print(f"[DEBUG] Tentando seletor: {selector}")
+        content_tags = soup.select(selector)
+
+        if content_tags:
+            temp_text = ""
+            for tag in content_tags:
+                paragraphs = tag.find_all('p')
+                if paragraphs:
+                    temp_text += " ".join([p.get_text(strip=True) for p in paragraphs])
+                else:
+                    temp_text += tag.get_text(strip=True) + " "
+
+            temp_text = temp_text.strip()
+            print(f"[DEBUG] Texto encontrado (len={len(temp_text)}) com seletor '{selector}'.")
+
+            # Anti-Boilerplate Validation
+            bad_phrases = ["by skill", "search for freelancers"]
+            found_bad = False
+            for phrase in bad_phrases:
+                if phrase in temp_text.lower():
+                    found_bad = True
+                    if len(temp_text) > 500:
+                        # Partial Cleaning Logic
+                         print(f"[DEBUG] Tentando limpar boilerplate '{phrase}' de texto longo...")
+                         # Simple cleaning: remove lines containing the phrase
+                         lines = temp_text.split('\n')
+                         cleaned_lines = [line for line in lines if phrase not in line.lower()]
+                         temp_text = "\n".join(cleaned_lines).strip()
+                         if not temp_text: # If empty after clean, reject
+                             print(f"[WARN] Texto vazio após limpeza de boilerplate '{phrase}'.")
+                             found_bad = True # Treat as bad to try next selector
+                         else:
+                             print(f"[DEBUG] Texto limpo com sucesso. Novo tamanho: {len(temp_text)}")
+                             found_bad = False # It's acceptable now
                     else:
-                        temp_text += tag.get_text(strip=True) + " "
-
-                # Anti-Boilerplate Validation
-                if "by skill" in temp_text.lower() or "search for freelancers" in temp_text.lower():
-                    continue # Reject and try next selector
-
-                text_content = temp_text.strip()
-                if text_content:
-                    found_valid_content = True
+                        print(f"[WARN] Rejeitado: Boilerplate '{phrase}' detectado em texto curto.")
                     break
 
-        # Absolute fallback to body if no specific selector worked
-        if not found_valid_content:
-            paragraphs = soup.body.find_all('p')
-            if paragraphs:
-                temp_text = " ".join([p.get_text(strip=True) for p in paragraphs])
-                if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
-                    text_content = temp_text
+            if found_bad:
+                continue # Try next selector
 
-            if not text_content:
-                temp_text = soup.body.get_text(strip=True)
-                if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
-                     text_content = temp_text
+            text_content = temp_text
+            if text_content:
+                found_valid_content = True
+                break
 
-        # Clean Title
-        title = "seu projeto"
-        if soup.title:
-            raw_title = soup.title.get_text(strip=True)
-            # Remove common suffixes
-            title = raw_title.split(" | ")[0].split(" - ")[0]
+    # Absolute fallback to body if no specific selector worked
+    if not found_valid_content:
+        print("[DEBUG] Tentando seletor de fallback: body (filtrado)")
+        paragraphs = soup.body.find_all('p')
+        if paragraphs:
+            temp_text = " ".join([p.get_text(strip=True) for p in paragraphs])
+            # Basic check again
+            if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
+                text_content = temp_text
+                print(f"[DEBUG] Texto encontrado no body (len={len(text_content)})")
 
-        return text_content.strip(), title
+        if not text_content:
+            # Last resort
+            temp_text = soup.body.get_text(strip=True)
+            # Very basic check
+            if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
+                 text_content = temp_text
+                 print(f"[DEBUG] Texto bruto do body usado (len={len(text_content)})")
 
-    except Exception as e:
-        print(f"\n[ERROR] Falha ao acessar a URL: {e}")
-        if not batch_mode:
-            print("Por favor, rode o comando novamente usando a flag --description e cole o texto manualmente.")
-            sys.exit(1)
-        else:
-            return None, None
+    if not text_content:
+         print(f"[WARN] Proposta ignorada. URL: {url} | Motivo: Nenhum conteúdo válido encontrado após tentar todos seletores.")
+         if batch_mode:
+             return None, None
+
+    return text_content.strip(), title
+
 
 def determine_core(description):
     """
@@ -178,6 +213,8 @@ def process_batch(filepath):
     """
     Processes a list of URLs from a file.
     """
+    print(f"[DEBUG] Entrou em process_batch com arquivo: {filepath}")
+
     if not os.path.exists(filepath):
         print(f"[ERROR] Arquivo não encontrado: {filepath}")
         sys.exit(1)
@@ -190,37 +227,51 @@ def process_batch(filepath):
     with open(filepath, 'r', encoding='utf-8') as f:
         urls = [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
 
+    print(f"[DEBUG] URLs carregadas: {len(urls)}")
+
     total_generated = 0
     total_urls = len(urls)
 
     for i, url in enumerate(urls, 1):
         print(f"[INFO] Processando URL {i} de {total_urls}...")
 
-        description, title = scrape_url(url, batch_mode=True)
+        try:
+             # Call scrape_url directly, let it crash if needed (removed broad try-except inside scrape_url)
+             # But here in loop, we might want to catch to continue batch?
+             # User said: "remove os try/except silenciosos". So I will catch specific ones or let it crash to see trace.
+             # To be safe for batch but verbose:
+            description, title = scrape_url(url, batch_mode=True)
 
-        if description:
-            print(f"[DEBUG] Texto Extraído: {description[:200]}...")
+            if description:
+                print(f"[DEBUG] Texto Extraído: {description[:200]}...")
 
-            core = determine_core(description)
-            proposal = generate_proposal(core, description, title)
+                core = determine_core(description)
+                proposal = generate_proposal(core, description, title)
 
-            # Generate filename
-            if title:
-                safe_title = sanitize_filename(title)
-                filename = f"proposta_{safe_title}.txt"
-            else:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-                filename = f"proposta_{timestamp}.txt"
+                # Generate filename
+                if title:
+                    safe_title = sanitize_filename(title)
+                    filename = f"proposta_{safe_title}.txt"
+                else:
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+                    filename = f"proposta_{timestamp}.txt"
 
-            full_path = os.path.join(output_dir, filename)
+                full_path = os.path.join(output_dir, filename)
 
-            try:
-                with open(full_path, "w", encoding="utf-8") as f:
-                    f.write(proposal)
-                print(f"[INFO] Salvo em: {full_path}")
-                total_generated += 1
-            except Exception as e:
-                print(f"[ERROR] Falha ao salvar proposta: {e}")
+                try:
+                    with open(full_path, "w", encoding="utf-8") as f:
+                        f.write(proposal)
+                    print(f"[INFO] Salvo em: {full_path}")
+                    total_generated += 1
+                except Exception as e:
+                    print(f"[ERROR] Falha ao salvar proposta: {e}")
+
+        except Exception as e:
+            # Catching here to show the trace but continue the batch IF desired,
+            # or just print error loudly.
+            print(f"[CRITICAL ERROR] Falha ao processar URL {url}: {e}")
+            import traceback
+            traceback.print_exc()
 
         print("-" * 30)
 
@@ -246,9 +297,17 @@ def main():
         description = args.description
         print("[INFO] Usando descrição fornecida manualmente.")
     elif args.url:
-        print(f"[INFO] Iniciando Web Scraping da URL: {args.url}")
-        description, title = scrape_url(args.url)
-        print(f"[INFO] Texto extraído com sucesso. Título: {title}")
+        # Also unprotected call here
+        try:
+            print(f"[INFO] Iniciando Web Scraping da URL: {args.url}")
+            description, title = scrape_url(args.url)
+            print(f"[INFO] Texto extraído com sucesso. Título: {title}")
+        except Exception as e:
+            print(f"[CRITICAL ERROR] Falha na execução principal: {e}")
+            import traceback
+            traceback.print_exc()
+            sys.exit(1)
+
     else:
         print("[ERROR] Você deve fornecer --description, --url ou --file.")
         parser.print_help()
