@@ -1,0 +1,105 @@
+import argparse
+import sys
+import os
+
+def determine_core(description):
+    """
+    Determines the core (Data, Tech, Marketing) based on keywords in the description.
+    """
+    description_lower = description.lower()
+
+    # Keywords definitions
+    data_keywords = ['excel', 'dados', 'financeiro', 'planilha']
+    tech_keywords = ['performance', 'android', 'automação', 'python', 'tech']
+    marketing_keywords = ['ads', 'tráfego', 'vendas', 'marketing']
+
+    # Logic to determine core
+    if any(k in description_lower for k in data_keywords):
+        return 'Data'
+    elif any(k in description_lower for k in tech_keywords):
+        return 'Tech'
+    elif any(k in description_lower for k in marketing_keywords):
+        return 'Marketing'
+    else:
+        # Fallback to Tech as a default or could be General
+        return 'Tech'
+
+def generate_proposal(core, description):
+    """
+    Generates the proposal content based on the determined core.
+    Tone: INTJ (Logical, direct, ROI-focused).
+    """
+
+    # Common structure placeholders
+    hook = ""
+    authority = ""
+    solution = ""
+    cta = ""
+
+    if core == 'Data':
+        hook = "Analisei a descrição do seu projeto e identifiquei uma necessidade crítica de estruturação e precisão nos dados."
+        authority = "Em um projeto recente ('Fluxo de Caixa Inteligente'), implementei um sistema que garantiu 100% de precisão na reconciliação de grandes volumes financeiros."
+        solution = "Minha proposta é implementar uma arquitetura de dados à prova de falhas, automatizando o processamento e eliminando erros manuais para garantir que suas decisões sejam baseadas em fatos, não em suposições."
+        cta = "Se você valoriza dados precisos e estruturados para escalar, aguardo seu contato."
+
+    elif core == 'Tech':
+        hook = "Sua descrição aponta para um desafio que exige código performático e escalável, não apenas uma solução temporária."
+        authority = "Desenvolvi o 'Turbo Core', uma refatoração crítica que aumentou a performance do sistema em +40%, impactando diretamente a experiência do usuário final."
+        solution = "Vou aplicar as mesmas práticas de engenharia de software para entregar uma solução robusta, focada em automação e eficiência (Python/Stack Tecnológico), garantindo ROI através da tecnologia."
+        cta = "Vamos elevar o padrão técnico do seu projeto. Estou à disposição."
+
+    elif core == 'Marketing':
+        hook = "Seu objetivo de tráfego e vendas exige uma estratégia agressiva focada em conversão, não apenas em métricas de vaidade."
+        authority = "Com o 'Lead Rescue 10s', criei automações que recuperam leads em segundos, maximizando drasticamente as taxas de conversão de campanhas."
+        solution = "Minha abordagem integra tráfego pago com automação de vendas para garantir que cada lead gerado tenha o máximo potencial de fechamento, otimizando seu orçamento de mídia."
+        cta = "Se busca resultados mensuráveis e crescimento de receita, vamos conversar agora."
+
+    # Constructing the full proposal
+    # Structure: 1. Gancho Inicial, 2. Prova de Autoridade, 3. Solução Proposta, 4. CTA
+    proposal_text = f"""--- PROPOSTA GERADA (Núcleo: {core}) ---
+
+1. Gancho Inicial
+{hook}
+
+2. Prova de Autoridade
+{authority}
+
+3. Solução Proposta
+{solution}
+
+4. Chamada para Ação (CTA)
+{cta}
+"""
+    return proposal_text
+
+def save_proposal(content, filename="ultima_proposta.txt"):
+    try:
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(content)
+        print(f"\n[INFO] Proposta salva com sucesso em '{filename}'.")
+    except Exception as e:
+        print(f"\n[ERROR] Falha ao salvar o arquivo: {e}")
+
+def main():
+    parser = argparse.ArgumentParser(description="Proposals Architect S-Tier - Master Template")
+    parser.add_argument("--description", required=True, help="Descrição da vaga/projeto")
+
+    args = parser.parse_args()
+
+    description = args.description
+
+    # 1. Determine Core
+    core = determine_core(description)
+    print(f"[INFO] Núcleo Determinado: {core}")
+
+    # 2. Generate Proposal
+    proposal = generate_proposal(core, description)
+
+    # 3. Output to Screen
+    print(proposal)
+
+    # 4. Save to File
+    save_proposal(proposal)
+
+if __name__ == "__main__":
+    main()
