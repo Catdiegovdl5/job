@@ -16,7 +16,6 @@ def scrape_url(page, url):
 
     try:
         page.goto(url, timeout=60000)
-        # Try to wait for the primary description selector
         try:
             page.wait_for_selector('.PageProjectView-description', timeout=5000)
         except:
@@ -25,13 +24,11 @@ def scrape_url(page, url):
         # Clean Title
         title = page.title()
         if title:
-            # Remove common suffixes
             title = title.split(" | ")[0].split(" - ")[0]
             print(f"[DEBUG] Título capturado: {title}")
         else:
             title = "seu projeto"
 
-        # Selectors for Freelancer.com and generic fallbacks
         selectors = [
             '.PageProjectView-description',
             '.project-description',
@@ -48,7 +45,6 @@ def scrape_url(page, url):
 
         for selector in selectors:
             print(f"[DEBUG] Tentando seletor: {selector}")
-            # Use query_selector_all via locator logic
             if page.locator(selector).count() > 0:
                 elements = page.locator(selector).all()
                 temp_text = ""
@@ -58,60 +54,53 @@ def scrape_url(page, url):
                 temp_text = temp_text.strip()
                 print(f"[DEBUG] Texto encontrado (len={len(temp_text)}) com seletor '{selector}'.")
 
-                # Noise Removal: Filter out common menu/navigation phrases
+                # Noise Removal
                 noise_phrases = ["log in", "sign up", "post a project", "hire freelancers", "find work", "solutions"]
                 lines = temp_text.split('\n')
                 cleaned_lines = []
                 for line in lines:
                     line_lower = line.lower()
-
-                    # Category Line Cleaner: Remove lines that are just category headers
-                    # Examples: "Jobs > Digital Marketing", "Digital Marketing", "Web Development"
                     if "jobs >" in line_lower or line_lower.strip() in ["digital marketing", "web development"]:
                         print(f"[DEBUG] Removendo linha de categoria/breadcrumb: '{line.strip()}'")
                         continue
-
                     if not any(noise in line_lower for noise in noise_phrases):
                         cleaned_lines.append(line)
 
                 temp_text = "\n".join(cleaned_lines).strip()
 
-                # Anti-Boilerplate Validation (Checking for "By skill" leakage specifically)
+                # Anti-Boilerplate
                 bad_phrases = ["by skill", "search for freelancers"]
                 found_bad = False
                 for phrase in bad_phrases:
                     if phrase in temp_text.lower():
                         found_bad = True
                         if len(temp_text) > 500:
-                            # Partial Cleaning Logic
                              print(f"[DEBUG] Tentando limpar boilerplate '{phrase}' de texto longo...")
                              lines = temp_text.split('\n')
                              cleaned_lines = [line for line in lines if phrase not in line.lower()]
                              temp_text = "\n".join(cleaned_lines).strip()
-                             if not temp_text: # If empty after clean, reject
+                             if not temp_text:
                                  print(f"[WARN] Texto vazio após limpeza de boilerplate '{phrase}'.")
-                                 found_bad = True # Treat as bad to try next selector
+                                 found_bad = True
                              else:
                                  print(f"[DEBUG] Texto limpo com sucesso. Novo tamanho: {len(temp_text)}")
-                                 found_bad = False # It's acceptable now
+                                 found_bad = False
                         else:
                             print(f"[WARN] Rejeitado: Boilerplate '{phrase}' detectado em texto curto.")
                         break
 
                 if found_bad:
-                    continue # Try next selector
+                    continue
 
                 text_content = temp_text
                 if text_content:
                     found_valid_content = True
                     break
 
-        # Absolute fallback to body if no specific selector worked
         if not found_valid_content:
             print("[DEBUG] Tentando seletor de fallback: body (filtrado)")
             temp_text = page.locator("body").inner_text()
 
-            # Noise Removal again for body
             noise_phrases = ["log in", "sign up", "post a project", "hire freelancers", "find work", "solutions"]
             lines = temp_text.split('\n')
             cleaned_lines = []
@@ -120,7 +109,6 @@ def scrape_url(page, url):
                      cleaned_lines.append(line)
             temp_text = "\n".join(cleaned_lines).strip()
 
-            # Basic check again
             if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
                 text_content = temp_text
                 print(f"[DEBUG] Texto encontrado no body (len={len(text_content)})")
@@ -133,32 +121,69 @@ def scrape_url(page, url):
 
     except Exception as e:
         print(f"\n[ERROR] Falha ao acessar a URL com Playwright: {e}")
-        # Re-raise to show in logs if needed, or return None
         raise e
 
-def determine_core(description):
+def determine_core(description, title=""):
     """
-    Determines the core (Data, Tech, Marketing) based on keywords in the description.
+    Determines the core (Data, Tech, Marketing) based on weighted keywords in description and title.
+    Formula: Score = (Body_Count * Weight) + (Title_Count * Weight * 3)
+    Weights: Strong=2, General=1.
     """
     description_lower = description.lower()
+    title_lower = title.lower() if title else ""
 
-    # Keywords definitions
-    data_keywords = ['excel', 'dados', 'financeiro', 'planilha']
-    tech_keywords = ['performance', 'android', 'automação', 'python', 'tech', 'mongodb', 'react', 'frontend', 'backend', 'node']
-    marketing_keywords = ['ads', 'tráfego', 'vendas', 'marketing', 'facebook', 'meta', 'instagram', 'google ads', 'tiktok', 'anúncios']
+    # Keyword Dictionaries with Weights (Strong=2, General=1)
+    cores = {
+        'Data': {
+            'strong': ['procx', 'power bi', 'sql'],
+            'general': ['excel', 'dados', 'financeiro', 'planilha']
+        },
+        'Tech': {
+            'strong': ['mongodb', 'react', 'node', 'turbo core', 'kernel', 'api', 'frontend', 'backend'],
+            'general': ['python', 'tech', 'android', 'automação', 'performance']
+        },
+        'Marketing': {
+            'strong': ['lead rescue', 'tráfego', 'facebook ads', 'google ads', 'meta'],
+            'general': ['marketing', 'vendas', 'ads', 'anúncios', 'instagram', 'tiktok']
+        }
+    }
 
-    # Priority Implementation: Marketing -> Tech -> Data
-    # "Strong Match" for Marketing keywords (Tráfego, Ads, Anúncios) implied by check order and expanded list
+    scores = {'Data': 0, 'Tech': 0, 'Marketing': 0}
 
-    if any(k in description_lower for k in marketing_keywords):
-        return 'Marketing'
-    elif any(k in description_lower for k in tech_keywords):
-        return 'Tech'
-    elif any(k in description_lower for k in data_keywords):
-        return 'Data'
+    for core, keywords in cores.items():
+        # Calculate Body Score
+        for word in keywords['strong']:
+            count = description_lower.count(word.lower())
+            scores[core] += count * 2
+        for word in keywords['general']:
+            count = description_lower.count(word.lower())
+            scores[core] += count * 1
+
+        # Calculate Title Score (3x Multiplier)
+        for word in keywords['strong']:
+            count = title_lower.count(word.lower())
+            scores[core] += count * 2 * 3
+        for word in keywords['general']:
+            count = title_lower.count(word.lower())
+            scores[core] += count * 1 * 3
+
+    # Log Scoreboard
+    print(f"[DEBUG] Scores Finais: Data={scores['Data']}, Tech={scores['Tech']}, Marketing={scores['Marketing']}")
+
+    # Determine Winner
+    # Tie-Breaker: Marketing > Tech > Data
+    if scores['Marketing'] >= scores['Tech'] and scores['Marketing'] >= scores['Data'] and scores['Marketing'] > 0:
+        winner = 'Marketing'
+    elif scores['Tech'] >= scores['Data'] and scores['Tech'] > 0:
+        winner = 'Tech'
+    elif scores['Data'] > 0:
+        winner = 'Data'
     else:
-        # Fallback to Tech as a default or could be General
-        return 'Tech'
+        # Default Fallback if all 0 (or Tech preference)
+        winner = 'Tech'
+
+    print(f"[DEBUG] Vencedor: {winner}")
+    return winner
 
 def generate_proposal(core, description, title="seu projeto"):
     """
@@ -230,13 +255,10 @@ def process_batch(filepath):
     total_urls = len(urls)
 
     with sync_playwright() as p:
-        # Launch browser once
-        # HEADLESS_MODE is False for the 7 link test as requested
         browser = p.chromium.launch(headless=False)
 
         for i, url in enumerate(urls, 1):
             print(f"[INFO] Processando URL {i} de {total_urls}...")
-
             context = browser.new_context()
             page = context.new_page()
 
@@ -246,10 +268,9 @@ def process_batch(filepath):
                 if description:
                     print(f"[DEBUG] Texto Extraído: {description[:200]}...")
 
-                    core = determine_core(description)
+                    core = determine_core(description, title)
                     proposal = generate_proposal(core, description, title)
 
-                    # Generate filename
                     if title:
                         safe_title = sanitize_filename(title)
                         filename = f"proposta_{safe_title}.txt"
@@ -301,10 +322,8 @@ def main():
         description = args.description
         print("[INFO] Usando descrição fornecida manualmente.")
     elif args.url:
-        # Also unprotected call here
         try:
             print(f"[INFO] Iniciando Web Scraping da URL (Single Mode with Playwright): {args.url}")
-            # Single mode needs its own browser logic
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=False)
                 context = browser.new_context()
@@ -326,21 +345,12 @@ def main():
         parser.print_help()
         sys.exit(1)
 
-    # Debug Output
     if description:
         print(f"[DEBUG] Texto Extraído: {description[:200]}...")
-
-        # 1. Determine Core
-        core = determine_core(description)
+        core = determine_core(description, title)
         print(f"[INFO] Núcleo Determinado: {core}")
-
-        # 2. Generate Proposal
         proposal = generate_proposal(core, description, title)
-
-        # 3. Output to Screen
         print(proposal)
-
-        # 4. Save to File
         save_proposal(proposal)
 
 if __name__ == "__main__":
