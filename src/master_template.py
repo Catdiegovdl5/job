@@ -59,11 +59,18 @@ def scrape_url(page, url):
                 print(f"[DEBUG] Texto encontrado (len={len(temp_text)}) com seletor '{selector}'.")
 
                 # Noise Removal: Filter out common menu/navigation phrases
-                noise_phrases = ["log in", "sign up", "post a project", "hire freelancers"]
+                noise_phrases = ["log in", "sign up", "post a project", "hire freelancers", "find work", "solutions"]
                 lines = temp_text.split('\n')
                 cleaned_lines = []
                 for line in lines:
                     line_lower = line.lower()
+
+                    # Category Line Cleaner: Remove lines that are just category headers
+                    # Examples: "Jobs > Digital Marketing", "Digital Marketing", "Web Development"
+                    if "jobs >" in line_lower or line_lower.strip() in ["digital marketing", "web development"]:
+                        print(f"[DEBUG] Removendo linha de categoria/breadcrumb: '{line.strip()}'")
+                        continue
+
                     if not any(noise in line_lower for noise in noise_phrases):
                         cleaned_lines.append(line)
 
@@ -105,7 +112,7 @@ def scrape_url(page, url):
             temp_text = page.locator("body").inner_text()
 
             # Noise Removal again for body
-            noise_phrases = ["log in", "sign up", "post a project", "hire freelancers"]
+            noise_phrases = ["log in", "sign up", "post a project", "hire freelancers", "find work", "solutions"]
             lines = temp_text.split('\n')
             cleaned_lines = []
             for line in lines:
@@ -137,7 +144,7 @@ def determine_core(description):
 
     # Keywords definitions
     data_keywords = ['excel', 'dados', 'financeiro', 'planilha']
-    tech_keywords = ['performance', 'android', 'automação', 'python', 'tech']
+    tech_keywords = ['performance', 'android', 'automação', 'python', 'tech', 'mongodb', 'react', 'frontend', 'backend', 'node']
     marketing_keywords = ['ads', 'tráfego', 'vendas', 'marketing', 'facebook', 'meta', 'instagram', 'google ads', 'tiktok', 'anúncios']
 
     # Priority Implementation: Marketing -> Tech -> Data
