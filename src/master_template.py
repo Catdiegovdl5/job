@@ -231,7 +231,7 @@ def sanitize_filename(name):
     # Truncate if too long
     return name[:50]
 
-def process_batch(filepath):
+def process_batch(filepath, visual_mode=False):
     """
     Processes a list of URLs from a file using Playwright (reusing browser).
     """
@@ -254,8 +254,11 @@ def process_batch(filepath):
     total_generated = 0
     total_urls = len(urls)
 
+    headless_setting = not visual_mode
+    print(f"[INFO] Iniciando navegador (Headless: {headless_setting})...")
+
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=headless_setting)
 
         for i, url in enumerate(urls, 1):
             print(f"[INFO] Processando URL {i} de {total_urls}...")
@@ -307,12 +310,13 @@ def main():
     parser.add_argument("--description", help="Descrição da vaga/projeto (Prioridade sobre URL)")
     parser.add_argument("--url", help="URL da vaga para extração automática")
     parser.add_argument("--file", help="Arquivo .txt com lista de URLs para processamento em lote")
+    parser.add_argument("--visual", action="store_true", help="Ativa o modo visível (Headless=False)")
 
     args = parser.parse_args()
 
     if args.file:
         print(f"[INFO] Iniciando Modo Batch com arquivo: {args.file}")
-        process_batch(args.file)
+        process_batch(args.file, visual_mode=args.visual)
         sys.exit(0)
 
     description = ""
@@ -324,8 +328,9 @@ def main():
     elif args.url:
         try:
             print(f"[INFO] Iniciando Web Scraping da URL (Single Mode with Playwright): {args.url}")
+            headless_setting = not args.visual
             with sync_playwright() as p:
-                browser = p.chromium.launch(headless=False)
+                browser = p.chromium.launch(headless=headless_setting)
                 context = browser.new_context()
                 page = context.new_page()
                 try:
