@@ -6,31 +6,35 @@ import sys
 # Configuration
 HEADLESS_MODE = False  # User requested False to see the robot in action
 LINKS_FILE = "links.txt"
-MIN_SCORE = 5
+MIN_SCORE = 3
 
 # Weights definition
-STRONG_WORDS = ['Turbo Core', 'n8n', 'PROCX', 'Facebook Ads', 'Automation']
-GENERAL_WORDS = ['Script', 'Data', 'Marketing', 'Excel']
+STRONG_WORDS = ['Turbo Core', 'n8n', 'PROCX', 'Facebook Ads', 'Automation', 'API', 'Dashboard', 'Scraping', 'Azure', 'CRM']
+GENERAL_WORDS = ['Script', 'Data', 'Marketing', 'Excel', 'Finance', 'Sheet', 'Database', 'Optimization', 'Ads', 'Campaign']
 
 def calculate_score(text):
     """
     Calculates the score based on the text and defined weights.
     Formula: Score = (Strong_Points * 2) + General_Points
+    Returns: (score, list_of_matched_words)
     """
     score = 0
+    matched_words = []
     text_lower = text.lower()
 
     # Check Strong Words (Weight 2)
     for word in STRONG_WORDS:
         if word.lower() in text_lower:
             score += 2
+            matched_words.append(f"{word}(2)")
 
     # Check General Words (Weight 1)
     for word in GENERAL_WORDS:
         if word.lower() in text_lower:
             score += 1
+            matched_words.append(f"{word}(1)")
 
-    return score
+    return score, matched_words
 
 def scout_jobs():
     """
@@ -58,15 +62,10 @@ def scout_jobs():
 
             try:
                 page.goto(url, timeout=60000)
-                page.wait_for_load_state("networkidle")
-
-                # Wait for job listings to appear
-                # Freelancer.com usually has job cards in .JobSearchCard-item or similar
-                # We will target links inside the job list container
-
-                # Depending on the layout (list vs grid), selectors might vary.
-                # A common selector for job titles is often an 'a' tag with class 'JobSearchCard-primary-heading-link'
-                # or generically looking for links inside the result list.
+                try:
+                    page.wait_for_load_state("networkidle", timeout=60000)
+                except Exception as e:
+                    print(f"[WARN] Timeout aguardando networkidle. Prosseguindo... ({e})")
 
                 # Attempt to find job cards
                 try:
@@ -88,26 +87,18 @@ def scout_jobs():
                         if href and not href.startswith('http'):
                             href = f"https://www.freelancer.com{href}"
 
-                        # Calculate Score based on Title (and maybe snippet if available easily, but Title is fastest)
-                        # To be more precise as requested ("compará-las com minhas palavras-chave"),
-                        # checking the title is the first step.
-                        # If we wanted to check description, we'd need to enter each page or scrape the snippet.
-                        # For speed in this 'scout' phase, let's use the visible text (Title + snippet if visible).
-
-                        # Often the snippet is in a sibling div. Let's stick to Title for the Score in the loop
-                        # to avoid heavy navigation, or check parent text.
-
-                        # Let's try to get the full card text for better scoring
-                        card = link.locator("xpath=../..") # Go up to parent card container roughly
+                        # Get full card text for better scoring
+                        card = link.locator("xpath=../..")
                         full_card_text = card.inner_text()
 
-                        score = calculate_score(full_card_text)
+                        score, matched_words = calculate_score(full_card_text)
+                        keywords_str = ", ".join(matched_words)
 
                         if score >= MIN_SCORE:
-                            print(f"[MATCH] Score {score}: {title}")
+                            print(f"[MATCH] Score {score} ({keywords_str}): {title}")
                             found_links.add(href)
-                        # else:
-                        #    print(f"[SKIP] Score {score}: {title}")
+                        else:
+                            print(f"[REJEITADO] Score {score} ({keywords_str}): {title}")
 
                     except Exception as e:
                         # Ignore individual link errors
