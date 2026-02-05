@@ -216,11 +216,12 @@ def determine_core(description, title=""):
     print(f"[DEBUG] Vencedor: {winner} (Score: {max_score})")
     return winner, max_score
 
-def generate_proposal(core, description, title="seu projeto"):
+def generate_proposal(core, description, title="seu projeto", score=0):
     """
     Generates the proposal content based on the determined core.
     Tone: INTJ (Logical, direct, ROI-focused).
     Structure: Single fluid text block, <150 words.
+    Includes score in header.
     """
 
     proposal_text = ""
@@ -244,7 +245,10 @@ def generate_proposal(core, description, title="seu projeto"):
     # Sniper Footer
     footer = "Note: I am a Top-Rated specialist with focus on high-performance ROI and scalable architecture."
 
-    return f"--- PROPOSTA GERADA (Núcleo: {core}) ---\n\n{proposal_text}\n\n{footer}"
+    # Header with Score
+    header = f"--- PROPOSTA GERADA (Núcleo: {core} | Score: {score}) ---"
+
+    return f"{header}\n\n{proposal_text}\n\n{footer}"
 
 def save_proposal(content, filename="ultima_proposta.txt"):
     try:
@@ -304,7 +308,7 @@ def process_batch(filepath, visual_mode=False):
                     print(f"[DEBUG] Texto Extraído: {description[:200]}...")
 
                     core, max_score = determine_core(description, title)
-                    proposal = generate_proposal(core, description, title)
+                    proposal = generate_proposal(core, description, title, max_score)
 
                     # Sniper Alert Check (> 70)
                     if max_score > 70:
@@ -392,7 +396,7 @@ def main():
         print(f"[DEBUG] Texto Extraído: {description[:200]}...")
         core, max_score = determine_core(description, title)
         print(f"[INFO] Núcleo Determinado: {core} (Score: {max_score})")
-        proposal = generate_proposal(core, description, title)
+        proposal = generate_proposal(core, description, title, max_score)
         print(proposal)
         save_proposal(proposal)
 

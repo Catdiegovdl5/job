@@ -1,4 +1,4 @@
---- PROPOSTA GERADA (Núcleo: Tech) ---
+--- PROPOSTA GERADA (Núcleo: Tech | Score: 6) ---
 
 Vi sua vaga para seu projeto e identifiquei que o desafio exige código performático e escalável, não apenas uma solução temporária.
 
