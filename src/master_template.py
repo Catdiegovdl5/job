@@ -135,11 +135,11 @@ def determine_core(description, title=""):
     # Keyword Dictionaries with Weights (Strong=2, General=1)
     cores = {
         'Data': {
-            'strong': ['procx', 'power bi', 'sql'],
+            'strong': ['procx', 'power bi', 'sql', 'vba', 'data'],
             'general': ['excel', 'dados', 'financeiro', 'planilha']
         },
         'Tech': {
-            'strong': ['mongodb', 'react', 'node', 'turbo core', 'kernel', 'api', 'frontend', 'backend'],
+            'strong': ['mongodb', 'react', 'node', 'turbo core', 'kernel', 'api', 'frontend', 'backend', 'ai', 'bot', 'html', 'dev'],
             'general': ['python', 'tech', 'android', 'automação', 'performance']
         },
         'Marketing': {
@@ -195,16 +195,14 @@ def generate_proposal(core, description, title="seu projeto"):
     proposal_text = ""
 
     if core == 'Data':
-        proposal_text = f"Vi sua vaga para {title} e identifiquei uma necessidade crítica de estruturação e precisão nos dados.\n\n" \
-                        f"Em um projeto recente ('PROCX'), implementei um sistema Microsoft que garantiu 100% de precisão na reconciliação de grandes volumes financeiros.\n\n" \
-                        f"Minha proposta é implementar uma arquitetura de dados à prova de falhas, automatizando o processamento e eliminando erros manuais para garantir que suas decisões sejam baseadas em fatos, não em suposições.\n\n" \
-                        f"Se você valoriza dados precisos e estruturados para escalar, aguardo seu contato."
+        proposal_text = f"Seu projeto de {title} exige precisão cirúrgica e uma arquitetura de dados indestrutível para evitar erros de processamento.\n\n" \
+                        f"Como especialista certificado, desenvolvi a metodologia 'PROCX', que automatiza fluxos complexos em SQL/VBA, eliminando 100% das falhas manuais.\n\n" \
+                        f"Vou estruturar a sua análise de dados para gerar insights executivos automáticos, garantindo que a informação seja uma ferramenta de decisão, não um peso."
 
     elif core == 'Tech':
         proposal_text = f"Vi sua vaga para {title} e identifiquei que o desafio exige código performático e escalável, não apenas uma solução temporária.\n\n" \
-                        f"Desenvolvi o 'Turbo Core', uma refatoração de baixo nível (Kernel/Performance) que aumentou a eficiência do sistema em +40%, impactando diretamente a estabilidade e velocidade.\n\n" \
-                        f"Vou aplicar as mesmas práticas de engenharia de software para entregar uma solução robusta, focada em automação e eficiência (Python/Stack Tecnológico), garantindo ROI através da tecnologia.\n\n" \
-                        f"Vamos elevar o padrão técnico do seu projeto. Estou à disposição."
+                        f"Desenvolvi o 'Turbo Core', uma refatoração de baixo nível (Kernel/Performance) que aumentou a eficiência do sistema em +40%.\n\n" \
+                        f"Vou aplicar as mesmas práticas de engenharia de software para entregar uma solução robusta (Python/IA), focada em automação e eficiência."
 
     elif core == 'Marketing':
         proposal_text = f"Vi sua vaga para {title} e identifiquei que seu objetivo de tráfego e vendas exige uma estratégia agressiva focada em conversão.\n\n" \
