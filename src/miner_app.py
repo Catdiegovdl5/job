@@ -55,7 +55,7 @@ class FreelancerScout:
         keyboard = {
             "inline_keyboard": [
                 [
-                    {"text": "✅ Enviar Lance", "callback_data": f"send_bid|{job['title']}"},
+                    {"text": "✅ ENVIAR LANCE AGORA", "callback_data": f"send_bid|{job['title']}"},
                     {"text": "❌ Ignorar", "callback_data": "ignore_bid"}
                 ]
             ]
@@ -126,8 +126,8 @@ class FreelancerScout:
                 job['score'] = score
                 jobs.append(job)
 
-                # ALERT ADJUSTMENT: Changed threshold from 70 to >= 5
-                if score >= 5:
+                # ALERT ADJUSTMENT: Changed threshold from >= 5 to > 0
+                if score > 0:
                     print(f"Auto-Pilot Triggered for: {job['title']} (Score: {score})")
                     print(f"Bids Count: {job.get('bids', 'N/A')}")
 
