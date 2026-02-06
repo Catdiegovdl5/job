@@ -206,7 +206,7 @@ def save_links(links):
         for link in links:
             f.write(f"{link}\n")
 
-def run_master_template(visual_mode=False):
+def run_master_template(visual_mode=False, autopilot=False):
     """Calls master_template.py to process the saved links."""
     if not os.path.exists(LINKS_FILE) or os.path.getsize(LINKS_FILE) == 0:
         print("[INFO] Arquivo de links vazio ou inexistente. Pulando geração de propostas.")
@@ -219,12 +219,15 @@ def run_master_template(visual_mode=False):
     cmd = [sys.executable, "src/master_template.py", "--file", LINKS_FILE]
     if visual_mode:
         cmd.append("--visual")
+    if autopilot:
+        cmd.append("--autopilot")
 
     subprocess.run(cmd)
 
 def main():
     parser = argparse.ArgumentParser(description="Freelancer Scout - Automated Job Hunter")
     parser.add_argument("--visual", action="store_true", help="Ativa o modo visível (Headless=False)")
+    parser.add_argument("--autopilot", action="store_true", help="Ativa modo Auto-Pilot (Bid direto)")
     args = parser.parse_args()
 
     # Infinite Loop for Continuous Scouting
@@ -244,7 +247,7 @@ def main():
         save_links(links)
 
         # 4. Run Master Template
-        run_master_template(visual_mode=args.visual)
+        run_master_template(visual_mode=args.visual, autopilot=args.autopilot)
 
         # Sleep for 5 minutes
         print("\n[INFO] Ciclo concluído. Entrando em modo de espera por 5 minutos...")

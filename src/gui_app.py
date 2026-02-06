@@ -7,6 +7,7 @@ import time
 import sys
 import re
 from datetime import datetime
+import tkinter.messagebox
 
 # Configuration
 ctk.set_appearance_mode("Dark")
@@ -20,11 +21,25 @@ class ArchitectApp(ctk.CTk):
         self.title("Proposals Architect - Command Center")
         self.geometry("1000x700")
 
+        # Dependency Check
+        try:
+            import telegram
+        except ImportError:
+            print("[CRITICAL ERROR] Módulo 'python-telegram-bot' não encontrado.")
+            # Since CTk inherits from Tk, we can try using standard message box
+            # But in headless/no-display env this might crash or be invisible.
+            # We wrap it to be safe.
+            try:
+                tkinter.messagebox.showerror("Erro de Dependência", "O módulo 'python-telegram-bot' não está instalado.\nFuncionalidades de Telegram não funcionarão.")
+            except:
+                pass # Headless fallback
+
         # State Variables
         self.sniper_process = None
+        self.commander_process = None
         self.log_queue = queue.Queue()
         self.bids_remaining = 23
-        self.known_proposals = set()
+        self.known_proposals = set() # Track proposals to detect new ones
         self.is_running = False
 
         # Grid Layout
@@ -34,7 +49,7 @@ class ArchitectApp(ctk.CTk):
         # --- Sidebar ---
         self.sidebar = ctk.CTkFrame(self, width=200, corner_radius=0)
         self.sidebar.grid(row=0, column=0, rowspan=4, sticky="nsew")
-        self.sidebar.grid_rowconfigure(4, weight=1)
+        self.sidebar.grid_rowconfigure(6, weight=1)
 
         self.logo_label = ctk.CTkLabel(self.sidebar, text="ARCHITECT\nSNIPER", font=ctk.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
@@ -46,17 +61,21 @@ class ArchitectApp(ctk.CTk):
         self.bids_value_label = ctk.CTkLabel(self.sidebar, text=str(self.bids_remaining), font=ctk.CTkFont(size=40, weight="bold"), text_color="#2CC985")
         self.bids_value_label.grid(row=2, column=0, padx=20, pady=(0, 20))
 
-        # Buttons
-        self.start_btn = ctk.CTkButton(self.sidebar, text="START SNIPER", command=self.start_sniper, fg_color="#2CC985", text_color="black", hover_color="#229A65")
-        self.start_btn.grid(row=5, column=0, padx=20, pady=10)
+        # Switches
+        self.autopilot_switch = ctk.CTkSwitch(self.sidebar, text="Sniper Automático")
+        self.autopilot_switch.grid(row=3, column=0, padx=20, pady=10)
 
-        self.stop_btn = ctk.CTkButton(self.sidebar, text="STOP SNIPER", command=self.stop_sniper, fg_color="#C92C2C", hover_color="#9A2222", state="disabled")
-        self.stop_btn.grid(row=6, column=0, padx=20, pady=10)
+        # Buttons
+        self.start_btn = ctk.CTkButton(self.sidebar, text="START SYSTEM", command=self.start_system, fg_color="#2CC985", text_color="black", hover_color="#229A65")
+        self.start_btn.grid(row=4, column=0, padx=20, pady=10)
+
+        self.stop_btn = ctk.CTkButton(self.sidebar, text="STOP SYSTEM", command=self.stop_system, fg_color="#C92C2C", hover_color="#9A2222", state="disabled")
+        self.stop_btn.grid(row=5, column=0, padx=20, pady=10)
 
         self.folder_btn = ctk.CTkButton(self.sidebar, text="OPEN FOLDER", command=self.open_folder)
         self.folder_btn.grid(row=7, column=0, padx=20, pady=10)
 
-        self.quick_view_btn = ctk.CTkButton(self.sidebar, text="QUICK VIEW (Max Score)", command=self.quick_view)
+        self.quick_view_btn = ctk.CTkButton(self.sidebar, text="QUICK VIEW", command=self.quick_view)
         self.quick_view_btn.grid(row=8, column=0, padx=20, pady=(10, 20))
 
         # --- Main Area ---
@@ -68,7 +87,7 @@ class ArchitectApp(ctk.CTk):
         self.table_label = ctk.CTkLabel(self.main_frame, text="ÚLTIMAS PROPOSTAS GERADAS", font=ctk.CTkFont(size=16, weight="bold"))
         self.table_label.grid(row=0, column=0, sticky="w", pady=(0, 10))
 
-        # Table Header (Manual implementation for custom look)
+        # Table Header
         self.table_header = ctk.CTkFrame(self.main_frame, height=30)
         self.table_header.grid(row=1, column=0, sticky="new")
         self.table_header.grid_columnconfigure(2, weight=1)
@@ -83,44 +102,77 @@ class ArchitectApp(ctk.CTk):
         self.scrollable_proposals.grid_columnconfigure(2, weight=1)
 
         # --- Logs Area ---
-        self.logs_label = ctk.CTkLabel(self.main_frame, text="LIVE LOGS", font=ctk.CTkFont(size=14, weight="bold"))
+        self.logs_label = ctk.CTkLabel(self.main_frame, text="LIVE LOGS (Unified)", font=ctk.CTkFont(size=14, weight="bold"))
         self.logs_label.grid(row=3, column=0, sticky="w", pady=(20, 5))
 
         self.log_textbox = ctk.CTkTextbox(self.main_frame, height=150, font=ctk.CTkFont(family="Consolas", size=12))
         self.log_textbox.grid(row=4, column=0, sticky="ew")
 
-        # Start loops
+        # Start polling loops
         self.update_log_display()
         self.poll_files()
 
-    def start_sniper(self):
+        # Auto-Start Commander if possible? User said "Unified Launch".
+        # Let's start Commander when "START SYSTEM" is clicked to keep it simple.
+
+    def start_system(self):
         if self.is_running:
             return
 
         self.is_running = True
         self.start_btn.configure(state="disabled")
         self.stop_btn.configure(state="normal")
-        self.log_textbox.insert("end", "[SYSTEM] Iniciando Sniper em thread separada...\n")
+        self.log_textbox.insert("end", "[SYSTEM] Inicializando subsistemas...\n")
 
-        # Start subprocess in thread
-        self.thread = threading.Thread(target=self._run_scout_process)
-        self.thread.daemon = True
-        self.thread.start()
+        # 1. Start Telegram Commander
+        self.start_commander()
 
-    def stop_sniper(self):
+        # 2. Start Sniper Scout
+        self.start_sniper()
+
+    def stop_system(self):
+        # Stop Scout
         if self.sniper_process:
             self.sniper_process.terminate()
             self.sniper_process = None
 
+        # Stop Commander
+        if self.commander_process:
+            self.commander_process.terminate()
+            self.commander_process = None
+
         self.is_running = False
         self.start_btn.configure(state="normal")
         self.stop_btn.configure(state="disabled")
-        self.log_textbox.insert("end", "[SYSTEM] Sniper interrompido pelo usuário.\n")
+        self.log_textbox.insert("end", "[SYSTEM] Todos os sistemas interrompidos.\n")
 
-    def _run_scout_process(self):
-        # Run python3 src/freelancer_scout.py
-        # Capture unbuffered output
+    def start_commander(self):
+        self.log_textbox.insert("end", "[SYSTEM] Iniciando Telegram Commander...\n")
+        cmd = [sys.executable, "-u", "src/telegram_commander.py"]
+
+        try:
+            self.commander_process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                bufsize=1
+            )
+            # Thread to read output
+            t = threading.Thread(target=self._read_process_output, args=(self.commander_process, "[COMMANDER]"))
+            t.daemon = True
+            t.start()
+        except Exception as e:
+            self.log_queue.put(f"[ERROR] Falha ao iniciar Commander: {e}\n")
+
+    def start_sniper(self):
+        autopilot = self.autopilot_switch.get()
+        mode_str = "AUTOMÁTICO" if autopilot else "MANUAL"
+        self.log_textbox.insert("end", f"[SYSTEM] Iniciando Sniper Scout (Modo: {mode_str})...\n")
+
         cmd = [sys.executable, "-u", "src/freelancer_scout.py"]
+        if autopilot:
+            cmd.append("--autopilot")
 
         try:
             self.sniper_process = subprocess.Popen(
@@ -130,19 +182,24 @@ class ArchitectApp(ctk.CTk):
                 text=True,
                 bufsize=1
             )
-
-            for line in iter(self.sniper_process.stdout.readline, ''):
-                self.log_queue.put(line)
-
-            self.sniper_process.stdout.close()
-            self.sniper_process.wait()
-
+            # Thread to read output
+            t = threading.Thread(target=self._read_process_output, args=(self.sniper_process, "[SNIPER]"))
+            t.daemon = True
+            t.start()
         except Exception as e:
-            self.log_queue.put(f"[ERROR] Subprocess crash: {e}\n")
+            self.log_queue.put(f"[ERROR] Falha ao iniciar Sniper: {e}\n")
+
+    def _read_process_output(self, process, prefix):
+        """Generic reader for subprocess stdout."""
+        try:
+            for line in iter(process.stdout.readline, ''):
+                if line:
+                    self.log_queue.put(f"{prefix} {line}")
+        except Exception:
+            pass
         finally:
-            self.is_running = False
-            # Needs to update UI from main thread logic, handled by buttons state in loop?
-            # Simplified: buttons won't toggle back automatically here but that's ok for V1.
+            if process:
+                process.stdout.close()
 
     def update_log_display(self):
         while not self.log_queue.empty():
@@ -161,15 +218,24 @@ class ArchitectApp(ctk.CTk):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        files = [f for f in os.listdir(directory) if (f.startswith("proposta_") or f.startswith("WAITING_APPROVAL_")) and f.endswith(".txt")]
+        # Check specifically for SUBMITTED files to update bid count
+        # and ANY proposal file to update table
+        all_files = [f for f in os.listdir(directory) if f.endswith(".txt")]
 
-        new_files = set(files) - self.known_proposals
+        # Determine new ones
+        new_files = set(all_files) - self.known_proposals
 
         if new_files:
             for f in new_files:
                 self.known_proposals.add(f)
-                self.add_proposal_to_ui(os.path.join(directory, f))
-                self.decrement_bids()
+
+                # Check if it is a "final" proposal file (submitted or waiting) to add to table
+                if f.startswith("proposta_") or f.startswith("WAITING_APPROVAL_") or f.startswith("SUBMITTED_"):
+                    self.add_proposal_to_ui(os.path.join(directory, f))
+
+                # If it is SUBMITTED, decrement bid counter (Action taken)
+                if f.startswith("SUBMITTED_"):
+                    self.decrement_bids()
 
         self.after(5000, self.poll_files)
 
@@ -179,40 +245,35 @@ class ArchitectApp(ctk.CTk):
             self.bids_value_label.configure(text=str(self.bids_remaining))
 
             if self.bids_remaining > 10:
-                self.bids_value_label.configure(text_color="#2CC985") # Green
+                self.bids_value_label.configure(text_color="#2CC985")
             elif self.bids_remaining > 5:
-                self.bids_value_label.configure(text_color="#F1C40F") # Yellow
+                self.bids_value_label.configure(text_color="#F1C40F")
             else:
-                self.bids_value_label.configure(text_color="#C92C2C") # Red
+                self.bids_value_label.configure(text_color="#C92C2C")
 
     def add_proposal_to_ui(self, filepath):
-        # Extract info
         core = "Unknown"
         filename = os.path.basename(filepath)
-        title = filename.replace("proposta_", "").replace("WAITING_APPROVAL_", "").replace(".txt", "").replace("_", " ")
+        # Clean up filename for display
+        title = filename.replace("proposta_", "").replace("WAITING_APPROVAL_", "").replace("SUBMITTED_", "").replace(".txt", "").replace("_", " ")
         score = "-"
 
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
                 content = f.read()
-                # Updated Regex to capture Score from the new header format
-                # --- PROPOSTA GERADA (Núcleo: Tech | Score: 75) ---
                 match = re.search(r"--- PROPOSTA GERADA \(Núcleo: (.*?) \| Score: (\d+)\) ---", content)
                 if match:
                     core = match.group(1).strip()
                     score = match.group(2).strip()
                 else:
-                    # Fallback for old files
                     match_old = re.search(r"--- PROPOSTA GERADA \(Núcleo: (.*?)\) ---", content)
                     if match_old:
                         core = match_old.group(1).strip()
         except:
             pass
 
-        # Create Row
         row = len(self.known_proposals)
 
-        # Color coding for Core
         core_color = "gray"
         if "Tech" in core: core_color = "#3498DB"
         elif "Data" in core: core_color = "#9B59B6"
@@ -235,21 +296,20 @@ class ArchitectApp(ctk.CTk):
             subprocess.Popen(["xdg-open", folder])
 
     def quick_view(self):
-        # Open the latest generated proposal
         if not self.known_proposals:
             return
 
-        # Find latest file by modification time
         directory = "propostas_geradas"
         files = [os.path.join(directory, f) for f in self.known_proposals]
-        latest_file = max(files, key=os.path.getmtime)
+        if files:
+            latest_file = max(files, key=os.path.getmtime)
 
-        if sys.platform == "win32":
-            os.startfile(latest_file)
-        elif sys.platform == "darwin":
-            subprocess.Popen(["open", latest_file])
-        else:
-            subprocess.Popen(["xdg-open", latest_file])
+            if sys.platform == "win32":
+                os.startfile(latest_file)
+            elif sys.platform == "darwin":
+                subprocess.Popen(["open", latest_file])
+            else:
+                subprocess.Popen(["xdg-open", latest_file])
 
 if __name__ == "__main__":
     app = ArchitectApp()

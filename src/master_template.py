@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 from playwright.sync_api import sync_playwright
 import requests
+import subprocess
 
 def send_telegram_notification(message):
     """
@@ -216,12 +217,12 @@ def determine_core(description, title=""):
     print(f"[DEBUG] Vencedor: {winner} (Score: {max_score})")
     return winner, max_score
 
-def generate_proposal(core, description, title="seu projeto", score=0):
+def generate_proposal(core, description, title="seu projeto", score=0, url=""):
     """
     Generates the proposal content based on the determined core.
     Tone: INTJ (Logical, direct, ROI-focused).
     Structure: Single fluid text block, <150 words.
-    Includes score in header.
+    Includes score and URL in header.
     """
 
     proposal_text = ""
@@ -245,18 +246,22 @@ def generate_proposal(core, description, title="seu projeto", score=0):
     # Sniper Footer
     footer = "Note: I am a Top-Rated specialist with focus on high-performance ROI and scalable architecture."
 
-    # Header with Score
-    header = f"--- PROPOSTA GERADA (Núcleo: {core} | Score: {score}) ---"
+    # Header with Score and URL
+    header = f"--- PROPOSTA GERADA (Núcleo: {core} | Score: {score}) ---\nURL: {url}"
 
     return f"{header}\n\n{proposal_text}\n\n{footer}"
 
-def save_proposal(content, filename="ultima_proposta.txt"):
+def save_proposal(content, filename="ultima_proposta.txt", status="WAITING_APPROVAL"):
     try:
-        with open(filename, "w", encoding="utf-8") as f:
+        # Construct filename with status prefix
+        final_filename = f"{status}_{filename}" if status else filename
+        with open(final_filename, "w", encoding="utf-8") as f:
             f.write(content)
-        print(f"\n[INFO] Proposta salva com sucesso em '{filename}'.")
+        print(f"\n[INFO] Proposta salva com sucesso em '{final_filename}'.")
+        return final_filename
     except Exception as e:
         print(f"\n[ERROR] Falha ao salvar o arquivo: {e}")
+        return None
 
 def sanitize_filename(name):
     """Sanitizes the filename to be safe for file systems."""
@@ -267,11 +272,11 @@ def sanitize_filename(name):
     # Truncate if too long
     return name[:50]
 
-def process_batch(filepath, visual_mode=False):
+def process_batch(filepath, visual_mode=False, autopilot=False):
     """
     Processes a list of URLs from a file using Playwright (reusing browser).
     """
-    print(f"[DEBUG] Entrou em process_batch com arquivo: {filepath}")
+    print(f"[DEBUG] Entrou em process_batch com arquivo: {filepath}, AutoPilot: {autopilot}")
 
     if not os.path.exists(filepath):
         print(f"[ERROR] Arquivo não encontrado: {filepath}")
@@ -308,30 +313,47 @@ def process_batch(filepath, visual_mode=False):
                     print(f"[DEBUG] Texto Extraído: {description[:200]}...")
 
                     core, max_score = determine_core(description, title)
-                    proposal = generate_proposal(core, description, title, max_score)
-
-                    # Sniper Alert Check (> 70)
-                    if max_score > 70:
-                        print(f"[SNIPER ALERT] High Value Opportunity Detected! Score: {max_score}")
-                        msg = f"🎯 *Sniper Alert*\nJob: {title}\nCore: {core}\nScore: {max_score}\nURL: {url}"
-                        send_telegram_notification(msg)
+                    proposal = generate_proposal(core, description, title, max_score, url)
 
                     if title:
                         safe_title = sanitize_filename(title)
-                        filename = f"proposta_{safe_title}.txt"
+                        base_filename = f"{safe_title}.txt"
                     else:
                         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
-                        filename = f"proposta_{timestamp}.txt"
+                        base_filename = f"{timestamp}.txt"
 
-                    full_path = os.path.join(output_dir, filename)
+                    full_path = os.path.join(output_dir, base_filename)
 
-                    try:
-                        with open(full_path, "w", encoding="utf-8") as f:
-                            f.write(proposal)
-                        print(f"[INFO] Salvo em: {full_path}")
-                        total_generated += 1
-                    except Exception as e:
-                        print(f"[ERROR] Falha ao salvar proposta: {e}")
+                    # AUTOPILOT LOGIC
+                    if autopilot and max_score > 85:
+                        print(f"[AUTO-PILOT] Score {max_score} > 85. Iniciando lance automático...")
+                        saved_path = save_proposal(proposal, full_path, status="SUBMITTED")
+
+                        # Trigger Bidder
+                        # We need to pass just the proposal body text
+                        proposal_body = proposal.split("\n\n", 1)[1] # Strip Header
+                        # Strip footer if needed, but Bidder just fills what's given.
+                        # Actually bidder logic might need cleaning if we pass full text including URL line.
+                        # Let's fix this in telegram_commander logic too.
+
+                        # Better: Extract body clean here.
+                        proposal_clean_body = generate_proposal(core, description, title, max_score, url).split("\n\n", 1)[1]
+
+                        cmd = [sys.executable, "src/bidder.py", url, proposal_clean_body]
+                        subprocess.Popen(cmd) # Async call
+
+                        print("[AUTO-PILOT] Bid enviado automaticamente!")
+                    else:
+                        # Normal Flow -> Waiting for Approval
+                        save_proposal(proposal, full_path, status="WAITING_APPROVAL")
+
+                        # Alert if High Score (but not auto-pilot or score <= 85)
+                        if max_score > 70:
+                            print(f"[SNIPER ALERT] High Value Opportunity Detected! Score: {max_score}")
+                            msg = f"🎯 *Sniper Alert*\nJob: {title}\nCore: {core}\nScore: {max_score}\nURL: {url}"
+                            send_telegram_notification(msg)
+
+                    total_generated += 1
 
             except Exception as e:
                 print(f"[CRITICAL ERROR] Falha ao processar URL {url}: {e}")
@@ -353,12 +375,13 @@ def main():
     parser.add_argument("--url", help="URL da vaga para extração automática")
     parser.add_argument("--file", help="Arquivo .txt com lista de URLs para processamento em lote")
     parser.add_argument("--visual", action="store_true", help="Ativa o modo visível (Headless=False)")
+    parser.add_argument("--autopilot", action="store_true", help="Ativa modo Auto-Pilot (Bid direto se Score > 85)")
 
     args = parser.parse_args()
 
     if args.file:
         print(f"[INFO] Iniciando Modo Batch com arquivo: {args.file}")
-        process_batch(args.file, visual_mode=args.visual)
+        process_batch(args.file, visual_mode=args.visual, autopilot=args.autopilot)
         sys.exit(0)
 
     description = ""
@@ -396,9 +419,10 @@ def main():
         print(f"[DEBUG] Texto Extraído: {description[:200]}...")
         core, max_score = determine_core(description, title)
         print(f"[INFO] Núcleo Determinado: {core} (Score: {max_score})")
-        proposal = generate_proposal(core, description, title, max_score)
+        proposal = generate_proposal(core, description, title, max_score, args.url if args.url else "")
         print(proposal)
-        save_proposal(proposal)
+        # Single mode doesn't really use autopilot logic as it's usually manual check
+        save_proposal(proposal, "ultima_proposta.txt", status=None)
 
 if __name__ == "__main__":
     main()

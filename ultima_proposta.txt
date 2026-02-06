@@ -1,4 +1,5 @@
 --- PROPOSTA GERADA (Núcleo: Tech | Score: 6) ---
+URL: https://example.com/job/123
 
 Vi sua vaga para seu projeto e identifiquei que o desafio exige código performático e escalável, não apenas uma solução temporária.
 
