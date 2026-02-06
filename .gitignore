@@ -3,3 +3,4 @@ __pycache__/
 *$py.class
 .pytest_cache/
 .env
+propostas_geradas/WAITING_APPROVAL_*.txt

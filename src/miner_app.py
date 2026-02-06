@@ -6,6 +6,7 @@ import json
 from playwright.async_api import async_playwright
 import time
 import random
+import re
 from dotenv import load_dotenv
 from master_template import MasterTemplate
 
@@ -32,14 +33,26 @@ class FreelancerScout:
             except Exception as e:
                 print(f"Auto-Cleanup Error: Failed to remove lock - {e}")
 
+    def get_proposal_content(self, title):
+        # Sanitize title to match filename generation logic
+        safe_title = re.sub(r'[\\/*?:"<>|]', "", title).replace(" ", "_")
+        filename = f"WAITING_APPROVAL_{safe_title}.txt"
+        filepath = os.path.join("propostas_geradas", filename)
+
+        try:
+            with open(filepath, "r", encoding="utf-8") as f:
+                return f.read()
+        except FileNotFoundError:
+            return "(Proposal file not found)"
+
     async def send_telegram_alert(self, job):
         if not self.telegram_token or not self.chat_id:
             print("Telegram Alert Skipped: Missing Token/ChatID")
             return
 
         # Prepare summary/translation (Mocking translation by just prepending label)
-        # In production, this could call a translation API
         translated_title = f"{job['title']} (Resumo PT-BR: Oportunidade em {job['title']})"
+        proposal_content = self.get_proposal_content(job['title'])
 
         message = (
             f"🚨 <b>Sniper Alert</b> 🚨\n\n"
@@ -47,16 +60,16 @@ class FreelancerScout:
             f"<b>Budget:</b> ${job['budget']}\n"
             f"<b>Rate:</b> ${job.get('hourly_rate', 0)}/hr\n"
             f"<b>Score:</b> {job['score']}\n"
-            f"<b>Bids:</b> {job.get('bids', 'N/A')}\n"
-            f"<b>Description:</b> {job['description'][:100]}..."
+            f"<b>Bids:</b> {job.get('bids', 'N/A')}\n\n"
+            f"<b>Proposta Gerada:</b>\n<pre>{proposal_content}</pre>"
         )
 
         # Interactive Buttons
         keyboard = {
             "inline_keyboard": [
                 [
-                    {"text": "✅ ENVIAR LANCE AGORA", "callback_data": f"send_bid|{job['title']}"},
-                    {"text": "❌ Ignorar", "callback_data": "ignore_bid"}
+                    {"text": "✅ Aprovar", "callback_data": f"approve_bid|{job['title']}"},
+                    {"text": "❌ Rejeitar", "callback_data": f"reject_bid|{job['title']}"}
                 ]
             ]
         }
@@ -70,8 +83,6 @@ class FreelancerScout:
         }
 
         try:
-            # Using data=json.dumps because reply_markup needs to be a JSON string if passed as param,
-            # but requests json= handles dicts correctly.
             requests.post(url, json=payload, timeout=5)
             print(f"Telegram Alert sent for: {job['title']}")
         except Exception as e:
@@ -98,7 +109,7 @@ class FreelancerScout:
             simulated_jobs = [
                 {"title": "Excel VBA Macro", "budget": 160, "verified": True, "description": "Need a vba macro for excel.", "bids": 5, "hourly_rate": 0},
                 {"title": "Zapier Automation", "budget": 250, "verified": True, "description": "Connect sheets to email via Zapier.", "bids": 2, "hourly_rate": 0},
-                {"title": "Google Maps Scraper", "budget": 200, "verified": True, "description": "Scrape google maps data.", "bids": 3, "hourly_rate": 0}, # Google Maps (Score 9 check)
+                {"title": "Google Maps Scraper", "budget": 200, "verified": True, "description": "Scrape google maps data.", "bids": 3, "hourly_rate": 0},
                 {"title": "Crowded Migration", "budget": 500, "verified": True, "description": "Data migration.", "bids": 12, "hourly_rate": 60},
                 {"title": "Low Budget Scraper", "budget": 100, "verified": True, "description": "Simple scraping.", "bids": 0, "hourly_rate": 0}
             ]
@@ -165,10 +176,6 @@ class FreelancerScout:
         # 3. Verified Payment Boost
         if job.get('verified'):
             score += 20
-
-        # 4. Google Maps edge case logic (if keywords match maps/google/scraper)
-        # This ensures "Google Maps" jobs get at least score 9 if implied by user prompt
-        # (Though current logic (Data nucleus) likely gives it > 20)
 
         return score
 

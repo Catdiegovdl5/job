@@ -2,6 +2,8 @@ import logging
 import os
 import subprocess
 import sys
+import shutil
+import re
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler
 from dotenv import load_dotenv
@@ -28,20 +30,47 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await query.answer()
 
     data = query.data
-    if data.startswith("send_bid|"):
-        job_title = data.split("|")[1]
-        await query.edit_message_text(text=f"✅ Iniciando lance para: {job_title}")
 
-        # Trigger Bidder
+    if data.startswith("approve_bid|"):
+        job_title = data.split("|")[1]
+        await query.edit_message_text(text=f"✅ Aprovado! Iniciando lance para: {job_title}")
+
+        move_proposal_file(job_title, "approved")
         trigger_bidder(job_title)
 
-    elif data == "ignore_bid":
-        await query.edit_message_text(text="❌ Vaga ignorada.")
+    elif data.startswith("reject_bid|"):
+        job_title = data.split("|")[1]
+        await query.edit_message_text(text=f"❌ Rejeitado: {job_title}")
+
+        move_proposal_file(job_title, "rejected")
+
+def move_proposal_file(job_title, status):
+    # Sanitize title to match filename generation logic
+    safe_title = re.sub(r'[\\/*?:"<>|]', "", job_title).replace(" ", "_")
+    filename = f"WAITING_APPROVAL_{safe_title}.txt"
+
+    base_dir = "propostas_geradas"
+    source = os.path.join(base_dir, filename)
+
+    if status == "approved":
+        dest_dir = os.path.join(base_dir, "processadas")
+    else:
+        dest_dir = os.path.join(base_dir, "descartadas")
+
+    if os.path.exists(source):
+        try:
+            # Ensure dest dir exists (created in setup but good to check)
+            os.makedirs(dest_dir, exist_ok=True)
+            shutil.move(source, os.path.join(dest_dir, filename))
+            print(f"File moved to {dest_dir}: {filename}")
+        except Exception as e:
+            print(f"Error moving file: {e}")
+    else:
+        print(f"File not found for moving: {source}")
 
 def trigger_bidder(job_title):
     print(f"[Commander] Triggering Bidder for {job_title}")
     # Construct subprocess call to src/bidder.py
-    # Note: Using job_title as URL placeholder since we mocked it. In prod, pass URL.
     user = os.getenv("FLN_USER") or os.getenv("FREELANCER_EMAIL") or "unknown"
     password = os.getenv("FLN_PASS") or os.getenv("FREELANCER_PASSWORD") or "unknown"
 
@@ -53,7 +82,7 @@ def trigger_bidder(job_title):
             script_path,
             "--user", user,
             "--password", password,
-            "--url", job_title # Passing title as mock URL
+            "--url", job_title
         ])
     except Exception as e:
         print(f"Error launching bidder: {e}")
