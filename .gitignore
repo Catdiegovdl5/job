@@ -1,4 +1,7 @@
 __pycache__/
-*.py[cod]
-*$py.class
-.pytest_cache/
+*.pyc
+.env
+src/.env
+propostas_geradas/
+links.txt
+user_data/

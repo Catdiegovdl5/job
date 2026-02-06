@@ -6,6 +6,10 @@ from datetime import datetime
 from playwright.sync_api import sync_playwright
 import requests
 import subprocess
+from dotenv import load_dotenv
+
+# Load Environment Variables
+load_dotenv("src/.env")
 
 def send_telegram_notification(message):
     """
@@ -126,10 +130,12 @@ def scrape_url(page, url):
                     found_valid_content = True
                     break
 
+        # Absolute fallback to body if no specific selector worked
         if not found_valid_content:
             print("[DEBUG] Tentando seletor de fallback: body (filtrado)")
             temp_text = page.locator("body").inner_text()
 
+            # Noise Removal again for body
             noise_phrases = ["log in", "sign up", "post a project", "hire freelancers", "find work", "solutions"]
             lines = temp_text.split('\n')
             cleaned_lines = []
@@ -138,6 +144,7 @@ def scrape_url(page, url):
                      cleaned_lines.append(line)
             temp_text = "\n".join(cleaned_lines).strip()
 
+            # Basic check again
             if "by skill" not in temp_text.lower() and "search for freelancers" not in temp_text.lower():
                 text_content = temp_text
                 print(f"[DEBUG] Texto encontrado no body (len={len(text_content)})")
@@ -246,7 +253,7 @@ def generate_proposal(core, description, title="seu projeto", score=0, url=""):
     # Sniper Footer
     footer = "Note: I am a Top-Rated specialist with focus on high-performance ROI and scalable architecture."
 
-    # Header with Score and URL
+    # Header with Score
     header = f"--- PROPOSTA GERADA (Núcleo: {core} | Score: {score}) ---\nURL: {url}"
 
     return f"{header}\n\n{proposal_text}\n\n{footer}"
@@ -332,10 +339,6 @@ def process_batch(filepath, visual_mode=False, autopilot=False):
                         # Trigger Bidder
                         # We need to pass just the proposal body text
                         proposal_body = proposal.split("\n\n", 1)[1] # Strip Header
-                        # Strip footer if needed, but Bidder just fills what's given.
-                        # Actually bidder logic might need cleaning if we pass full text including URL line.
-                        # Let's fix this in telegram_commander logic too.
-
                         # Better: Extract body clean here.
                         proposal_clean_body = generate_proposal(core, description, title, max_score, url).split("\n\n", 1)[1]
 

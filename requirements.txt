@@ -4,3 +4,4 @@ playwright
 pytest-playwright
 customtkinter
 python-telegram-bot
+python-dotenv

@@ -6,6 +6,10 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 import subprocess
 import sys
+from dotenv import load_dotenv
+
+# Load Environment Variables
+load_dotenv("src/.env")
 
 # Configuration
 WATCH_DIR = "propostas_geradas"
@@ -77,11 +81,6 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if url_match:
                 url = url_match.group(1).strip()
 
-            # Extract Body (removing headers)
-            # Assumption: Body starts after double newline after headers
-            # Or simplified: pass whole text and let bidder clean up?
-            # Bidder expects just the text.
-            # Let's split by the footer or header markers.
             parts = content.split("---", 2)
             if len(parts) > 2:
                 proposal_body = parts[2].strip() # Content after header
