@@ -161,7 +161,7 @@ class ArchitectApp(ctk.CTk):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        files = [f for f in os.listdir(directory) if f.startswith("proposta_") and f.endswith(".txt")]
+        files = [f for f in os.listdir(directory) if (f.startswith("proposta_") or f.startswith("WAITING_APPROVAL_")) and f.endswith(".txt")]
 
         new_files = set(files) - self.known_proposals
 
@@ -174,20 +174,22 @@ class ArchitectApp(ctk.CTk):
         self.after(5000, self.poll_files)
 
     def decrement_bids(self):
-        self.bids_remaining -= 1
-        self.bids_value_label.configure(text=str(self.bids_remaining))
+        if self.bids_remaining > 0:
+            self.bids_remaining -= 1
+            self.bids_value_label.configure(text=str(self.bids_remaining))
 
-        if self.bids_remaining > 10:
-            self.bids_value_label.configure(text_color="#2CC985") # Green
-        elif self.bids_remaining > 5:
-            self.bids_value_label.configure(text_color="#F1C40F") # Yellow
-        else:
-            self.bids_value_label.configure(text_color="#C92C2C") # Red
+            if self.bids_remaining > 10:
+                self.bids_value_label.configure(text_color="#2CC985") # Green
+            elif self.bids_remaining > 5:
+                self.bids_value_label.configure(text_color="#F1C40F") # Yellow
+            else:
+                self.bids_value_label.configure(text_color="#C92C2C") # Red
 
     def add_proposal_to_ui(self, filepath):
         # Extract info
         core = "Unknown"
-        title = os.path.basename(filepath).replace("proposta_", "").replace(".txt", "").replace("_", " ")
+        filename = os.path.basename(filepath)
+        title = filename.replace("proposta_", "").replace("WAITING_APPROVAL_", "").replace(".txt", "").replace("_", " ")
         score = "-"
 
         try:
