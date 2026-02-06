@@ -137,8 +137,8 @@ class FreelancerScout:
                 job['score'] = score
                 jobs.append(job)
 
-                # ALERT ADJUSTMENT: Changed threshold from >= 5 to > 0
-                if score > 0:
+                # ALERT ADJUSTMENT: Changed threshold to >= 0 to force alerts even for score 0
+                if score >= 0:
                     print(f"Auto-Pilot Triggered for: {job['title']} (Score: {score})")
                     print(f"Bids Count: {job.get('bids', 'N/A')}")
 
@@ -157,25 +157,35 @@ class FreelancerScout:
         desc = job.get('description', '').lower()
         title = job.get('title', '').lower()
 
+        # Debug Score
+        print(f"\n[DEBUG Score] Checking Job: {title}")
+
         # 1. Base Logic (Nucleos from JSON)
         nucleos = self.weights_data.get('nucleos', {})
 
         for nucleus_name, data in nucleos.items():
-            keywords = data.get('keywords', [])
+            keywords = [k.lower() for k in data.get('keywords', [])]
             weight = data.get('weight', 1)
 
             # Check for matches
             for kw in keywords:
                 if kw in desc or kw in title:
-                    score += (10 * weight) # Base multiplier
+                    points = (10 * weight)
+                    score += points # Base multiplier
+                    print(f"  -> Match ({nucleus_name}): {kw} (+{points})")
 
         # 2. Hourly Rate Boost (Priorize projects with Hourly Rate > $40/hr)
         if job.get('hourly_rate', 0) > 40:
             score += 30
+            print("  -> Hourly Rate Boost (+30)")
 
         # 3. Verified Payment Boost
         if job.get('verified'):
             score += 20
+            print("  -> Verified Payment Boost (+20)")
+
+        if score == 0:
+             print("  -> Nucleus Unknown (No keywords matched)")
 
         return score
 
