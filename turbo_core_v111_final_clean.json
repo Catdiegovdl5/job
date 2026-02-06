@@ -1,0 +1,25 @@
+{
+  "nucleos": {
+    "Data": {
+      "keywords": ["scraping", "mining", "extraction", "crawler", "automation", "python", "selenium", "playwright"],
+      "description": "Foco em extração de dados, automação e scripts."
+    },
+    "Tech": {
+      "keywords": ["fullstack", "react", "node", "api", "backend", "frontend", "aws", "docker"],
+      "description": "Desenvolvimento de software, web apps e infraestrutura."
+    },
+    "Marketing": {
+      "keywords": ["seo", "traffic", "ads", "copywriting", "social media", "growth"],
+      "description": "Estratégias de marketing digital e crescimento."
+    }
+  },
+  "templates": {
+    "default": "Olá,\n\nAnalisei seu projeto '{project_title}' e tenho exatamente a experiência necessária.\n\nMinha abordagem:\n1. Análise técnica detalhada.\n2. Implementação ágil.\n3. Garantia de qualidade.\n\nVamos conversar?\n\nAtenciosamente,\n[Seu Nome]",
+    "scraping": "Olá,\n\nSou especialista em automação e scraping (Python/Playwright). Posso extrair os dados de '{project_title}' com eficiência e contornar bloqueios.\n\nTecnologias: Python, Playwright, Pandas.\n\nAguardo seu retorno.",
+    "web_dev": "Olá,\n\nTenho experiência sólida em desenvolvimento web. Posso entregar seu projeto '{project_title}' com código limpo e escalável.\n\nStack: React, Node.js, Python.\n\nVamos agendar uma call?"
+  },
+  "global_settings": {
+    "min_budget": 200,
+    "verified_payment_only": true
+  }
+}
