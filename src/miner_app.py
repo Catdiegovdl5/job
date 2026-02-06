@@ -7,6 +7,7 @@ from playwright.async_api import async_playwright
 import time
 import random
 import re
+import html
 from dotenv import load_dotenv
 from master_template import MasterTemplate
 
@@ -47,12 +48,14 @@ class FreelancerScout:
 
     async def send_telegram_alert(self, job):
         if not self.telegram_token or not self.chat_id:
-            print("Telegram Alert Skipped: Missing Token/ChatID")
+            print(f"Telegram Alert Skipped: Missing Token/ChatID. Token: '{self.telegram_token}', ChatID: '{self.chat_id}'")
             return
 
         # Prepare summary/translation (Mocking translation by just prepending label)
-        translated_title = f"{job['title']} (Resumo PT-BR: Oportunidade em {job['title']})"
-        proposal_content = self.get_proposal_content(job['title'])
+        # Escape HTML characters to prevent 'Bad Request' errors
+        safe_title = html.escape(job['title'])
+        translated_title = f"{safe_title} (Resumo PT-BR: Oportunidade em {safe_title})"
+        proposal_content = html.escape(self.get_proposal_content(job['title']))
 
         message = (
             f"🚨 <b>Sniper Alert</b> 🚨\n\n"
@@ -74,7 +77,14 @@ class FreelancerScout:
             ]
         }
 
-        url = f"https://api.telegram.org/bot{self.telegram_token}/sendMessage"
+        # Check for potential 'bot' prefix duplication in token
+        token = self.telegram_token
+        if token.startswith("bot"):
+            print("Warning: Token starts with 'bot', this might be duplicated in URL construction.")
+
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        print(f"[DEBUG] Telegram URL: {url.replace(token, 'TOKEN_HIDDEN')}")
+
         payload = {
             "chat_id": self.chat_id,
             "text": message,
@@ -83,10 +93,13 @@ class FreelancerScout:
         }
 
         try:
-            requests.post(url, json=payload, timeout=5)
-            print(f"Telegram Alert sent for: {job['title']}")
+            response = requests.post(url, json=payload, timeout=10)
+            if response.status_code == 200:
+                print(f"Telegram Alert sent for: {job['title']}")
+            else:
+                print(f"Failed to send Telegram alert: {response.status_code} - {response.text}")
         except Exception as e:
-            print(f"Failed to send Telegram alert: {e}")
+            print(f"Exception sending Telegram alert: {e}")
 
     async def search_jobs(self, query="python"):
         self.clean_singleton_lock()
