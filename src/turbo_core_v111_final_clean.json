@@ -11,6 +11,11 @@
     "Marketing": {
       "keywords": ["seo", "traffic", "ads", "copywriting", "social media", "growth"],
       "description": "Estratégias de marketing digital e crescimento."
+    },
+    "OceanoAzul": {
+      "keywords": ["migration", "automation", "integration", "vba", "scraping", "api"],
+      "weight": 10,
+      "description": "Nichos de alta demanda e pouca concorrência."
     }
   },
   "templates": {
@@ -20,6 +25,8 @@
   },
   "global_settings": {
     "min_budget": 200,
+    "min_hourly_rate": 40,
+    "max_bids": 15,
     "verified_payment_only": true
   }
 }

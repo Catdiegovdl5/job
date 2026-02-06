@@ -18,6 +18,8 @@ class FreelancerScout:
         self.master_template = MasterTemplate()
         self.telegram_token = os.getenv("TELEGRAM_TOKEN")
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID")
+        # Load weights from master template's data source for efficiency, or just use master_template to query
+        self.weights_data = self.master_template.data
 
     def clean_singleton_lock(self):
         """Removes the SingletonLock file to prevent 'ProcessSingleton' errors."""
@@ -38,6 +40,7 @@ class FreelancerScout:
             f"🚨 <b>Sniper Alert</b> 🚨\n\n"
             f"<b>Job:</b> {job['title']}\n"
             f"<b>Budget:</b> ${job['budget']}\n"
+            f"<b>Rate:</b> ${job.get('hourly_rate', 0)}/hr\n"
             f"<b>Score:</b> {job['score']}\n"
             f"<b>Bids:</b> {job.get('bids', 'N/A')}\n"
             f"<b>Description:</b> {job['description'][:100]}..."
@@ -82,53 +85,75 @@ class FreelancerScout:
 
             jobs = []
 
-            # SIMULATION DATA (to prove the logic works in the environment)
-            # Added 'bids' field to confirm the 23 BIDS counter logic
+            # SIMULATION DATA UPDATED FOR OCEANO AZUL TESTING
             simulated_jobs = [
-                {"title": "Build a Scraper", "budget": 250, "verified": True, "description": "Need a python scraper.", "bids": 23},
-                {"title": "Fix my bug", "budget": 50, "verified": True, "description": "Small fix.", "bids": 5},
-                {"title": "Big Project", "budget": 500, "verified": False, "description": "Huge project.", "bids": 12},
-                {"title": "High Value Python", "budget": 300, "verified": True, "description": "Complex python task.", "bids": 15}
+                {"title": "Migration Script", "budget": 250, "verified": True, "description": "Need to migrate database.", "bids": 5, "hourly_rate": 50}, # High score (Migration + Rate)
+                {"title": "Simple Scraping", "budget": 50, "verified": True, "description": "Just scraping.", "bids": 5, "hourly_rate": 20}, # Low budget, ignored
+                {"title": "Crowded Project", "budget": 500, "verified": True, "description": "Huge project.", "bids": 20, "hourly_rate": 60}, # Ignored (> 15 bids)
+                {"title": "API Integration", "budget": 300, "verified": True, "description": "Complex API integration.", "bids": 10, "hourly_rate": 45} # High score (API + Rate)
             ]
 
             for job in simulated_jobs:
-                # Filter Logic
-                budget = job['budget']
-                verified = job['verified']
+                # 1. Filter: Verified Payment
+                if not job.get('verified'):
+                    continue
 
-                # FIX: Filter Verified Payment and Budget > $200
-                if verified and budget > 200:
-                    score = self.calculate_score(job)
-                    job['score'] = score
-                    jobs.append(job)
+                # 2. Filter: Budget > $200
+                if job.get('budget', 0) <= 200:
+                    continue
 
-                    # ALERT ADJUSTMENT: Changed threshold from > 85 to > 0 for testing
-                    if score > 0:
-                        print(f"Auto-Pilot Triggered for: {job['title']} (Score: {score})")
-                        print(f"Bids Count: {job.get('bids', 'N/A')}")
+                # 3. Filter: Ignore jobs with > 15 bids
+                if job.get('bids', 0) > 15:
+                    print(f"Ignored Crowded Job: {job['title']} ({job['bids']} bids)")
+                    continue
 
-                        # Trigger Proposal Generation
-                        proposal_path = self.master_template.generate_proposal(job)
-                        print(f"Generated Proposal: {proposal_path}")
+                # Calculate Score
+                score = self.calculate_score(job)
+                job['score'] = score
+                jobs.append(job)
 
-                        # Send Telegram Alert
-                        await self.send_telegram_alert(job)
+                # ALERT ADJUSTMENT: Changed threshold from > 85 to > 0 for testing
+                if score > 0:
+                    print(f"Auto-Pilot Triggered for: {job['title']} (Score: {score})")
+                    print(f"Bids Count: {job.get('bids', 'N/A')}")
+
+                    # Trigger Proposal Generation
+                    proposal_path = self.master_template.generate_proposal(job)
+                    print(f"Generated Proposal: {proposal_path}")
+
+                    # Send Telegram Alert
+                    await self.send_telegram_alert(job)
 
             await browser.close()
             return jobs
 
     def calculate_score(self, job):
-        # specific scoring logic
         score = 0
         desc = job.get('description', '').lower()
-        if 'python' in desc or 'scraper' in desc:
-            score += 50
-        if job['budget'] > 300:
+        title = job.get('title', '').lower()
+
+        # 1. Base Logic (from previous version, updated with JSON weights if available)
+        # We read from self.weights_data['nucleos']
+        nucleos = self.weights_data.get('nucleos', {})
+
+        for nucleus_name, data in nucleos.items():
+            keywords = data.get('keywords', [])
+            weight = data.get('weight', 1) # Default weight 1 if not specified (Data/Tech/Marketing)
+
+            # Check for matches
+            for kw in keywords:
+                if kw in desc or kw in title:
+                    score += (10 * weight) # Multiply by weight factor
+                    # Break after one match per nucleus? Or accumulate? Accumulating for now.
+
+        # 2. Hourly Rate Boost (Priorize projects with Hourly Rate > $40/hr)
+        if job.get('hourly_rate', 0) > 40:
+            score += 30 # Significant boost
+
+        # 3. Verified Payment Boost
+        if job.get('verified'):
             score += 20
-        if job['verified']:
-            score += 20
-        # Random factor for demo
-        score += random.randint(0, 10)
+
         return score
 
 if __name__ == "__main__":
