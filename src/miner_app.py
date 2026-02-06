@@ -118,22 +118,70 @@ class FreelancerScout:
 
             jobs = []
 
-            # SIMULATION DATA UPDATED FOR 'LUCRO RAPIDO' TESTING
-            simulated_jobs = [
-                {"title": "Excel VBA Macro", "budget": 160, "verified": True, "description": "Need a vba macro for excel.", "bids": 5, "hourly_rate": 0},
-                {"title": "Zapier Automation", "budget": 250, "verified": True, "description": "Connect sheets to email via Zapier.", "bids": 2, "hourly_rate": 0},
-                {"title": "Google Maps Scraper", "budget": 200, "verified": True, "description": "Scrape google maps data.", "bids": 3, "hourly_rate": 0},
-                {"title": "Crowded Migration", "budget": 500, "verified": True, "description": "Data migration.", "bids": 12, "hourly_rate": 60},
-                {"title": "Low Budget Scraper", "budget": 100, "verified": True, "description": "Simple scraping.", "bids": 0, "hourly_rate": 0}
-            ]
+            # Attempt to scrape real jobs
+            scraped_jobs = []
+            try:
+                # Freelancer.com specific selectors (Project Cards)
+                job_cards = await page.locator(".JobSearchCard-item").all()
+                print(f"[Scraper] Found {len(job_cards)} job cards on page.")
+
+                for card in job_cards:
+                    try:
+                        title = await card.locator(".JobSearchCard-primary-heading-link").inner_text()
+                        description = await card.locator(".JobSearchCard-primary-description").inner_text()
+
+                        # Budget Parsing
+                        budget_text = await card.locator(".JobSearchCard-primary-price").inner_text()
+                        # Clean budget string (e.g., "$250 - $750 USD" -> 250)
+                        budget_text_clean = re.sub(r"[^\d\-]", "", budget_text.split("-")[0])
+                        budget = int(budget_text_clean) if budget_text_clean else 0
+
+                        # Bids Parsing
+                        bids_text = await card.locator(".JobSearchCard-secondary-entry:has-text('bids')").inner_text()
+                        bids = int(re.sub(r"[^\d]", "", bids_text)) if bids_text else 0
+
+                        # Verified Check
+                        verified = await card.locator(".JobSearchCard-primary-heading-status-verified").count() > 0
+
+                        # Hourly Rate Check (heuristic)
+                        is_hourly = "hr" in budget_text.lower()
+                        hourly_rate = budget if is_hourly else 0
+
+                        job_data = {
+                            "title": title.strip(),
+                            "budget": budget,
+                            "verified": verified,
+                            "description": description.strip(),
+                            "bids": bids,
+                            "hourly_rate": hourly_rate
+                        }
+                        scraped_jobs.append(job_data)
+                    except Exception as e:
+                        print(f"[Scraper] Error parsing card: {e}")
+                        continue
+
+            except Exception as e:
+                print(f"[Scraper] Error during scraping: {e}")
+
+            # Fallback to simulation if no jobs found (e.g., login wall or selector change)
+            if not scraped_jobs:
+                print("[Scraper] No jobs scraped (Login Wall?). Using Simulation Mode.")
+                scraped_jobs = [
+                    {"title": "Excel VBA Macro", "budget": 160, "verified": True, "description": "Need a vba macro for excel.", "bids": 5, "hourly_rate": 0},
+                    {"title": "Zapier Automation", "budget": 250, "verified": True, "description": "Connect sheets to email via Zapier.", "bids": 2, "hourly_rate": 0},
+                    {"title": "Google Maps Scraper", "budget": 200, "verified": True, "description": "Scrape google maps data.", "bids": 3, "hourly_rate": 0},
+                    {"title": "Crowded Migration", "budget": 500, "verified": True, "description": "Data migration.", "bids": 12, "hourly_rate": 60},
+                    {"title": "Low Budget Scraper", "budget": 100, "verified": True, "description": "Simple scraping.", "bids": 0, "hourly_rate": 0}
+                ]
 
             global_settings = self.weights_data.get('global_settings', {})
             min_budget = global_settings.get('min_budget', 150)
             max_bids = global_settings.get('max_bids', 10)
 
-            for job in simulated_jobs:
+            for job in scraped_jobs:
                 # 1. Filter: Verified Payment
                 if not job.get('verified'):
+                    print(f"Ignored Unverified: {job['title']}")
                     continue
 
                 # 2. Filter: Budget > $150

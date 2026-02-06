@@ -31,10 +31,29 @@ class SniperGUI:
         self.btn_telegram = tk.Button(self.btn_frame, text="Start Telegram Bot", command=self.start_telegram, bg="blue", fg="white")
         self.btn_telegram.pack(side=tk.LEFT, padx=10)
 
+        self.btn_kill = tk.Button(self.btn_frame, text="🛑 STOP ALL", command=self.kill_all, bg="red", fg="white")
+        self.btn_kill.pack(side=tk.LEFT, padx=10)
+
         self.log_area = scrolledtext.ScrolledText(root, width=80, height=20)
         self.log_area.pack(pady=10)
 
         self.processes = {}
+
+    def kill_all(self):
+        self.log("Stopping all managed processes...")
+        for name, process in self.processes.items():
+            if process.poll() is None:  # If running
+                process.terminate()
+                self.log(f"Terminated {name}")
+
+        # Hard kill for zombie python processes related to our app
+        try:
+            # Unix-like kill
+            subprocess.run(["pkill", "-f", "src/telegram_commander.py"])
+            subprocess.run(["pkill", "-f", "src/miner_app.py"])
+            self.log("Force killed potential zombies (pkill).")
+        except Exception as e:
+            self.log(f"Pkill failed (might be on Windows?): {e}")
 
     def log(self, message):
         self.log_area.insert(tk.END, message + "\n")
@@ -46,6 +65,7 @@ class SniperGUI:
         threading.Thread(target=self._run_process, args=("src/miner_app.py", "Miner", []), daemon=True).start()
 
     def start_telegram(self):
+        self.kill_all() # Ensure clean slate before starting commander to avoid Conflict
         self.log("Starting Telegram Commander...")
         # Pointing to src/telegram_commander.py
         threading.Thread(target=self._run_process, args=("src/telegram_commander.py", "Telegram", []), daemon=True).start()
