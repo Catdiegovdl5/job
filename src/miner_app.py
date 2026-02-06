@@ -1,10 +1,12 @@
 import asyncio
 import os
 import shutil
+import requests
 from playwright.async_api import async_playwright
 import time
 import random
 from dotenv import load_dotenv
+from master_template import MasterTemplate
 
 load_dotenv()
 
@@ -13,6 +15,9 @@ class FreelancerScout:
         self.headless = headless
         self.base_url = "https://www.freelancer.com/jobs"
         self.user_data_dir = "./chrome_user_data"
+        self.master_template = MasterTemplate()
+        self.telegram_token = os.getenv("TELEGRAM_TOKEN")
+        self.chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
     def clean_singleton_lock(self):
         """Removes the SingletonLock file to prevent 'ProcessSingleton' errors."""
@@ -23,6 +28,31 @@ class FreelancerScout:
                 print(f"Auto-Cleanup: Removed {lock_path}")
             except Exception as e:
                 print(f"Auto-Cleanup Error: Failed to remove lock - {e}")
+
+    async def send_telegram_alert(self, job):
+        if not self.telegram_token or not self.chat_id:
+            print("Telegram Alert Skipped: Missing Token/ChatID")
+            return
+
+        message = (
+            f"🚨 <b>Sniper Alert</b> 🚨\n\n"
+            f"<b>Job:</b> {job['title']}\n"
+            f"<b>Budget:</b> ${job['budget']}\n"
+            f"<b>Score:</b> {job['score']}\n"
+            f"<b>Bids:</b> {job.get('bids', 'N/A')}\n"
+            f"<b>Description:</b> {job['description'][:100]}..."
+        )
+        url = f"https://api.telegram.org/bot{self.telegram_token}/sendMessage"
+        payload = {
+            "chat_id": self.chat_id,
+            "text": message,
+            "parse_mode": "HTML"
+        }
+        try:
+            requests.post(url, json=payload, timeout=5)
+            print(f"Telegram Alert sent for: {job['title']}")
+        except Exception as e:
+            print(f"Failed to send Telegram alert: {e}")
 
     async def search_jobs(self, query="python"):
         self.clean_singleton_lock()
@@ -39,14 +69,26 @@ class FreelancerScout:
             print("Waiting 15 seconds for page load...")
             await page.wait_for_timeout(15000)
 
+            # --- REAL SCRAPING LOGIC PLACEHOLDER ---
+            # To enable real scraping, uncomment and adjust selectors:
+            # job_cards = await page.query_selector_all('.JobSearchCard-item')
+            # for card in job_cards:
+            #     title = await card.query_selector('.JobSearchCard-primary-heading-link').inner_text()
+            #     budget = ...
+            #     description = ...
+            #     bids = ...
+            #     jobs.append({...})
+            # ---------------------------------------
+
             jobs = []
 
             # SIMULATION DATA (to prove the logic works in the environment)
+            # Added 'bids' field to confirm the 23 BIDS counter logic
             simulated_jobs = [
-                {"title": "Build a Scraper", "budget": 250, "verified": True, "description": "Need a python scraper."},
-                {"title": "Fix my bug", "budget": 50, "verified": True, "description": "Small fix."},
-                {"title": "Big Project", "budget": 500, "verified": False, "description": "Huge project."},
-                {"title": "High Value Python", "budget": 300, "verified": True, "description": "Complex python task."}
+                {"title": "Build a Scraper", "budget": 250, "verified": True, "description": "Need a python scraper.", "bids": 23},
+                {"title": "Fix my bug", "budget": 50, "verified": True, "description": "Small fix.", "bids": 5},
+                {"title": "Big Project", "budget": 500, "verified": False, "description": "Huge project.", "bids": 12},
+                {"title": "High Value Python", "budget": 300, "verified": True, "description": "Complex python task.", "bids": 15}
             ]
 
             for job in simulated_jobs:
@@ -60,11 +102,17 @@ class FreelancerScout:
                     job['score'] = score
                     jobs.append(job)
 
-                    # FIX: Auto-Pilot Logic (Score > 85)
-                    if score > 85:
+                    # ALERT ADJUSTMENT: Changed threshold from > 85 to > 0 for testing
+                    if score > 0:
                         print(f"Auto-Pilot Triggered for: {job['title']} (Score: {score})")
-                        # Here we would trigger the proposal generation automatically
-                        # master_template.generate_proposal(job)
+                        print(f"Bids Count: {job.get('bids', 'N/A')}")
+
+                        # Trigger Proposal Generation
+                        proposal_path = self.master_template.generate_proposal(job)
+                        print(f"Generated Proposal: {proposal_path}")
+
+                        # Send Telegram Alert
+                        await self.send_telegram_alert(job)
 
             await browser.close()
             return jobs

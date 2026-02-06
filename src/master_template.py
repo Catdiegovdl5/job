@@ -24,15 +24,23 @@ class MasterTemplate:
         title_lower = title.lower()
         desc_lower = description.lower()
 
+        # Debug Score
+        print(f"\n[DEBUG] Analyzing Project: {title}")
+        print(f"[DEBUG] Description snippet: {desc_lower[:50]}...")
+
         best_match = "default"
         max_score = 0
 
         if 'nucleos' in self.data:
             for nucleus, info in self.data['nucleos'].items():
                 score = 0
-                for keyword in info.get('keywords', []):
+                keywords = info.get('keywords', [])
+                print(f"[DEBUG] Checking Nucleus: {nucleus} | Keywords: {keywords}")
+
+                for keyword in keywords:
                     if keyword in title_lower or keyword in desc_lower:
                         score += 1
+                        print(f"  -> Match: {keyword}")
 
                 # Simple heuristic: map nucleus to template key if possible
                 # For now, we map 'Data' to 'scraping' template if score is high
