@@ -18,7 +18,7 @@ class FreelancerScout:
         self.master_template = MasterTemplate()
         self.telegram_token = os.getenv("TELEGRAM_TOKEN")
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID")
-        # Load weights from master template's data source for efficiency, or just use master_template to query
+        # Load weights from master template's data source
         self.weights_data = self.master_template.data
 
     def clean_singleton_lock(self):
@@ -72,38 +72,32 @@ class FreelancerScout:
             print("Waiting 15 seconds for page load...")
             await page.wait_for_timeout(15000)
 
-            # --- REAL SCRAPING LOGIC PLACEHOLDER ---
-            # To enable real scraping, uncomment and adjust selectors:
-            # job_cards = await page.query_selector_all('.JobSearchCard-item')
-            # for card in job_cards:
-            #     title = await card.query_selector('.JobSearchCard-primary-heading-link').inner_text()
-            #     budget = ...
-            #     description = ...
-            #     bids = ...
-            #     jobs.append({...})
-            # ---------------------------------------
-
             jobs = []
 
-            # SIMULATION DATA UPDATED FOR OCEANO AZUL TESTING
+            # SIMULATION DATA UPDATED FOR 'LUCRO RAPIDO' TESTING
             simulated_jobs = [
-                {"title": "Migration Script", "budget": 250, "verified": True, "description": "Need to migrate database.", "bids": 5, "hourly_rate": 50}, # High score (Migration + Rate)
-                {"title": "Simple Scraping", "budget": 50, "verified": True, "description": "Just scraping.", "bids": 5, "hourly_rate": 20}, # Low budget, ignored
-                {"title": "Crowded Project", "budget": 500, "verified": True, "description": "Huge project.", "bids": 20, "hourly_rate": 60}, # Ignored (> 15 bids)
-                {"title": "API Integration", "budget": 300, "verified": True, "description": "Complex API integration.", "bids": 10, "hourly_rate": 45} # High score (API + Rate)
+                {"title": "Excel VBA Macro", "budget": 160, "verified": True, "description": "Need a vba macro for excel.", "bids": 5, "hourly_rate": 0}, # Should match LucroRapido
+                {"title": "Zapier Automation", "budget": 250, "verified": True, "description": "Connect sheets to email via Zapier.", "bids": 2, "hourly_rate": 0}, # High Score
+                {"title": "Crowded Migration", "budget": 500, "verified": True, "description": "Data migration.", "bids": 12, "hourly_rate": 60}, # Ignored (> 10 bids)
+                {"title": "Low Budget Scraper", "budget": 100, "verified": True, "description": "Simple scraping.", "bids": 0, "hourly_rate": 0} # Ignored (< 150 budget)
             ]
+
+            # Load dynamic settings from JSON if possible, or use hardcoded logic updated per request
+            global_settings = self.weights_data.get('global_settings', {})
+            min_budget = global_settings.get('min_budget', 150)
+            max_bids = global_settings.get('max_bids', 10)
 
             for job in simulated_jobs:
                 # 1. Filter: Verified Payment
                 if not job.get('verified'):
                     continue
 
-                # 2. Filter: Budget > $200
-                if job.get('budget', 0) <= 200:
+                # 2. Filter: Budget > $150
+                if job.get('budget', 0) <= min_budget:
                     continue
 
-                # 3. Filter: Ignore jobs with > 15 bids
-                if job.get('bids', 0) > 15:
+                # 3. Filter: Ignore jobs with > 10 bids
+                if job.get('bids', 0) > max_bids:
                     print(f"Ignored Crowded Job: {job['title']} ({job['bids']} bids)")
                     continue
 
@@ -132,23 +126,21 @@ class FreelancerScout:
         desc = job.get('description', '').lower()
         title = job.get('title', '').lower()
 
-        # 1. Base Logic (from previous version, updated with JSON weights if available)
-        # We read from self.weights_data['nucleos']
+        # 1. Base Logic (Nucleos from JSON)
         nucleos = self.weights_data.get('nucleos', {})
 
         for nucleus_name, data in nucleos.items():
             keywords = data.get('keywords', [])
-            weight = data.get('weight', 1) # Default weight 1 if not specified (Data/Tech/Marketing)
+            weight = data.get('weight', 1)
 
             # Check for matches
             for kw in keywords:
                 if kw in desc or kw in title:
-                    score += (10 * weight) # Multiply by weight factor
-                    # Break after one match per nucleus? Or accumulate? Accumulating for now.
+                    score += (10 * weight) # Base multiplier
 
         # 2. Hourly Rate Boost (Priorize projects with Hourly Rate > $40/hr)
         if job.get('hourly_rate', 0) > 40:
-            score += 30 # Significant boost
+            score += 30
 
         # 3. Verified Payment Boost
         if job.get('verified'):

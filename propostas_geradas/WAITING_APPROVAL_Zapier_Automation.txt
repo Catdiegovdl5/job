@@ -1,0 +1,7 @@
+Hello,
+
+I am a Data Solutions Consultant specializing in automation and scraping. I can extract the required data for 'Zapier Automation' efficiently, bypassing blocks and ensuring clean data delivery.
+
+Tech Stack: Python, Playwright, Pandas, Excel/VBA integration.
+
+Looking forward to optimizing your data workflow.
