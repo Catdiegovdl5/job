@@ -4,7 +4,9 @@ import re
 
 class MasterTemplate:
     def __init__(self, core_file='turbo_core_v111_final_clean.json'):
-        self.core_file = core_file
+        # Ensure path is relative to this script
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.core_file = os.path.join(base_dir, core_file)
         self.data = self.load_core()
 
     def load_core(self):
