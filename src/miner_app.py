@@ -212,8 +212,35 @@ class FreelancerScout:
                     proposal_path = self.master_template.generate_proposal(job)
                     print(f"Generated Proposal: {proposal_path}")
 
-                    # Send Telegram Alert
+                    # Add to Pending Jobs (GUI Approval)
+                    self.add_to_pending_jobs(job)
+
+                    # Send Telegram Alert (Notification Only)
                     await self.send_telegram_alert(job)
+
+    def add_to_pending_jobs(self, job):
+        """Adds the job to pending_jobs.json for GUI approval."""
+        file_path = "pending_jobs.json"
+        try:
+            jobs = []
+            if os.path.exists(file_path):
+                with open(file_path, "r") as f:
+                    try:
+                        jobs = json.load(f)
+                    except json.JSONDecodeError:
+                        jobs = []
+
+            # Check for duplicates
+            if not any(j['title'] == job['title'] for j in jobs):
+                jobs.append(job)
+                with open(file_path, "w") as f:
+                    json.dump(jobs, f, indent=4)
+                print(f"Job added to Pending Queue: {job['title']}")
+            else:
+                print(f"Job already in Pending Queue: {job['title']}")
+
+        except Exception as e:
+            print(f"Error saving to pending_jobs.json: {e}")
 
             await browser.close()
             return jobs

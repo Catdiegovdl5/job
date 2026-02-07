@@ -39,10 +39,111 @@ class SniperGUI:
         self.btn_kill = tk.Button(self.btn_frame, text="🛑 STOP ALL", command=self.kill_all, bg="red", fg="white")
         self.btn_kill.pack(side=tk.LEFT, padx=10)
 
-        self.log_area = scrolledtext.ScrolledText(root, width=80, height=20)
+        self.log_area = scrolledtext.ScrolledText(root, width=80, height=15)
         self.log_area.pack(pady=10)
 
+        # --- NEW APPROVAL SECTION ---
+        self.approval_frame = tk.LabelFrame(root, text="Pending Approvals", font=("Arial", 12))
+        self.approval_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+
+        self.approval_list = tk.Listbox(self.approval_frame, height=8)
+        self.approval_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.approval_list.bind('<<ListboxSelect>>', self.on_select_job)
+
+        self.action_frame = tk.Frame(self.approval_frame)
+        self.action_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=5, pady=5)
+
+        self.btn_approve = tk.Button(self.action_frame, text="✅ Approve", command=self.approve_job, bg="green", fg="white", state=tk.DISABLED)
+        self.btn_approve.pack(fill=tk.X, pady=2)
+
+        self.btn_reject = tk.Button(self.action_frame, text="❌ Reject", command=self.reject_job, bg="red", fg="white", state=tk.DISABLED)
+        self.btn_reject.pack(fill=tk.X, pady=2)
+
         self.processes = {}
+        self.pending_jobs = []
+
+        # Start checking for pending jobs
+        self.check_pending_jobs()
+
+    def check_pending_jobs(self):
+        """Reads pending_jobs.json and updates the list."""
+        try:
+            import json
+            if os.path.exists("pending_jobs.json"):
+                with open("pending_jobs.json", "r") as f:
+                    new_jobs = json.load(f)
+
+                # Check if list changed
+                current_titles = [j['title'] for j in self.pending_jobs]
+                new_titles = [j['title'] for j in new_jobs]
+
+                if current_titles != new_titles:
+                    self.pending_jobs = new_jobs
+                    self.approval_list.delete(0, tk.END)
+                    for job in self.pending_jobs:
+                        display_text = f"{job['title']} | ${job['budget']} | Score: {job['score']}"
+                        self.approval_list.insert(tk.END, display_text)
+
+        except Exception as e:
+            pass # Silent fail to avoid spamming log
+
+        self.root.after(2000, self.check_pending_jobs) # Poll every 2s
+
+    def on_select_job(self, event):
+        selection = self.approval_list.curselection()
+        if selection:
+            self.btn_approve.config(state=tk.NORMAL)
+            self.btn_reject.config(state=tk.NORMAL)
+
+            # Show proposal preview in log? Or maybe a popup?
+            index = selection[0]
+            job = self.pending_jobs[index]
+            self.log(f"--- SELECTED: {job['title']} ---\n{job.get('description', '')[:200]}...")
+        else:
+            self.btn_approve.config(state=tk.DISABLED)
+            self.btn_reject.config(state=tk.DISABLED)
+
+    def approve_job(self):
+        selection = self.approval_list.curselection()
+        if selection:
+            index = selection[0]
+            job = self.pending_jobs[index]
+            self.log(f"✅ APPROVING: {job['title']}")
+
+            # Trigger Bidder
+            self.trigger_bidder(job['title'])
+
+            # Remove from list
+            self.remove_job(index)
+
+    def reject_job(self):
+        selection = self.approval_list.curselection()
+        if selection:
+            index = selection[0]
+            job = self.pending_jobs[index]
+            self.log(f"❌ REJECTING: {job['title']}")
+            self.remove_job(index)
+
+    def remove_job(self, index):
+        import json
+        del self.pending_jobs[index]
+        self.approval_list.delete(index)
+
+        # Update JSON file
+        with open("pending_jobs.json", "w") as f:
+            json.dump(self.pending_jobs, f, indent=4)
+
+        self.btn_approve.config(state=tk.DISABLED)
+        self.btn_reject.config(state=tk.DISABLED)
+
+    def trigger_bidder(self, job_title):
+        self.log(f"Starting Bidder for {job_title}...")
+        user = os.getenv("FLN_USER") or os.getenv("FREELANCER_EMAIL") or "unknown"
+        password = os.getenv("FLN_PASS") or os.getenv("FREELANCER_PASSWORD") or "unknown"
+
+        # Construct URL or pass title
+        args = ["--user", user, "--password", password, "--url", job_title]
+        threading.Thread(target=self._run_process, args=("src/bidder.py", "Bidder", args), daemon=True).start()
 
     def kill_all(self):
         self.log("Stopping all managed processes...")
