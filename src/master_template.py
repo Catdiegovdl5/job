@@ -34,8 +34,8 @@ class MasterTemplate:
         """
         Selects the best template based on keywords matching the project title/description.
         """
-        title_lower = title.lower()
-        desc_lower = description.lower()
+        title_lower = title.strip().lower()
+        desc_lower = description.strip().lower()
 
         # Debug Score
         print(f"\n[DEBUG] Analyzing Project: {title}")

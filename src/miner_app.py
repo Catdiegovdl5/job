@@ -105,7 +105,8 @@ class FreelancerScout:
 
         try:
             print(f"Sending Telegram Alert for: {job['title']}")
-            response = requests.post(url, json=payload, timeout=10)
+            # Use asyncio.to_thread to make requests non-blocking
+            response = await asyncio.to_thread(requests.post, url, json=payload, timeout=10)
             if response.status_code == 200:
                 print(f"Telegram Alert sent successfully.")
             else:
@@ -281,17 +282,25 @@ class FreelancerScout:
 
     def calculate_score(self, job):
         score = 0
-        desc = job.get('description', '').lower()
-        title = job.get('title', '').lower()
+        desc = job.get('description', '').strip().lower()
+        title = job.get('title', '').strip().lower()
+
+        best_nucleus = "Unknown"
+        max_nucleus_points = 0
 
         # Debug Score
         print(f"\n[DEBUG Score] Checking Job: {title}")
 
         # 0. Emergency Heuristic Override (Title Keywords) - DIRECTIVE OMNI-GATILHO
-        priority_keywords = ['scraper', 'automation', 'vba', 'extraction', 'bot']
+        # Added 'zapier', 'api' as requested
+        priority_keywords = ['scraper', 'automation', 'vba', 'extraction', 'bot', 'zapier', 'api']
+
+        heuristic_bonus = False
         for pk in priority_keywords:
             if pk in title:
                 score += 50
+                heuristic_bonus = True
+                best_nucleus = "BLUE_OCEAN_HEURISTIC"
                 print(f"  -> [OMNI-GATILHO] Priority Keyword Match: {pk} (+50)")
                 break # Apply bonus only once
 
@@ -311,6 +320,15 @@ class FreelancerScout:
                     points = (10 * weight)
                     score += points # Base multiplier
                     print(f"  -> Match ({nucleus_name}): {kw} (+{points})")
+
+                    if points > max_nucleus_points:
+                        max_nucleus_points = points
+                        # Only override "Unknown", don't override Heuristic unless points are huge?
+                        # Actually, user wants "Force Core classification to the highest-weighted match"
+                        if not heuristic_bonus:
+                            best_nucleus = nucleus_name
+
+        print(f"  -> Core Classification: {best_nucleus}")
 
         # 2. Hourly Rate Boost (Priorize projects with Hourly Rate > $40/hr)
         if job.get('hourly_rate', 0) > 40:
