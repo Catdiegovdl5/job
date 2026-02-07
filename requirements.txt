@@ -1,3 +1,5 @@
 requests
 playwright
 customtkinter
+playwright-stealth
+psutil
