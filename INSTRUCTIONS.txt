@@ -1,0 +1,35 @@
+
+# Instruções para rodar o Sniper Engine
+
+Siga estes passos para configurar e executar o programa no seu ambiente Linux.
+
+1. **Instale as dependências:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Configure o arquivo .env (se necessário):**
+   Crie um arquivo chamado `.env` na raiz do projeto com as suas credenciais:
+   ```env
+   TELEGRAM_TOKEN=SEU_TOKEN_AQUI
+   TELEGRAM_CHAT_ID=SEU_CHAT_ID_AQUI
+   FLN_USER=SEU_EMAIL_FREELANCER
+   FLN_PASS=SUA_SENHA_FREELANCER
+   GEMINI_API_KEY=SUA_CHAVE_GEMINI (opcional)
+   ```
+
+3. **Para rodar o modo gráfico (Recomendado):**
+   Execute o script `gui_app.py`:
+   ```bash
+   python3 gui_app.py
+   ```
+   *No painel gráfico, clique em "Start Telegram Bot" para iniciar o bot.*
+
+4. **Para rodar o bot diretamente (Terminal):**
+   Execute o script `src/telegram_commander.py`:
+   ```bash
+   python3 src/telegram_commander.py
+   ```
+
+**Observação:**
+O programa foi modificado para garantir que apenas uma instância do bot Telegram esteja rodando por vez. Se você tentar iniciar uma segunda instância, ela será bloqueada automaticamente para evitar o erro `Conflict`.
