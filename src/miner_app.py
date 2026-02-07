@@ -287,8 +287,19 @@ class FreelancerScout:
         # Debug Score
         print(f"\n[DEBUG Score] Checking Job: {title}")
 
+        # 0. Emergency Heuristic Override (Title Keywords) - DIRECTIVE OMNI-GATILHO
+        priority_keywords = ['scraper', 'automation', 'vba', 'extraction', 'bot']
+        for pk in priority_keywords:
+            if pk in title:
+                score += 50
+                print(f"  -> [OMNI-GATILHO] Priority Keyword Match: {pk} (+50)")
+                break # Apply bonus only once
+
         # 1. Base Logic (Nucleos from JSON)
         nucleos = self.weights_data.get('nucleos', {})
+
+        if not nucleos:
+             print("  -> [WARNING] No 'nucleos' data loaded! Check master_template/json.")
 
         for nucleus_name, data in nucleos.items():
             keywords = [k.lower() for k in data.get('keywords', [])]

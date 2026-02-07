@@ -138,10 +138,22 @@ def run_bot():
 
     print("Telegram Bot Polling Started...")
 
-    # Polling is disabled in favor of GUI-based approval to avoid Conflict errors.
-    # The bot will only be used for sending notifications (one-way).
-    print("Telegram Polling Disabled (Notification Mode Only).")
-    # application.run_polling()
+    # Polling Re-enabled (Conditional)
+    # The GUI's kill_all() method must ensure no other instance is running.
+    # We use drop_pending_updates=True to prevent conflict loops.
+    print("Telegram Polling Started (Interactive Mode)...")
+
+    try:
+        application.run_polling(
+            drop_pending_updates=True,
+            poll_interval=2.0
+        )
+    except Conflict:
+        print("CRITICAL ERROR: Conflict - terminated by other getUpdates request.")
+        print("Make sure only one bot instance is running.")
+        sys.exit(1)
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
 if __name__ == '__main__':
     run_bot()

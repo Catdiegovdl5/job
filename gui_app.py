@@ -37,6 +37,10 @@ class SniperGUI:
         self.btn_test = tk.Button(self.btn_frame, text="Test Telegram", command=self.test_telegram, bg="gray", fg="white")
         self.btn_test.pack(side=tk.LEFT, padx=10)
 
+        # New Button: Force Send Proposal to Telegram (Directive 3)
+        self.btn_force_send = tk.Button(self.btn_frame, text="TESTAR ENVIO TELEGRAM", command=self.force_send_telegram, bg="purple", fg="white")
+        self.btn_force_send.pack(side=tk.LEFT, padx=10)
+
         self.btn_kill = tk.Button(self.btn_frame, text="🛑 STOP ALL", command=self.kill_all, bg="red", fg="white")
         self.btn_kill.pack(side=tk.LEFT, padx=10)
 
@@ -275,6 +279,76 @@ class SniperGUI:
                 self.log(f"FAILURE: Telegram API Error {resp.status_code}: {resp.text}")
         except Exception as e:
             self.log(f"FAILURE: Connection Error: {e}")
+
+    def force_send_telegram(self):
+        """Forces sending the first pending job to Telegram."""
+        if not self.pending_jobs:
+            self.log("⚠️ No pending jobs to test send.")
+            return
+
+        job = self.pending_jobs[0]
+        self.log(f"🚀 Force Sending Job to Telegram: {job['title']}")
+
+        # We need to replicate miner_app.send_telegram_alert logic roughly
+        # Or simpler: just spawn a quick python script to do it?
+        # Actually, let's just do requests logic here to avoid complex imports
+
+        import requests
+        import html
+
+        token = os.getenv("TELEGRAM_TOKEN")
+        chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+        if not token or not chat_id:
+            self.log("ERROR: Missing Token/ChatID")
+            return
+
+        safe_title = html.escape(job['title'])
+        job_link = f"https://www.freelancer.com/projects/{job['title'].replace(' ', '-').lower()}"
+
+        # Try to read proposal content if file exists
+        proposal_content = "(Preview unavailable)"
+        safe_filename_title = "".join(c for c in job['title'] if c.isalnum() or c in (' ', '_')).replace(" ", "_")
+        filename = f"WAITING_APPROVAL_{safe_filename_title}.txt"
+        filepath = os.path.join("propostas_geradas", filename)
+
+        if os.path.exists(filepath):
+            with open(filepath, "r", encoding="utf-8") as f:
+                proposal_content = html.escape(f.read())
+
+        message = (
+            f"🚨 <b>Sniper Alert (FORCED TEST)</b> 🚨\n\n"
+            f"<b>Job:</b> <a href='{job_link}'>{safe_title}</a>\n"
+            f"<b>Budget:</b> ${job['budget']}\n"
+            f"<b>Score:</b> {job['score']} (Forced)\n\n"
+            f"<b>Proposta Gerada:</b>\n<pre>{proposal_content}</pre>"
+        )
+
+        keyboard = {
+            "inline_keyboard": [
+                [
+                    {"text": "✅ Aprovar (Simulado)", "callback_data": f"approve_bid|{job['title']}"},
+                    {"text": "❌ Rejeitar", "callback_data": f"reject_bid|{job['title']}"}
+                ]
+            ]
+        }
+
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        payload = {
+            "chat_id": chat_id,
+            "text": message,
+            "parse_mode": "HTML",
+            "reply_markup": keyboard
+        }
+
+        try:
+            resp = requests.post(url, json=payload, timeout=10)
+            if resp.status_code == 200:
+                self.log("SUCCESS: Force sent to Telegram.")
+            else:
+                self.log(f"FAILURE: {resp.status_code} - {resp.text}")
+        except Exception as e:
+            self.log(f"FAILURE: {e}")
 
     def start_bidder(self):
         self.log("Starting Bidder...")

@@ -13,9 +13,22 @@ class MasterTemplate:
         try:
             with open(self.core_file, 'r', encoding='utf-8') as f:
                 return json.load(f)
-        except FileNotFoundError:
-            print(f"Error: {self.core_file} not found.")
-            return {}
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"Error loading {self.core_file}: {e}. Using Emergency Fallback.")
+            # Emergency Fallback Dictionary
+            return {
+                "nucleos": {
+                    "Data": {"keywords": ["scraping", "mining", "extraction", "crawler", "automation", "python", "selenium", "playwright"], "weight": 5},
+                    "Tech": {"keywords": ["fullstack", "react", "node", "api", "backend", "frontend", "aws", "docker"], "weight": 3},
+                    "Marketing": {"keywords": ["seo", "traffic", "ads", "copywriting", "social media", "growth"], "weight": 2},
+                    "LucroRapido": {"keywords": ["vba", "excel automation", "google sheets api", "zapier", "make.com", "data migration", "web scraping"], "weight": 5}
+                },
+                "templates": {
+                    "scraping": "Hello,\n\nI can build a robust Python scraper using Playwright/Selenium to extract the data you need efficiently.\n\nBest,\n[Your Name]",
+                    "web_dev": "Hi,\n\nI am a Fullstack developer experienced in modern web technologies. I can deliver this project with high quality.\n\nRegards,\n[Your Name]",
+                    "default": "Hi,\n\nI am interested in your project and have the skills to deliver it.\n\nBest regards,"
+                }
+            }
 
     def get_template_for_project(self, title, description):
         """
