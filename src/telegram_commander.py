@@ -7,7 +7,7 @@ import re
 import fcntl
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.error import Conflict
-from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler
+from telegram.ext import ApplicationBuilder, ContextTypes, CommandHandler, CallbackQueryHandler, Application
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -27,6 +27,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def status(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await context.bot.send_message(chat_id=update.effective_chat.id, text="Systems Nominal. Sniper Mode Active.")
 
+async def post_init(application: ApplicationBuilder):
+    """Notify the user that the system is online."""
+    if CHAT_ID:
+        try:
+            await application.bot.send_message(chat_id=CHAT_ID, text="🤖 **[Sniper Commander]** Online e Conectado!\nPronto para caçar.")
+        except Exception as e:
+            logging.error(f"Failed to send startup message: {e}")
+
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
@@ -45,6 +53,17 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text=f"❌ Rejeitado: {job_title}")
 
         move_proposal_file(job_title, "rejected")
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Log the error and handle Telegram conflicts gracefully."""
+    logging.error(f"Exception while handling an update: {context.error}")
+
+    if isinstance(context.error, Conflict):
+        logging.critical("Conflict error detected! Another instance is running.")
+        # We can't really recover from this easily without restarting,
+        # but logging it cleanly prevents the ugly traceback flood.
+        # Maybe we can try to wait and retry?
+        pass
 
 def move_proposal_file(job_title, status):
     # Sanitize title to match filename generation logic
@@ -107,16 +126,23 @@ def run_bot():
         print("Error: TELEGRAM_TOKEN not found in .env")
         return
 
-    application = ApplicationBuilder().token(TOKEN).build()
+    # Add post_init to send startup message
+    application = ApplicationBuilder().token(TOKEN).post_init(post_init).build()
 
     application.add_handler(CommandHandler('start', start))
     application.add_handler(CommandHandler('status', status))
     application.add_handler(CallbackQueryHandler(button_handler))
 
+    # Register error handler
+    application.add_error_handler(error_handler)
+
     print("Telegram Bot Polling Started...")
 
+    # Set drop_pending_updates=True to ignore old updates that might cause conflicts or loops
+    # Set allowed_updates to only what we need
+    # Adjust poll_interval to be less aggressive if needed
     try:
-        application.run_polling()
+        application.run_polling(drop_pending_updates=True)
     except Conflict:
         print("CRITICAL ERROR: Conflict - terminated by other getUpdates request.")
         print("Make sure only one bot instance is running.")
