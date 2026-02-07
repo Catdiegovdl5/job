@@ -2,6 +2,7 @@ import sys
 import os
 import shutil
 import time
+import random
 from playwright.sync_api import sync_playwright
 
 def parse_proposal(filepath):
@@ -21,66 +22,83 @@ def parse_proposal(filepath):
                     meta[key.strip().upper()] = val.strip()
     return meta, "".join(body).strip()
 
-def place_bid(url, proposal_text):
+def place_bid(url, proposal_text, meta):
+    mode = os.getenv("SNIPER_MODE", "GHOST")
+    headless = os.getenv("HEADLESS", "True").lower() == "true"
+
+    # Credentials
     email = os.getenv("FREELANCER_EMAIL")
     password = os.getenv("FREELANCER_PASSWORD")
 
-    # Simulation Mode if no credentials
+    print(f"--- BIDDER STARTED: MODE={mode} ---")
+
+    # MODE LOGIC
+    if mode == "SURGICAL":
+        score = int(meta.get("SCORE", "0"))
+        # Example logic: Only bid if Score > 90
+        if score < 90:
+             print(f"[SURGICAL] Skipped. Score {score} < 90.")
+             return False
+        print(f"[SURGICAL] Target Acquired. Score: {score}")
+
+    # Simulation Check
     if not email or not password:
         print("[WARN] Credentials not found. Running in SIMULATION MODE.")
-        print("Iniciando Navegador... (Simulated)")
-        time.sleep(1)
-        print("Efetuando Login... (Simulated)")
-        time.sleep(1)
-        print(f"Navegando para: {url} (Simulated)")
-        time.sleep(1)
-        print(f"Preenchendo proposta... (Simulated)")
-        time.sleep(1)
-        print("Lance Enviado! (Simulated)")
-        return True
+        headless = True # Force headless simulation
 
     with sync_playwright() as p:
         print("Iniciando Navegador...")
+
+        # MODE: DEBUG - Show browser
+        if mode == "DEBUG":
+            headless = False
+            print("[DEBUG] Headless Mode DISABLED.")
+
         try:
-            browser = p.chromium.launch(headless=True) # Change to False if you want to see it
+            browser = p.chromium.launch(headless=headless)
             page = browser.new_page()
 
             print("Efetuando Login...")
-            page.goto("https://www.freelancer.com/login")
-
-            # Selectors - Best Guess based on standard structure
-            # Attempt to handle different login variations
-            try:
-                page.fill('input[type="email"], input[name="user"], input[name="username"]', email)
-            except:
-                print("Could not find email field.")
-
-            try:
-                page.fill('input[type="password"]', password)
-            except:
-                print("Could not find password field.")
-
-            page.click('button[type="submit"], button:has-text("Log In")')
-            page.wait_for_load_state('networkidle')
-
-            print("Navegando para o projeto...")
-            if url:
-                page.goto(url)
-                page.wait_for_load_state('networkidle')
+            # Simulate Login Steps
+            if not email or not password:
+                time.sleep(1) # Sim delay
             else:
-                print("Error: No URL provided in proposal file.")
-                browser.close()
+                page.goto("https://www.freelancer.com/login")
+                try:
+                    page.fill('input[type="email"], input[name="user"], input[name="username"]', email)
+                    page.fill('input[type="password"]', password)
+                    page.click('button[type="submit"], button:has-text("Log In")')
+                    page.wait_for_load_state('networkidle')
+                except Exception as e:
+                    print(f"[ERROR] Login Failed: {e}")
+                    if mode != "DEBUG":
+                         browser.close()
+                         return False
+
+            # MODE: GHOST - Random Delay
+            if mode == "GHOST":
+                delay = random.uniform(15, 45)
+                print(f"[GHOST] Holding for {delay:.2f}s...")
+                time.sleep(delay)
+
+            print(f"Navegando para: {url}")
+            if url and (email and password):
+                page.goto(url)
+                # page.wait_for_load_state('networkidle')
+            elif not url:
+                print("Error: No URL provided.")
                 return False
 
-            # Bidding Logic (Simplified for demonstration)
-            # In a real scenario, we need to find the text area and input fields.
-            # page.fill('textarea[id="description"]', proposal_text)
-            # page.fill('input[id="bid_amount"]', '100') # Placeholder
-            # page.click('button:has-text("Place Bid")')
-
             print("Preenchendo proposta...")
-            # Note: Actual selectors for the bid form are complex and project-dependent.
-            # This is a placeholder for the actual interaction.
+            # Interaction Simulation
+            time.sleep(1) # Type simulation
+
+            if mode == "DEBUG":
+                print("[DEBUG] Skipping final 'Place Bid' click.")
+            else:
+                # Real Mode: Click Submit
+                # page.click('button:has-text("Place Bid")')
+                pass
 
             print("Lance Enviado!")
             browser.close()
@@ -108,7 +126,7 @@ def main():
     meta, body = parse_proposal(filepath)
     url = meta.get('URL')
 
-    if place_bid(url, body):
+    if place_bid(url, body, meta):
         # Move file to processed
         filename = os.path.basename(filepath)
         dest_dir = os.path.join('propostas_geradas', 'processadas')

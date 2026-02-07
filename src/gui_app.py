@@ -4,28 +4,113 @@ import glob
 import subprocess
 import threading
 import sys
+import json
+import time
+from datetime import datetime
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
 
+STATS_FILE = "data/stats.json"
+
 class App(ctk.CTk):
     def __init__(self):
         super().__init__()
-        self.title("Sniper Scout GUI")
-        self.geometry("1000x600")
+        self.title("Sniper Scout GUI - NOC System")
+        self.geometry("1000x700")
 
-        self.tabview = ctk.CTkTabview(self, width=900, height=500)
+        # Initialize Stats
+        self.ensure_stats_file()
+
+        self.tabview = ctk.CTkTabview(self, width=900, height=600)
         self.tabview.pack(padx=20, pady=20, expand=True, fill="both")
 
         self.tab_dashboard = self.tabview.add("Dashboard")
         self.tab_bidding = self.tabview.add("Central de Lances")
 
         self.processing_files = set()
+        self.auto_sniper_active = False
 
+        self.setup_dashboard_tab()
         self.setup_bidding_tab()
 
         # Initial Load
         self.refresh_table()
+        self.update_dashboard_metrics()
+
+    def ensure_stats_file(self):
+        if not os.path.exists("data"):
+            os.makedirs("data")
+        if not os.path.exists(STATS_FILE):
+            with open(STATS_FILE, "w") as f:
+                json.dump({"total_bids": 0, "bids_today": 0, "success_rate": 0}, f)
+
+    def get_stats(self):
+        try:
+            with open(STATS_FILE, "r") as f:
+                return json.load(f)
+        except:
+            return {"total_bids": 0, "bids_today": 0, "success_rate": 0}
+
+    def setup_dashboard_tab(self):
+        self.tab_dashboard.grid_columnconfigure((0, 1, 2), weight=1)
+
+        # KPI Cards
+        self.card_pending = ctk.CTkLabel(self.tab_dashboard, text="PENDENTES\n0", fg_color="#2b2b2b", corner_radius=10, height=80, font=("Arial", 16, "bold"))
+        self.card_pending.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+        self.card_sent = ctk.CTkLabel(self.tab_dashboard, text="ENVIADOS\n0", fg_color="#1f538d", corner_radius=10, height=80, font=("Arial", 16, "bold"))
+        self.card_sent.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
+
+        self.card_success = ctk.CTkLabel(self.tab_dashboard, text="TAXA SUCESSO\n0%", fg_color="#2b2b2b", corner_radius=10, height=80, font=("Arial", 16, "bold"))
+        self.card_success.grid(row=0, column=2, padx=10, pady=10, sticky="nsew")
+
+        # Mode Selector
+        self.mode_label = ctk.CTkLabel(self.tab_dashboard, text="MODO DE OPERAÇÃO:", font=("Arial", 14))
+        self.mode_label.grid(row=1, column=0, columnspan=3, pady=(20, 5))
+
+        self.mode_selector = ctk.CTkSegmentedButton(self.tab_dashboard,
+                                                    values=["GHOST", "BLITZ", "SURGICAL", "DEBUG"],
+                                                    command=self.change_mode)
+        self.mode_selector.set("GHOST")
+        self.mode_selector.grid(row=2, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
+
+        # Kill Switch
+        self.kill_btn = ctk.CTkButton(self.tab_dashboard, text="KILL ALL PLAYWRIGHT", fg_color="red", command=self.kill_playwright)
+        self.kill_btn.grid(row=3, column=0, columnspan=3, pady=10)
+
+        # Terminal Output
+        self.terminal_out = ctk.CTkTextbox(self.tab_dashboard, height=250, fg_color="black", text_color="#00FF00", font=("Consolas", 12))
+        self.terminal_out.grid(row=4, column=0, columnspan=3, padx=10, pady=10, sticky="nsew")
+        self.terminal_out.insert("0.0", "--- Sniper Scout NOC System Ready ---\n")
+
+    def change_mode(self, value):
+        self.log_to_console(f"[SYSTEM] Mode switched to: {value}")
+
+    def kill_playwright(self):
+        self.log_to_console("[SYSTEM] Killing all chromium processes...")
+        try:
+            subprocess.run(["pkill", "-9", "chromium"], check=False)
+            subprocess.run(["pkill", "-9", "chrome"], check=False) # Just in case
+            self.log_to_console("[SYSTEM] Processes terminated.")
+        except Exception as e:
+            self.log_to_console(f"[ERROR] Failed to kill processes: {e}")
+
+    def log_to_console(self, message):
+        self.terminal_out.insert("end", f"{message}\n")
+        self.terminal_out.see("end")
+
+    def update_dashboard_metrics(self):
+        # Pending
+        pending_count = len(glob.glob("propostas_geradas/WAITING_APPROVAL_*.txt"))
+        self.card_pending.configure(text=f"PENDENTES\n{pending_count}")
+
+        # Sent / Stats
+        stats = self.get_stats()
+        self.card_sent.configure(text=f"ENVIADOS\n{stats.get('total_bids', 0)}")
+        self.card_success.configure(text=f"TAXA SUCESSO\n{stats.get('success_rate', 0)}%")
+
+        self.after(5000, self.update_dashboard_metrics) # Refresh every 5s
 
     def setup_bidding_tab(self):
         # Header
@@ -106,17 +191,25 @@ class App(ctk.CTk):
                     except ValueError:
                         pass
 
+        self.update_dashboard_metrics() # Ensure dashboard is in sync
+
     def launch_bid(self, filepath):
         if filepath in self.processing_files:
             return
 
+        mode = self.mode_selector.get()
+        self.log_to_console(f"--- Launching Bid: {os.path.basename(filepath)} [Mode: {mode}] ---")
+
         self.processing_files.add(filepath)
-        self.refresh_table() # Update UI to show processing status immediately
+        self.refresh_table()
 
         self.update_status(f"Launching bid for {os.path.basename(filepath)}...")
 
         def run_script():
             try:
+                env = os.environ.copy()
+                env["SNIPER_MODE"] = mode
+
                 # Using sys.executable to ensure we use the same python environment
                 process = subprocess.Popen(
                     [sys.executable, "src/bidder.py", filepath],
@@ -124,30 +217,58 @@ class App(ctk.CTk):
                     stderr=subprocess.PIPE,
                     text=True,
                     bufsize=1,
-                    universal_newlines=True
+                    universal_newlines=True,
+                    env=env
                 )
 
                 # Read output live
                 for line in process.stdout:
-                    self.update_status(line.strip())
+                    line = line.strip()
+                    self.update_status(line)
+                    self.log_to_console(f"[BIDDER] {line}")
 
                 process.wait()
                 rc = process.returncode
 
                 if rc == 0:
                     self.update_status("Bid Processed Successfully!")
+                    self.log_to_console("[SUCCESS] Bid Processed Successfully!")
+
+                    # Update Stats
+                    self.increment_stats()
+
+                    # Linux Notification
+                    try:
+                        subprocess.run(["notify-send", "Sniper Scout", f"Bid Sent: {os.path.basename(filepath)}"], check=False)
+                    except:
+                        pass
                 else:
                     stderr = process.stderr.read()
                     self.update_status(f"Error: {stderr}")
+                    self.log_to_console(f"[ERROR] {stderr}")
+
             except Exception as e:
                  self.update_status(f"Exception: {str(e)}")
+                 self.log_to_console(f"[EXCEPTION] {str(e)}")
             finally:
                 if filepath in self.processing_files:
                     self.processing_files.remove(filepath)
-                # Refresh UI after a short delay to remove the processed item
                 self.after(2000, self.refresh_table)
 
         threading.Thread(target=run_script, daemon=True).start()
+
+    def increment_stats(self):
+        try:
+            with open(STATS_FILE, "r+") as f:
+                data = json.load(f)
+                data["total_bids"] = data.get("total_bids", 0) + 1
+                data["bids_today"] = data.get("bids_today", 0) + 1 # Logic for date reset needed later
+                # Success rate logic can be refined
+                f.seek(0)
+                json.dump(data, f)
+                f.truncate()
+        except Exception as e:
+            self.log_to_console(f"[ERROR] Stats update failed: {e}")
 
     def update_status(self, msg):
         self.after(0, lambda: self.status_label.configure(text=msg))
