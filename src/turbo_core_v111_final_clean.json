@@ -1,0 +1,32 @@
+{
+  "nucleos": {
+    "Data": {
+      "keywords": ["scraping", "mining", "extraction", "crawler", "automation", "python", "selenium", "playwright"],
+      "description": "Foco em extração de dados, automação e scripts."
+    },
+    "Tech": {
+      "keywords": ["fullstack", "react", "node", "api", "backend", "frontend", "aws", "docker"],
+      "description": "Desenvolvimento de software, web apps e infraestrutura."
+    },
+    "Marketing": {
+      "keywords": ["seo", "traffic", "ads", "copywriting", "social media", "growth"],
+      "description": "Estratégias de marketing digital e crescimento."
+    },
+    "LucroRapido": {
+      "keywords": ["vba", "excel automation", "google sheets api", "zapier", "make.com", "data migration", "web scraping"],
+      "weight": 5,
+      "description": "Nicho de Ouro: Alta demanda, baixa complexidade."
+    }
+  },
+  "templates": {
+    "default": "Hello,\n\nI have analyzed your project '{project_title}' and I see a clear path to the solution.\n\nAs a Solutions Consultant, my approach focuses on efficiency and reliability:\n1. Detailed requirement analysis.\n2. Robust implementation.\n3. Quality assurance and handover.\n\nLet's discuss how we can solve this quickly.\n\nBest regards,\n[Your Name]",
+    "scraping": "Hello,\n\nI am a Data Solutions Consultant specializing in automation and scraping. I can extract the required data for '{project_title}' efficiently, bypassing blocks and ensuring clean data delivery.\n\nTech Stack: Python, Playwright, Pandas, Excel/VBA integration.\n\nLooking forward to optimizing your data workflow.",
+    "web_dev": "Hello,\n\nI offer a consultancy approach to your '{project_title}' project, ensuring not just clean code but a scalable solution that fits your business needs.\n\nStack: React, Node.js, Python, AWS.\n\nLet's schedule a brief call to align on objectives?"
+  },
+  "global_settings": {
+    "min_budget": 150,
+    "min_hourly_rate": 40,
+    "max_bids": 10,
+    "verified_payment_only": true
+  }
+}
