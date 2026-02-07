@@ -6,6 +6,7 @@ import sys
 import os
 import psutil
 import time
+import shutil
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -53,17 +54,63 @@ class SniperGUI:
         self.action_frame = tk.Frame(self.approval_frame)
         self.action_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=5, pady=5)
 
-        self.btn_approve = tk.Button(self.action_frame, text="✅ Approve", command=self.approve_job, bg="green", fg="white", state=tk.DISABLED)
+        self.btn_approve = tk.Button(self.action_frame, text="🚀 LAUNCH", command=self.approve_job, bg="green", fg="white", state=tk.DISABLED)
         self.btn_approve.pack(fill=tk.X, pady=2)
 
         self.btn_reject = tk.Button(self.action_frame, text="❌ Reject", command=self.reject_job, bg="red", fg="white", state=tk.DISABLED)
         self.btn_reject.pack(fill=tk.X, pady=2)
+
+        # Status Label
+        self.status_label = tk.Label(self.root, text="Status: Ready", bd=1, relief=tk.SUNKEN, anchor=tk.W)
+        self.status_label.pack(side=tk.BOTTOM, fill=tk.X)
 
         self.processes = {}
         self.pending_jobs = []
 
         # Start checking for pending jobs
         self.check_pending_jobs()
+        # Start Folder Watcher
+        self.check_folder_enviar()
+
+    def check_folder_enviar(self):
+        """Monitors propostas_geradas/ENVIAR/ for new files."""
+        # Using relative path for portability, though user requested absolute.
+        # This will work as long as cwd is project root.
+        watch_dir = os.path.join("propostas_geradas", "ENVIAR")
+        process_dir = os.path.join("propostas_geradas", "processadas")
+
+        if os.path.exists(watch_dir):
+            for filename in os.listdir(watch_dir):
+                if filename.endswith(".txt"):
+                    filepath = os.path.join(watch_dir, filename)
+                    self.log(f"[FOLDER WATCHER] New file detected: {filename}")
+                    self.status_label.config(text=f"Status: Dispatching {filename}...")
+
+                    # Trigger Bidder
+                    self.trigger_bidder_file(filepath)
+
+                    # Move to processed
+                    try:
+                        shutil.move(filepath, os.path.join(process_dir, filename))
+                        self.log(f"[FOLDER WATCHER] Moved to processadas.")
+                    except Exception as e:
+                        self.log(f"[ERROR] Moving file: {e}")
+
+                    self.status_label.config(text="Status: Ready")
+
+        self.root.after(2000, self.check_folder_enviar)
+
+    def trigger_bidder_file(self, filepath):
+        self.log(f"🚀 LAUNCHING Bidder for file: {filepath}")
+        user = os.getenv("FLN_USER") or os.getenv("FREELANCER_EMAIL") or "unknown"
+        password = os.getenv("FLN_PASS") or os.getenv("FREELANCER_PASSWORD") or "unknown"
+
+        # Correctly pass --file argument
+        args = ["--user", user, "--password", password, "--file", filepath]
+
+        # Run process
+        script_path = os.path.join("src", "bidder.py")
+        threading.Thread(target=self._run_process, args=(script_path, "Bidder", args), daemon=True).start()
 
     def check_pending_jobs(self):
         """Reads pending_jobs.json and updates the list."""
@@ -109,12 +156,21 @@ class SniperGUI:
             index = selection[0]
             job = self.pending_jobs[index]
             self.log(f"✅ APPROVING: {job['title']}")
+            self.status_label.config(text="Status: Dispatching...")
+
+            # Determine filepath (assumes miner logic)
+            safe_title = "".join(c for c in job['title'] if c.isalnum() or c in (' ', '_')).replace(" ", "_")
+            filename = f"WAITING_APPROVAL_{safe_title}.txt"
+            filepath = os.path.join("propostas_geradas", filename)
 
             # Trigger Bidder
-            self.trigger_bidder(job['title'])
+            self.trigger_bidder_file(filepath)
 
             # Remove from list
             self.remove_job(index)
+            # Reset status later or immediately? Thread runs async so status might flicker.
+            # Ideally trigger_bidder_file logic manages status but it's async.
+            self.root.after(3000, lambda: self.status_label.config(text="Status: Ready"))
 
     def reject_job(self):
         selection = self.approval_list.curselection()

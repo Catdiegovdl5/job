@@ -1,6 +1,8 @@
 import asyncio
 import os
+import sys
 import shutil
+import subprocess
 import requests
 import json
 from playwright.async_api import async_playwright
@@ -23,6 +25,11 @@ class FreelancerScout:
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID")
         # Load weights from master template's data source
         self.weights_data = self.master_template.data
+
+        # [AUTO-PILOT] Setting
+        # In a real scenario, this might come from a config file or GUI toggle.
+        # For now, we assume it's ON if the env var is set, or default to False for safety.
+        self.sniper_automatico = os.getenv("SNIPER_AUTO", "False").lower() == "true"
 
     def clean_singleton_lock(self):
         """Removes the SingletonLock file to prevent 'ProcessSingleton' errors."""
@@ -205,18 +212,44 @@ class FreelancerScout:
 
                 # ALERT ADJUSTMENT: Changed threshold to >= 0 to force alerts even for score 0
                 if score >= 0:
-                    print(f"Auto-Pilot Triggered for: {job['title']} (Score: {score})")
+                    print(f"Candidate Found: {job['title']} (Score: {score})")
                     print(f"Bids Count: {job.get('bids', 'N/A')}")
 
                     # Trigger Proposal Generation
                     proposal_path = self.master_template.generate_proposal(job)
                     print(f"Generated Proposal: {proposal_path}")
 
-                    # Add to Pending Jobs (GUI Approval)
+                    # [AUTO-PILOT] High score logic
+                    if score >= 85 and self.sniper_automatico:
+                        print(f"[AUTO-PILOT] High score detected ({score}). Executing immediate bid...")
+                        self.trigger_auto_bid(proposal_path)
+
+                    # Add to Pending Jobs (GUI Approval) - Even if auto-bid, we might want to track it?
+                    # Or maybe only if NOT auto-bid? Let's add all for visibility.
                     self.add_to_pending_jobs(job)
 
                     # Send Telegram Alert (Notification Only)
                     await self.send_telegram_alert(job)
+
+    def trigger_auto_bid(self, proposal_path):
+        """Triggers the bidder directly for high-scoring jobs."""
+        user = os.getenv("FLN_USER") or os.getenv("FREELANCER_EMAIL") or "unknown"
+        password = os.getenv("FLN_PASS") or os.getenv("FREELANCER_PASSWORD") or "unknown"
+
+        script_path = os.path.join(os.path.dirname(__file__), "bidder.py")
+
+        try:
+            # Non-blocking subprocess
+            subprocess.Popen([
+                sys.executable,
+                script_path,
+                "--user", user,
+                "--password", password,
+                "--file", proposal_path
+            ])
+            print(f"[AUTO-PILOT] Bidder launched for {proposal_path}")
+        except Exception as e:
+            print(f"[AUTO-PILOT] Error launching bidder: {e}")
 
     def add_to_pending_jobs(self, job):
         """Adds the job to pending_jobs.json for GUI approval."""
@@ -242,8 +275,9 @@ class FreelancerScout:
         except Exception as e:
             print(f"Error saving to pending_jobs.json: {e}")
 
-            await browser.close()
-            return jobs
+        # Browser close is handled in search_jobs
+        # await browser.close()
+        # return jobs
 
     def calculate_score(self, job):
         score = 0
