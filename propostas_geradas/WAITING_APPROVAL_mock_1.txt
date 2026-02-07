@@ -1,0 +1,25 @@
+CORE: Web Scraping
+SCORE: 90
+TITLE: Scrape Data from Website
+URL: https://www.freelancer.com/projects/web-scraping/example-project
+---
+### Proposal for Freelancer.com (Focus: Speed & Technical)
+Language: English
+
+Hello,
+I have reverse-engineered your project: 'Scrape Data from Website'.
+Here is the technical roadmap to solve your pain points immediately:
+
+| Phase | Milestone | Deliverable |
+|-------|-----------|-------------|
+| 1 | Technical Audit & Reverse Engineering | Gap Analysis |
+| 2 | Arsenal Integration (Video/Traffic/SEO) | Technical Solution |
+| 3 | Performance Scaling & ROI Tracking | Performance Report |
+
+Technical Stack:
+- Video: Pipeline Veo 3 + Nano Banana (Fidelidade 4K) + ElevenLabs (Sound Design)
+- Traffic: CAPI (Conversions API) + GTM Server-Side + Estratégia de Atribuição Avançada
+- SEO: GEO (Generative Engine Optimization) + AEO (Answer Engine Optimization) + Knowledge Graph @graph
+- Content: Técnica Nugget (Answer-First) + Information Gain (E-E-A-T)
+
+Test Keywords: [REVERSE-ENGINEERING], [4K-PIPELINE], [CAPI-OPTIMIZATION].
