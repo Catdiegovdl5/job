@@ -207,8 +207,9 @@ class FreelancerScout:
                     continue
 
                 # Calculate Score
-                score = self.calculate_score(job)
+                score, core = self.calculate_score(job)
                 job['score'] = score
+                job['core'] = core
                 jobs.append(job)
 
                 # ALERT ADJUSTMENT: Changed threshold to >= 0 to force alerts even for score 0
@@ -343,7 +344,7 @@ class FreelancerScout:
         if score == 0:
              print("  -> Nucleus Unknown (No keywords matched)")
 
-        return score
+        return score, best_nucleus
 
 if __name__ == "__main__":
     scout = FreelancerScout()

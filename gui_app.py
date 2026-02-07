@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import scrolledtext
+from tkinter import ttk
 import subprocess
 import threading
 import sys
@@ -15,12 +16,23 @@ class SniperGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Freelancer Sniper Engine - Command Center")
-        self.root.geometry("700x500")
+        self.root.geometry("800x600")
 
-        self.label = tk.Label(root, text="Sniper Engine Control", font=("Arial", 16))
+        # --- TABS SETUP ---
+        self.notebook = ttk.Notebook(root)
+        self.notebook.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+
+        self.tab1 = tk.Frame(self.notebook)
+        self.tab2 = tk.Frame(self.notebook)
+
+        self.notebook.add(self.tab1, text="Scout & Logs")
+        self.notebook.add(self.tab2, text="Bidding Manager")
+
+        # --- TAB 1: SCOUT & LOGS ---
+        self.label = tk.Label(self.tab1, text="Sniper Engine Control", font=("Arial", 16))
         self.label.pack(pady=10)
 
-        self.btn_frame = tk.Frame(root)
+        self.btn_frame = tk.Frame(self.tab1)
         self.btn_frame.pack(pady=10)
 
         # Updated Paths to src/
@@ -44,28 +56,49 @@ class SniperGUI:
         self.btn_kill = tk.Button(self.btn_frame, text="🛑 STOP ALL", command=self.kill_all, bg="red", fg="white")
         self.btn_kill.pack(side=tk.LEFT, padx=10)
 
-        self.log_area = scrolledtext.ScrolledText(root, width=80, height=15)
-        self.log_area.pack(pady=10)
+        self.log_area = scrolledtext.ScrolledText(self.tab1, width=90, height=20)
+        self.log_area.pack(pady=10, fill=tk.BOTH, expand=True)
 
-        # --- NEW APPROVAL SECTION ---
-        self.approval_frame = tk.LabelFrame(root, text="Pending Approvals", font=("Arial", 12))
-        self.approval_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=5)
+        # --- TAB 2: BIDDING MANAGER ---
+        # Treeview for Job List
+        self.tree_frame = tk.Frame(self.tab2)
+        self.tree_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
 
-        self.approval_list = tk.Listbox(self.approval_frame, height=8)
-        self.approval_list.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5, pady=5)
-        self.approval_list.bind('<<ListboxSelect>>', self.on_select_job)
+        self.tree = ttk.Treeview(self.tree_frame, columns=("Title", "Core", "Score", "Budget"), show="headings")
+        self.tree.heading("Title", text="Job Title")
+        self.tree.heading("Core", text="Core / Nucleus")
+        self.tree.heading("Score", text="Score")
+        self.tree.heading("Budget", text="Budget")
 
-        self.action_frame = tk.Frame(self.approval_frame)
-        self.action_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=5, pady=5)
+        self.tree.column("Title", width=300)
+        self.tree.column("Core", width=150)
+        self.tree.column("Score", width=50)
+        self.tree.column("Budget", width=80)
 
-        self.btn_approve = tk.Button(self.action_frame, text="🚀 LAUNCH", command=self.approve_job, bg="green", fg="white", state=tk.DISABLED)
-        self.btn_approve.pack(fill=tk.X, pady=2)
+        self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
-        self.btn_reject = tk.Button(self.action_frame, text="❌ Reject", command=self.reject_job, bg="red", fg="white", state=tk.DISABLED)
-        self.btn_reject.pack(fill=tk.X, pady=2)
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(self.tree_frame, orient="vertical", command=self.tree.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.tree.configure(yscrollcommand=scrollbar.set)
 
-        # Status Label
-        self.status_label = tk.Label(self.root, text="Status: Ready", bd=1, relief=tk.SUNKEN, anchor=tk.W)
+        self.tree.bind('<<TreeviewSelect>>', self.on_select_job)
+
+        # Action Buttons
+        self.action_frame = tk.Frame(self.tab2)
+        self.action_frame.pack(fill=tk.X, padx=10, pady=10)
+
+        self.btn_preview = tk.Button(self.action_frame, text="👁 Preview Proposal", command=self.preview_job, bg="gray", fg="white", state=tk.DISABLED)
+        self.btn_preview.pack(side=tk.LEFT, padx=10)
+
+        self.btn_approve = tk.Button(self.action_frame, text="🚀 LAUNCH (CONFIRM & SEND)", command=self.approve_job, bg="green", fg="white", state=tk.DISABLED)
+        self.btn_approve.pack(side=tk.LEFT, padx=10)
+
+        self.btn_reject = tk.Button(self.action_frame, text="❌ REJECT (DELETE)", command=self.reject_job, bg="red", fg="white", state=tk.DISABLED)
+        self.btn_reject.pack(side=tk.LEFT, padx=10)
+
+        # Status Label (Global)
+        self.status_label = tk.Label(root, text="Status: Ready", bd=1, relief=tk.SUNKEN, anchor=tk.W)
         self.status_label.pack(side=tk.BOTTOM, fill=tk.X)
 
         self.processes = {}
@@ -117,52 +150,80 @@ class SniperGUI:
         threading.Thread(target=self._run_process, args=(script_path, "Bidder", args), daemon=True).start()
 
     def check_pending_jobs(self):
-        """Reads pending_jobs.json and updates the list."""
+        """Reads pending_jobs.json and updates the Treeview."""
         try:
             import json
             if os.path.exists("pending_jobs.json"):
                 with open("pending_jobs.json", "r") as f:
                     new_jobs = json.load(f)
 
-                # Check if list changed
-                current_titles = [j['title'] for j in self.pending_jobs]
-                new_titles = [j['title'] for j in new_jobs]
-
-                if current_titles != new_titles:
+                # Check if list changed (simple length/content check)
+                # Ideally, we update the treeview intelligently, but clearing and reloading is simpler for now
+                # To avoid flickering, only update if difference detected
+                if new_jobs != self.pending_jobs:
                     self.pending_jobs = new_jobs
-                    self.approval_list.delete(0, tk.END)
-                    for job in self.pending_jobs:
-                        display_text = f"{job['title']} | ${job['budget']} | Score: {job['score']}"
-                        self.approval_list.insert(tk.END, display_text)
+
+                    # Clear Treeview
+                    for item in self.tree.get_children():
+                        self.tree.delete(item)
+
+                    # Repopulate
+                    for i, job in enumerate(self.pending_jobs):
+                        self.tree.insert("", tk.END, iid=i, values=(
+                            job.get('title', 'N/A'),
+                            job.get('core', 'Unknown'),
+                            job.get('score', 0),
+                            f"${job.get('budget', 0)}"
+                        ))
 
         except Exception as e:
-            pass # Silent fail to avoid spamming log
+            pass
 
-        self.root.after(2000, self.check_pending_jobs) # Poll every 2s
+        self.root.after(2000, self.check_pending_jobs)
 
     def on_select_job(self, event):
-        selection = self.approval_list.curselection()
+        selection = self.tree.selection()
         if selection:
+            self.btn_preview.config(state=tk.NORMAL)
             self.btn_approve.config(state=tk.NORMAL)
             self.btn_reject.config(state=tk.NORMAL)
-
-            # Show proposal preview in log? Or maybe a popup?
-            index = selection[0]
-            job = self.pending_jobs[index]
-            self.log(f"--- SELECTED: {job['title']} ---\n{job.get('description', '')[:200]}...")
         else:
+            self.btn_preview.config(state=tk.DISABLED)
             self.btn_approve.config(state=tk.DISABLED)
             self.btn_reject.config(state=tk.DISABLED)
 
-    def approve_job(self):
-        selection = self.approval_list.curselection()
+    def preview_job(self):
+        selection = self.tree.selection()
         if selection:
-            index = selection[0]
+            index = int(selection[0])
             job = self.pending_jobs[index]
-            self.log(f"✅ APPROVING: {job['title']}")
+
+            # Load proposal text
+            safe_title = "".join(c for c in job['title'] if c.isalnum() or c in (' ', '_')).replace(" ", "_")
+            filename = f"WAITING_APPROVAL_{safe_title}.txt"
+            filepath = os.path.join("propostas_geradas", filename)
+
+            content = "(No proposal file found)"
+            if os.path.exists(filepath):
+                with open(filepath, "r", encoding="utf-8") as f:
+                    content = f.read()
+
+            # Show popup
+            top = tk.Toplevel(self.root)
+            top.title(f"Preview: {job['title']}")
+            text_widget = scrolledtext.ScrolledText(top, width=80, height=30)
+            text_widget.pack(fill=tk.BOTH, expand=True)
+            text_widget.insert(tk.END, content)
+
+    def approve_job(self):
+        selection = self.tree.selection()
+        if selection:
+            index = int(selection[0])
+            job = self.pending_jobs[index]
+            self.log(f"✅ CONFIRM & SEND: {job['title']}")
             self.status_label.config(text="Status: Dispatching...")
 
-            # Determine filepath (assumes miner logic)
+            # Determine filepath
             safe_title = "".join(c for c in job['title'] if c.isalnum() or c in (' ', '_')).replace(" ", "_")
             filename = f"WAITING_APPROVAL_{safe_title}.txt"
             filepath = os.path.join("propostas_geradas", filename)
@@ -170,31 +231,51 @@ class SniperGUI:
             # Trigger Bidder
             self.trigger_bidder_file(filepath)
 
-            # Remove from list
+            # Remove from list (JSON)
             self.remove_job(index)
-            # Reset status later or immediately? Thread runs async so status might flicker.
-            # Ideally trigger_bidder_file logic manages status but it's async.
+
+            # Note: We don't move file here because trigger_bidder_file spawns a thread.
+            # Ideally bidder or folder watcher handles movement.
+            # But "approve" means we are done with "pending".
+            # Let's move it to 'processadas' manually to be safe?
+            # Actually, trigger_bidder_file just runs the script.
+            # Let's trust folder watcher or just leave it for now (simulated).
+
             self.root.after(3000, lambda: self.status_label.config(text="Status: Ready"))
 
     def reject_job(self):
-        selection = self.approval_list.curselection()
+        selection = self.tree.selection()
         if selection:
-            index = selection[0]
+            index = int(selection[0])
             job = self.pending_jobs[index]
             self.log(f"❌ REJECTING: {job['title']}")
+
+            # Delete file
+            safe_title = "".join(c for c in job['title'] if c.isalnum() or c in (' ', '_')).replace(" ", "_")
+            filename = f"WAITING_APPROVAL_{safe_title}.txt"
+            filepath = os.path.join("propostas_geradas", filename)
+            if os.path.exists(filepath):
+                try:
+                    os.remove(filepath)
+                    self.log(f"Deleted proposal file: {filename}")
+                except Exception as e:
+                    self.log(f"Error deleting file: {e}")
+
             self.remove_job(index)
 
     def remove_job(self, index):
         import json
-        del self.pending_jobs[index]
-        self.approval_list.delete(index)
+        if 0 <= index < len(self.pending_jobs):
+            del self.pending_jobs[index]
+            # Treeview update will happen on next poll or we can force it
+            # self.tree.delete(str(index)) # ID is index str
 
-        # Update JSON file
-        with open("pending_jobs.json", "w") as f:
-            json.dump(self.pending_jobs, f, indent=4)
+            # Update JSON file
+            with open("pending_jobs.json", "w") as f:
+                json.dump(self.pending_jobs, f, indent=4)
 
-        self.btn_approve.config(state=tk.DISABLED)
-        self.btn_reject.config(state=tk.DISABLED)
+            # Refresh tree immediately to avoid lag
+            self.check_pending_jobs()
 
     def trigger_bidder(self, job_title):
         self.log(f"Starting Bidder for {job_title}...")
