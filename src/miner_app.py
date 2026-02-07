@@ -48,7 +48,7 @@ class FreelancerScout:
 
     async def send_telegram_alert(self, job):
         if not self.telegram_token or not self.chat_id:
-            print(f"Telegram Alert Skipped: Missing Token/ChatID. Token: '{self.telegram_token}', ChatID: '{self.chat_id}'")
+            print(f"Telegram Alert Skipped: Missing Token/ChatID. Please configure .env.")
             return
 
         # Prepare summary/translation (Mocking translation by just prepending label)
@@ -57,9 +57,13 @@ class FreelancerScout:
         translated_title = f"{safe_title} (Resumo PT-BR: Oportunidade em {safe_title})"
         proposal_content = html.escape(self.get_proposal_content(job['title']))
 
+        # Determine link based on title (URL construction for Freelancer.com usually follows title slug)
+        # This is a heuristic; ideal would be to scrape the actual link.
+        job_link = f"https://www.freelancer.com/projects/{job['title'].replace(' ', '-').lower()}"
+
         message = (
             f"🚨 <b>Sniper Alert</b> 🚨\n\n"
-            f"<b>Job:</b> {translated_title}\n"
+            f"<b>Job:</b> <a href='{job_link}'>{translated_title}</a>\n"
             f"<b>Budget:</b> ${job['budget']}\n"
             f"<b>Rate:</b> ${job.get('hourly_rate', 0)}/hr\n"
             f"<b>Score:</b> {job['score']}\n"
@@ -71,7 +75,7 @@ class FreelancerScout:
         keyboard = {
             "inline_keyboard": [
                 [
-                    {"text": "✅ Aprovar", "callback_data": f"approve_bid|{job['title']}"},
+                    {"text": "✅ Aprovar (Enviar Proposta)", "callback_data": f"approve_bid|{job['title']}"},
                     {"text": "❌ Rejeitar", "callback_data": f"reject_bid|{job['title']}"}
                 ]
             ]

@@ -29,37 +29,44 @@ class FreelancerBidder:
     async def run(self, target_url=None):
         if not self.user or not self.password:
             print("Error: Missing Credentials. Set FLN_USER/FLN_PASS in .env or pass args.")
-            return
+            # For now, we continue in simulation mode if credentials are missing
+            print("Running in SIMULATION MODE due to missing credentials.")
+
+        # If target_url is just a title (passed from miner), try to construct URL
+        if target_url and not target_url.startswith("http"):
+             target_url = f"https://www.freelancer.com/projects/{target_url.replace(' ', '-').lower()}"
 
         self.clean_singleton_lock()
         print(f"Starting Bidder for user: {self.user}")
+        print(f"Target Job: {target_url}")
 
         async with async_playwright() as p:
-            # Launch with persistent context if we want to save session, or standard.
-            # Using standard for now to be safe in this env.
             browser = await p.chromium.launch(headless=self.headless)
             page = await browser.new_page()
 
-            # Timeout Adjustment: 45 seconds
-            print("Navigating to login page (Timeout: 45s)...")
+            print("Navigating to Freelancer Login (Timeout: 45s)...")
             try:
-                await page.goto(self.login_url, timeout=45000)
-
-                # Simulation of Login
+                # Real Login Logic (Commented out to prevent blocking/captcha in headless if not configured properly)
+                # await page.goto(self.login_url, timeout=45000)
                 # await page.fill('input[name="username"]', self.user)
                 # await page.fill('input[name="password"]', self.password)
                 # await page.click('button[type="submit"]')
                 # await page.wait_for_navigation()
 
-                print("Login simulated.")
+                # Simulation Logic
+                print(">> [SIMULATION] Login Successful.")
+                print(f">> [SIMULATION] Navigating to Project: {target_url}")
 
-                if target_url:
-                    print(f"Navigating to Target Job: {target_url}")
-                    # await page.goto(target_url, timeout=45000)
-                    # Perform bidding logic...
+                # Here we would load the generated proposal from file
+                # But since we don't have the filename passed directly, we simulate
+                print(">> [SIMULATION] Loading Proposal Text...")
+                print(">> [SIMULATION] Pasting Proposal into Bid Form...")
+                print(">> [SIMULATION] Clicking 'Place Bid'...")
+
+                print("✅ BID PLACED SUCCESSFULLY (Simulated)")
 
             except Exception as e:
-                print(f"Timeout/Error during navigation: {e}")
+                print(f"Error during bidder execution: {e}")
             finally:
                 await browser.close()
 
