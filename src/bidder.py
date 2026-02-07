@@ -32,6 +32,11 @@ def place_bid(url, proposal_text, meta):
 
     print(f"--- BIDDER STARTED: MODE={mode} ---")
 
+    # Status File: PROCESSING
+    status_file = filepath + ".status"
+    with open(status_file, "w") as f:
+        f.write("PROCESSING")
+
     # MODE LOGIC
     if mode == "SURGICAL":
         score = int(meta.get("SCORE", "0"))
@@ -46,17 +51,26 @@ def place_bid(url, proposal_text, meta):
         print("[WARN] Credentials not found. Running in SIMULATION MODE.")
         headless = True # Force headless simulation
 
-    with sync_playwright() as p:
-        print("Iniciando Navegador...")
+    browser = None
+    try:
+        with sync_playwright() as p:
+            print("Iniciando Navegador...")
 
-        # MODE: DEBUG - Show browser
-        if mode == "DEBUG":
-            headless = False
-            print("[DEBUG] Headless Mode DISABLED.")
+            # MODE: DEBUG - Show browser
+            if mode == "DEBUG":
+                headless = False
+                print("[DEBUG] Headless Mode DISABLED.")
 
-        try:
-            browser = p.chromium.launch(headless=headless)
-            page = browser.new_page()
+            browser = p.chromium.launch(
+                headless=headless,
+                args=[
+                    "--disable-gpu",
+                    "--no-sandbox",
+                    "--disable-dev-shm-usage"
+                ]
+            )
+            context = browser.new_context()
+            page = context.new_page()
 
             print("Efetuando Login...")
             # Simulate Login Steps
@@ -72,7 +86,6 @@ def place_bid(url, proposal_text, meta):
                 except Exception as e:
                     print(f"[ERROR] Login Failed: {e}")
                     if mode != "DEBUG":
-                         browser.close()
                          return False
 
             # MODE: GHOST - Random Delay
@@ -101,16 +114,25 @@ def place_bid(url, proposal_text, meta):
                 pass
 
             print("Lance Enviado!")
-            browser.close()
+
+            # Status File: SENT
+            with open(status_file, "w") as f:
+                f.write("SENT")
+
             return True
 
-        except Exception as e:
-            print(f"Error during execution: {e}")
+    except Exception as e:
+        print(f"Error during execution: {e}")
+        # Status File: FAILED
+        with open(status_file, "w") as f:
+            f.write(f"FAILED: {e}")
+        return False
+    finally:
+        if browser:
             try:
                 browser.close()
             except:
                 pass
-            return False
 
 def main():
     if len(sys.argv) < 2:

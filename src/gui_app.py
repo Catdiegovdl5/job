@@ -7,6 +7,7 @@ import sys
 import json
 import time
 from datetime import datetime
+import shutil
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -18,6 +19,9 @@ class App(ctk.CTk):
         super().__init__()
         self.title("Sniper Scout GUI - NOC System")
         self.geometry("1000x700")
+
+        # Concurrency Control
+        self.bid_semaphore = threading.Semaphore(2)
 
         # Initialize Stats
         self.ensure_stats_file()
@@ -76,7 +80,7 @@ class App(ctk.CTk):
         self.mode_selector.grid(row=2, column=0, columnspan=3, padx=20, pady=10, sticky="ew")
 
         # Kill Switch
-        self.kill_btn = ctk.CTkButton(self.tab_dashboard, text="KILL ALL PLAYWRIGHT", fg_color="red", command=self.kill_playwright)
+        self.kill_btn = ctk.CTkButton(self.tab_dashboard, text="KILL ALL PLAYWRIGHT", fg_color="red", command=self.confirm_kill_playwright)
         self.kill_btn.grid(row=3, column=0, columnspan=3, pady=10)
 
         # Terminal Output
@@ -86,6 +90,27 @@ class App(ctk.CTk):
 
     def change_mode(self, value):
         self.log_to_console(f"[SYSTEM] Mode switched to: {value}")
+
+    def confirm_kill_playwright(self):
+        # Using a simple dialog workaround or text input since CTkMessagebox is not standard in base ctk
+        # For simplicity in this environment, we'll log a warning and ask to click again or just do it with a big log.
+        # But per prompt "add a simple confirmation pop-up", I will use a separate Toplevel window.
+
+        confirm_window = ctk.CTkToplevel(self)
+        confirm_window.title("CONFIRM KILL")
+        confirm_window.geometry("300x150")
+
+        lbl = ctk.CTkLabel(confirm_window, text="Are you sure you want to KILL\nall Playwright processes?", font=("Arial", 14, "bold"), text_color="red")
+        lbl.pack(pady=20)
+
+        btn_frame = ctk.CTkFrame(confirm_window)
+        btn_frame.pack(fill="x", padx=20)
+
+        btn_yes = ctk.CTkButton(btn_frame, text="YES, KILL", fg_color="red", command=lambda: [self.kill_playwright(), confirm_window.destroy()])
+        btn_yes.pack(side="left", expand=True, padx=5)
+
+        btn_no = ctk.CTkButton(btn_frame, text="Cancel", command=confirm_window.destroy)
+        btn_no.pack(side="right", expand=True, padx=5)
 
     def kill_playwright(self):
         self.log_to_console("[SYSTEM] Killing all chromium processes...")
@@ -97,6 +122,9 @@ class App(ctk.CTk):
             self.log_to_console(f"[ERROR] Failed to kill processes: {e}")
 
     def log_to_console(self, message):
+        self.after(0, lambda: self._log_to_console_main(message))
+
+    def _log_to_console_main(self, message):
         self.terminal_out.insert("end", f"{message}\n")
         self.terminal_out.see("end")
 
@@ -123,6 +151,10 @@ class App(ctk.CTk):
         self.sniper_var = ctk.BooleanVar(value=False)
         self.sniper_switch = ctk.CTkSwitch(self.header_frame, text="Sniper Automático", variable=self.sniper_var, command=self.check_auto_sniper)
         self.sniper_switch.pack(side="right", padx=10)
+
+        self.show_debug_var = ctk.BooleanVar(value=False)
+        self.show_debug_chk = ctk.CTkCheckBox(self.header_frame, text="Show All (Debug)", variable=self.show_debug_var, command=self.refresh_table)
+        self.show_debug_chk.pack(side="right", padx=10)
 
         self.status_label = ctk.CTkLabel(self.header_frame, text="Ready", text_color="gray", width=400, anchor="w")
         self.status_label.pack(side="left", padx=20, fill="x", expand=True)
@@ -155,6 +187,17 @@ class App(ctk.CTk):
             print(f"Error reading {filepath}: {e}")
         return meta
 
+    def trash_proposal(self, filepath):
+        try:
+            os.remove(filepath)
+            status_file = filepath + ".status"
+            if os.path.exists(status_file):
+                os.remove(status_file)
+            self.update_status(f"Deleted: {os.path.basename(filepath)}")
+            self.refresh_table()
+        except Exception as e:
+            self.update_status(f"Error deleting: {e}")
+
     def refresh_table(self):
         # Clear existing
         for widget in self.scroll_frame.winfo_children():
@@ -165,23 +208,56 @@ class App(ctk.CTk):
 
         for filepath in files:
             meta = self.parse_file(filepath)
+            title = meta.get("TITLE", "Unknown")
+            score_val = meta.get("SCORE", "0")
+
+            # FILTER: Hide Unknowns unless Debug checked
+            if not self.show_debug_var.get():
+                if title == "Unknown" or score_val == "0":
+                    continue
+
             row = ctk.CTkFrame(self.scroll_frame)
             row.pack(fill="x", pady=2)
 
             # Columns
             ctk.CTkLabel(row, text=meta.get("CORE", "N/A"), width=150).pack(side="left", expand=True, fill="x")
-
-            score_val = meta.get("SCORE", "0")
             ctk.CTkLabel(row, text=score_val, width=150).pack(side="left", expand=True, fill="x")
+            ctk.CTkLabel(row, text=title, width=150).pack(side="left", expand=True, fill="x")
 
-            ctk.CTkLabel(row, text=meta.get("TITLE", "Unknown"), width=150).pack(side="left", expand=True, fill="x")
+            # Status Logic
+            status_file = filepath + ".status"
+            status_text = ""
+            status_color = "gray"
 
-            if filepath in self.processing_files:
-                 ctk.CTkLabel(row, text="PROCESSING...", width=150, text_color="orange").pack(side="left", expand=True, fill="x")
+            if os.path.exists(status_file):
+                with open(status_file, "r") as f:
+                    content = f.read().strip()
+                if "PROCESSING" in content:
+                    status_text = "⏳ PROCESSANDO..."
+                    status_color = "orange"
+                elif "SENT" in content:
+                    status_text = "✅ ENVIADO"
+                    status_color = "green"
+                elif "FAILED" in content:
+                    status_text = "❌ FALHA"
+                    status_color = "red"
+
+            if status_text:
+                ctk.CTkLabel(row, text=status_text, text_color=status_color, width=150).pack(side="left", expand=True, fill="x")
+            elif filepath in self.processing_files:
+                 ctk.CTkLabel(row, text="QUEUED...", width=150, text_color="orange").pack(side="left", expand=True, fill="x")
             else:
-                action_btn = ctk.CTkButton(row, text="🚀 LANÇAR LANCE", fg_color="green", width=150,
+                # ACTION BUTTONS
+                action_frame = ctk.CTkFrame(row, fg_color="transparent")
+                action_frame.pack(side="left", expand=True, fill="x")
+
+                launch_btn = ctk.CTkButton(action_frame, text="🚀", fg_color="green", width=60,
                                          command=lambda f=filepath: self.launch_bid(f))
-                action_btn.pack(side="left", expand=True, fill="x", padx=5)
+                launch_btn.pack(side="left", padx=5)
+
+                trash_btn = ctk.CTkButton(action_frame, text="🗑️", fg_color="red", width=60,
+                                         command=lambda f=filepath: self.trash_proposal(f))
+                trash_btn.pack(side="left", padx=5)
 
                 # Auto-Sniper Check
                 if self.sniper_var.get():
@@ -198,62 +274,63 @@ class App(ctk.CTk):
             return
 
         mode = self.mode_selector.get()
-        self.log_to_console(f"--- Launching Bid: {os.path.basename(filepath)} [Mode: {mode}] ---")
+        self.log_to_console(f"--- Queueing Bid: {os.path.basename(filepath)} [Mode: {mode}] ---")
 
         self.processing_files.add(filepath)
         self.refresh_table()
 
-        self.update_status(f"Launching bid for {os.path.basename(filepath)}...")
+        self.update_status(f"Queueing bid for {os.path.basename(filepath)}...")
 
         def run_script():
-            try:
-                env = os.environ.copy()
-                env["SNIPER_MODE"] = mode
+            with self.bid_semaphore:
+                try:
+                    env = os.environ.copy()
+                    env["SNIPER_MODE"] = mode
 
-                # Using sys.executable to ensure we use the same python environment
-                process = subprocess.Popen(
-                    [sys.executable, "src/bidder.py", filepath],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    bufsize=1,
-                    universal_newlines=True,
-                    env=env
-                )
+                    # Using sys.executable to ensure we use the same python environment
+                    process = subprocess.Popen(
+                        [sys.executable, "src/bidder.py", filepath],
+                        stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE,
+                        text=True,
+                        bufsize=1,
+                        universal_newlines=True,
+                        env=env
+                    )
 
-                # Read output live
-                for line in process.stdout:
-                    line = line.strip()
-                    self.update_status(line)
-                    self.log_to_console(f"[BIDDER] {line}")
+                    # Read output live
+                    for line in process.stdout:
+                        line = line.strip()
+                        self.update_status(line)
+                        self.log_to_console(f"[BIDDER] {line}")
 
-                process.wait()
-                rc = process.returncode
+                    process.wait()
+                    rc = process.returncode
 
-                if rc == 0:
-                    self.update_status("Bid Processed Successfully!")
-                    self.log_to_console("[SUCCESS] Bid Processed Successfully!")
+                    if rc == 0:
+                        self.update_status("Bid Processed Successfully!")
+                        self.log_to_console("[SUCCESS] Bid Processed Successfully!")
 
-                    # Update Stats
-                    self.increment_stats()
+                        # Update Stats
+                        self.increment_stats()
 
-                    # Linux Notification
-                    try:
-                        subprocess.run(["notify-send", "Sniper Scout", f"Bid Sent: {os.path.basename(filepath)}"], check=False)
-                    except:
-                        pass
-                else:
-                    stderr = process.stderr.read()
-                    self.update_status(f"Error: {stderr}")
-                    self.log_to_console(f"[ERROR] {stderr}")
+                        # Linux Notification
+                        try:
+                            subprocess.run(["notify-send", "Sniper Scout", f"Bid Sent: {os.path.basename(filepath)}"], check=False)
+                        except:
+                            pass
+                    else:
+                        stderr = process.stderr.read()
+                        self.update_status(f"Error: {stderr}")
+                        self.log_to_console(f"[ERROR] {stderr}")
 
-            except Exception as e:
-                 self.update_status(f"Exception: {str(e)}")
-                 self.log_to_console(f"[EXCEPTION] {str(e)}")
-            finally:
-                if filepath in self.processing_files:
-                    self.processing_files.remove(filepath)
-                self.after(2000, self.refresh_table)
+                except Exception as e:
+                     self.update_status(f"Exception: {str(e)}")
+                     self.log_to_console(f"[EXCEPTION] {str(e)}")
+                finally:
+                    if filepath in self.processing_files:
+                        self.processing_files.remove(filepath)
+                    self.after(2000, self.refresh_table)
 
         threading.Thread(target=run_script, daemon=True).start()
 
