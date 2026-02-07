@@ -9,7 +9,9 @@ import time
 import shutil
 import psutil
 import sqlite3
+import webbrowser
 from datetime import datetime
+from src.proposal_generator import generate_proposal_ai
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -21,7 +23,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("Sniper Scout GUI - NOC System")
-        self.geometry("1000x800")
+        self.geometry("1200x800")
 
         # Concurrency Control
         self.bid_semaphore = threading.Semaphore(2)
@@ -30,10 +32,12 @@ class App(ctk.CTk):
         self.ensure_data()
         self.init_db()
 
-        self.tabview = ctk.CTkTabview(self, width=900, height=700)
+        # Tabs
+        self.tabview = ctk.CTkTabview(self, width=1100, height=700)
         self.tabview.pack(padx=20, pady=20, expand=True, fill="both")
 
         self.tab_dashboard = self.tabview.add("Dashboard")
+        self.tab_scout = self.tabview.add("Scout / Curadoria")
         self.tab_bidding = self.tabview.add("Central de Lances")
         self.tab_ai = self.tabview.add("AI Settings")
         self.tab_proxy = self.tabview.add("Proxy Config")
@@ -41,13 +45,16 @@ class App(ctk.CTk):
         self.processing_files = set()
         self.auto_sniper_active = False
 
+        # --- Tab Setup ---
         self.setup_dashboard_tab()
+        self.setup_scout_tab()
         self.setup_bidding_tab()
         self.setup_ai_tab()
         self.setup_proxy_tab()
 
         # Initial Load
         self.refresh_table()
+        self.refresh_scout_leads()
         self.update_dashboard_metrics()
         self.monitor_resources()
 
@@ -64,6 +71,11 @@ class App(ctk.CTk):
             cursor = conn.cursor()
             cursor.execute('''CREATE TABLE IF NOT EXISTS bids
                               (filepath TEXT PRIMARY KEY, title TEXT, core TEXT, score INTEGER, status TEXT, last_updated TIMESTAMP, error TEXT)''')
+            # Ensure LEADS table exists (Scout writes here)
+            cursor.execute('''CREATE TABLE IF NOT EXISTS leads
+                              (url TEXT PRIMARY KEY, title TEXT, description TEXT,
+                               skills TEXT, budget TEXT, status TEXT DEFAULT 'NEW',
+                               created_at TIMESTAMP, score INTEGER DEFAULT 0, proposal_draft TEXT)''')
             conn.commit()
             conn.close()
         except Exception as e:
@@ -76,7 +88,131 @@ class App(ctk.CTk):
         except:
             return {"total_bids": 0, "bids_today": 0, "success_rate": 0}
 
-    # --- TABS SETUP ---
+    # --- SCOUT TAB (Curadoria) ---
+    def setup_scout_tab(self):
+        # Header
+        self.scout_header = ctk.CTkFrame(self.tab_scout)
+        self.scout_header.pack(fill="x", padx=10, pady=5)
+
+        ctk.CTkButton(self.scout_header, text="🔄 Refresh Leads", command=self.refresh_scout_leads).pack(side="left", padx=10)
+        ctk.CTkButton(self.scout_header, text="🔍 Run Scout Now", command=self.run_scout_process, fg_color="orange").pack(side="left", padx=10)
+
+        self.scout_status = ctk.CTkLabel(self.scout_header, text="Ready", text_color="gray")
+        self.scout_status.pack(side="left", padx=20)
+
+        # Leads List (Scrollable)
+        self.leads_frame = ctk.CTkScrollableFrame(self.tab_scout, width=1000, height=500)
+        self.leads_frame.pack(fill="both", expand=True, padx=10, pady=5)
+
+    def run_scout_process(self):
+        self.scout_status.configure(text="Scout Running in Background...", text_color="orange")
+        def _run():
+            try:
+                # Assuming src/scout.py exists and handles its own DB writes
+                subprocess.run([sys.executable, "src/scout.py"], check=False)
+                self.after(0, self.refresh_scout_leads)
+                self.after(0, lambda: self.scout_status.configure(text="Scout Finished", text_color="green"))
+            except Exception as e:
+                self.after(0, lambda: self.scout_status.configure(text=f"Error: {e}", text_color="red"))
+        threading.Thread(target=_run, daemon=True).start()
+
+    def refresh_scout_leads(self):
+        for widget in self.leads_frame.winfo_children():
+            widget.destroy()
+
+        try:
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute("SELECT url, title, description, skills, budget, score FROM leads WHERE status='NEW' ORDER BY created_at DESC")
+            leads = cursor.fetchall()
+            conn.close()
+
+            if not leads:
+                ctk.CTkLabel(self.leads_frame, text="No new leads found. Run Scout to find projects.", font=("Arial", 14)).pack(pady=20)
+                return
+
+            for lead in leads:
+                self.create_lead_card(lead)
+        except Exception as e:
+            print(f"Error loading leads: {e}")
+
+    def create_lead_card(self, lead):
+        url, title, description, skills, budget, score = lead
+
+        card = ctk.CTkFrame(self.leads_frame, fg_color="#333333", corner_radius=10)
+        card.pack(fill="x", pady=5, padx=5)
+
+        # Left: Info
+        info_frame = ctk.CTkFrame(card, fg_color="transparent")
+        info_frame.pack(side="left", expand=True, fill="both", padx=10, pady=10)
+
+        ctk.CTkLabel(info_frame, text=title, font=("Arial", 16, "bold"), anchor="w").pack(fill="x")
+        ctk.CTkLabel(info_frame, text=f"Budget: {budget} | Skills: {skills[:50]}...", text_color="gray", anchor="w").pack(fill="x")
+        ctk.CTkLabel(info_frame, text=description[:150] + "...", text_color="silver", anchor="w", wraplength=600).pack(fill="x", pady=5)
+
+        # Right: Actions
+        action_frame = ctk.CTkFrame(card, fg_color="transparent")
+        action_frame.pack(side="right", padx=10, pady=10)
+
+        ctk.CTkButton(action_frame, text="👁️ Ver", width=80, fg_color="#444",
+                      command=lambda u=url: webbrowser.open(u)).pack(side="top", pady=2)
+
+        ctk.CTkButton(action_frame, text="✅ Aprovar", width=80, fg_color="green",
+                      command=lambda u=url: self.approve_lead(u, title, description, skills)).pack(side="top", pady=2)
+
+        ctk.CTkButton(action_frame, text="❌ Rejeitar", width=80, fg_color="red",
+                      command=lambda u=url: self.reject_lead(u)).pack(side="top", pady=2)
+
+    def approve_lead(self, url, title, description, skills):
+        # 1. Generate Proposal Draft (AI)
+        # 2. Save to propostas_geradas/WAITING_APPROVAL_...
+        # 3. Update DB status to APPROVED
+
+        def _process():
+            try:
+                # AI Generation
+                proposal_text = generate_proposal_ai(description, "Freelancer.com", title=title, skills=skills)
+
+                # File Generation (Legacy/Current Flow)
+                filename = f"WAITING_APPROVAL_{int(time.time())}.txt"
+                filepath = os.path.join("propostas_geradas", filename)
+
+                with open(filepath, "w", encoding="utf-8") as f:
+                    f.write(f"CORE: {skills[:20]}\n")
+                    f.write(f"SCORE: 0\n") # Placeholder score
+                    f.write(f"TITLE: {title}\n")
+                    f.write(f"URL: {url}\n")
+                    f.write("---\n")
+                    f.write(proposal_text)
+
+                # DB Update
+                conn = sqlite3.connect(DB_FILE)
+                cursor = conn.cursor()
+                cursor.execute("UPDATE leads SET status='APPROVED' WHERE url=?", (url,))
+                conn.commit()
+                conn.close()
+
+                self.after(0, self.refresh_scout_leads)
+                self.after(0, self.refresh_table) # Refresh Central de Lances
+                self.after(0, lambda: self.scout_status.configure(text=f"Approved: {title}", text_color="green"))
+
+            except Exception as e:
+                print(f"Approval Error: {e}")
+
+        threading.Thread(target=_process, daemon=True).start()
+
+    def reject_lead(self, url):
+        try:
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+            cursor.execute("UPDATE leads SET status='REJECTED' WHERE url=?", (url,))
+            conn.commit()
+            conn.close()
+            self.refresh_scout_leads()
+        except Exception as e:
+            print(f"Rejection Error: {e}")
+
+    # --- DASHBOARD & OTHER TABS (Existing Logic) ---
 
     def setup_dashboard_tab(self):
         self.tab_dashboard.grid_columnconfigure((0, 1, 2), weight=1)
@@ -137,12 +273,10 @@ class App(ctk.CTk):
         self.proxy_status.pack(pady=10)
 
     def save_ai_settings(self):
-        # Save to JSON or .env logic here
         self.log_to_console(f"[AI] Settings Saved: Model={self.ai_model.get()}, Temp={self.ai_temp.get()}")
 
     def save_proxy_settings(self):
         proxy = self.proxy_entry.get()
-        # Save logic
         self.log_to_console(f"[PROXY] Configuration updated: {proxy}")
         self.proxy_status.configure(text="Proxy Active", text_color="green")
 
@@ -189,18 +323,13 @@ class App(ctk.CTk):
         self.terminal_out.see("end")
 
     def update_dashboard_metrics(self):
-        # Pending
         pending_count = len(glob.glob("propostas_geradas/WAITING_APPROVAL_*.txt"))
         self.card_pending.configure(text=f"PENDENTES\n{pending_count}")
-
-        # Sent / Stats
         stats = self.get_stats()
         self.card_sent.configure(text=f"ENVIADOS\n{stats.get('total_bids', 0)}")
-
         self.after(5000, self.update_dashboard_metrics)
 
     def setup_bidding_tab(self):
-        # Header
         self.header_frame = ctk.CTkFrame(self.tab_bidding)
         self.header_frame.pack(fill="x", padx=10, pady=5)
 
@@ -218,7 +347,6 @@ class App(ctk.CTk):
         self.status_label = ctk.CTkLabel(self.header_frame, text="Ready", text_color="gray", width=400, anchor="w")
         self.status_label.pack(side="left", padx=20, fill="x", expand=True)
 
-        # Table Header
         self.table_header = ctk.CTkFrame(self.tab_bidding, height=30)
         self.table_header.pack(fill="x", padx=10, pady=(5,0))
 
@@ -227,7 +355,6 @@ class App(ctk.CTk):
             lbl = ctk.CTkLabel(self.table_header, text=col, font=("Arial", 12, "bold"), width=150)
             lbl.pack(side="left", expand=True, fill="x")
 
-        # Table Body (Scrollable)
         self.scroll_frame = ctk.CTkScrollableFrame(self.tab_bidding, width=900, height=400)
         self.scroll_frame.pack(fill="both", expand=True, padx=10, pady=5)
 
@@ -258,7 +385,6 @@ class App(ctk.CTk):
             self.update_status(f"Error deleting: {e}")
 
     def refresh_table(self):
-        # Clear existing
         for widget in self.scroll_frame.winfo_children():
             widget.destroy()
 
@@ -270,7 +396,6 @@ class App(ctk.CTk):
             title = meta.get("TITLE", "Unknown")
             score_val = meta.get("SCORE", "0")
 
-            # FILTER: Hide Unknowns unless Debug checked
             if not self.show_debug_var.get():
                 if title == "Unknown" or score_val == "0":
                     continue
@@ -278,12 +403,10 @@ class App(ctk.CTk):
             row = ctk.CTkFrame(self.scroll_frame)
             row.pack(fill="x", pady=2)
 
-            # Columns
             ctk.CTkLabel(row, text=meta.get("CORE", "N/A"), width=150).pack(side="left", expand=True, fill="x")
             ctk.CTkLabel(row, text=score_val, width=150).pack(side="left", expand=True, fill="x")
             ctk.CTkLabel(row, text=title, width=150).pack(side="left", expand=True, fill="x")
 
-            # Status Logic (Hybrid: DB + File)
             status_text = ""
             status_color = "gray"
 
@@ -305,7 +428,6 @@ class App(ctk.CTk):
             except:
                 pass
 
-            # Fallback to File if DB empty
             if not status_text:
                 status_file = filepath + ".status"
                 if os.path.exists(status_file):
@@ -326,7 +448,6 @@ class App(ctk.CTk):
             elif filepath in self.processing_files:
                  ctk.CTkLabel(row, text="QUEUED...", width=150, text_color="orange").pack(side="left", expand=True, fill="x")
             else:
-                # ACTION BUTTONS
                 action_frame = ctk.CTkFrame(row, fg_color="transparent")
                 action_frame.pack(side="left", expand=True, fill="x")
 
@@ -338,7 +459,6 @@ class App(ctk.CTk):
                                          command=lambda f=filepath: self.trash_proposal(f))
                 trash_btn.pack(side="left", padx=5)
 
-                # Auto-Sniper Check
                 if self.sniper_var.get():
                     try:
                         if int(score_val) >= 85:
@@ -346,8 +466,7 @@ class App(ctk.CTk):
                     except ValueError:
                         pass
 
-        self.update_dashboard_metrics() # Ensure dashboard is in sync
-        # Polling for Auto-Sniper and Status Updates
+        self.update_dashboard_metrics()
         self.after(5000, self.refresh_table)
 
     def launch_bid(self, filepath):
@@ -363,12 +482,11 @@ class App(ctk.CTk):
         self.update_status(f"Queueing bid for {os.path.basename(filepath)}...")
 
         def run_script():
-            with self.bid_semaphore: # CONCURRENCY LIMIT
+            with self.bid_semaphore:
                 try:
                     env = os.environ.copy()
                     env["SNIPER_MODE"] = mode
 
-                    # Using sys.executable to ensure we use the same python environment
                     process = subprocess.Popen(
                         [sys.executable, "src/bidder.py", filepath],
                         stdout=subprocess.PIPE,
@@ -379,7 +497,6 @@ class App(ctk.CTk):
                         env=env
                     )
 
-                    # Read output live
                     for line in process.stdout:
                         line = line.strip()
                         self.update_status(line)
@@ -392,7 +509,6 @@ class App(ctk.CTk):
                         self.update_status("Bid Processed Successfully!")
                         self.log_to_console("[SUCCESS] Bid Processed Successfully!")
                         self.increment_stats()
-
                         try:
                             subprocess.run(["notify-send", "Sniper Scout", f"Bid Sent: {os.path.basename(filepath)}"], check=False)
                         except:

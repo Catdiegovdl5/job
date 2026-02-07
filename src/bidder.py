@@ -210,8 +210,13 @@ def place_bid(filepath, meta, body, mode):
                 # For this implementation, we stick to the body from file to ensure stability
                 # but we simulate the typing.
 
-                # Typing Proposal Human-like
-                type_like_human(page, textarea_selector, body)
+                # Typing Proposal
+                if mode == "BLITZ":
+                    # Instant fill
+                    page.fill(textarea_selector, body)
+                else:
+                    # Human-like typing
+                    type_like_human(page, textarea_selector, body)
 
                 # Typing Amount (Mock value for now as it wasn't in file spec)
                 # page.fill('input[id="bid_amount"]', '150')
@@ -228,7 +233,7 @@ def place_bid(filepath, meta, body, mode):
                 time.sleep(5)
             else:
                 # Real Mode: Click Submit
-                # page.click('button:has-text("Place Bid")')
+                page.click('button:has-text("Place Bid")')
                 update_status(filepath, "SENT")
                 logger.info("Bid Sent Successfully!")
                 return True
