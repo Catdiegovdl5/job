@@ -26,13 +26,13 @@ class SniperGUI(ctk.CTk):
 
         # Add tabs
         self.tabview.add("Dashboard")
-        self.tabview.add("Pending Bids")
+        self.tabview.add("Central de Lances")
 
         # Setup Dashboard Tab
         self.setup_dashboard_tab()
 
-        # Setup Pending Bids Tab
-        self.setup_pending_bids_tab()
+        # Setup Central de Lances Tab
+        self.setup_central_lances_tab()
 
     def setup_dashboard_tab(self):
         """
@@ -47,11 +47,11 @@ class SniperGUI(ctk.CTk):
         self.btn_start_scout = ctk.CTkButton(self.dashboard_frame, text="Start Scout Mission", command=self.start_scout)
         self.btn_start_scout.grid(row=1, column=0, padx=20, pady=10)
 
-    def setup_pending_bids_tab(self):
+    def setup_central_lances_tab(self):
         """
-        Sets up the Pending Bids tab with a dynamic list and refresh button.
+        Sets up the Central de Lances tab with a dynamic list and refresh button.
         """
-        self.pending_frame = self.tabview.tab("Pending Bids")
+        self.pending_frame = self.tabview.tab("Central de Lances")
         self.pending_frame.grid_columnconfigure(0, weight=1)
         self.pending_frame.grid_rowconfigure(1, weight=1) # List area expands
 
@@ -69,6 +69,7 @@ class SniperGUI(ctk.CTk):
 
         # Initial Load
         self.refresh_list()
+        print("[SYSTEM] Central de Lances ready for input.")
 
     def start_scout(self):
         """
@@ -87,22 +88,31 @@ class SniperGUI(ctk.CTk):
     def refresh_list(self):
         """
         Scans the directory for pending bids and repopulates the list.
+        Uses try-except to handle race conditions where files might be deleted mid-scan.
         """
-        # Clear existing widgets in scroll_frame
-        for widget in self.scroll_frame.winfo_children():
-            widget.destroy()
+        try:
+            # Clear existing widgets in scroll_frame
+            for widget in self.scroll_frame.winfo_children():
+                widget.destroy()
 
-        # Scan for files
-        files = glob.glob("propostas_geradas/WAITING_APPROVAL_*.txt")
-        logging.info(f"Found {len(files)} pending bids.")
+            # Scan for files
+            files = glob.glob("propostas_geradas/WAITING_APPROVAL_*.txt")
+            logging.info(f"Found {len(files)} pending bids.")
 
-        if not files:
-            lbl = ctk.CTkLabel(self.scroll_frame, text="No pending bids found.")
-            lbl.pack(pady=20)
-            return
+            if not files:
+                lbl = ctk.CTkLabel(self.scroll_frame, text="No pending bids found.")
+                lbl.pack(pady=20)
+                return
 
-        for filepath in files:
-            self.create_bid_row(filepath)
+            for filepath in files:
+                try:
+                    if os.path.exists(filepath):
+                        self.create_bid_row(filepath)
+                except Exception as e:
+                    logging.warning(f"Error displaying row for {filepath}: {e}")
+
+        except Exception as e:
+            logging.error(f"Error refreshing list: {e}")
 
     def create_bid_row(self, filepath):
         """
@@ -136,7 +146,7 @@ class SniperGUI(ctk.CTk):
         # Optimistic UI update: Remove the row immediately or on refresh
         # For simplicity, we refresh after a short delay or let the user refresh manually.
         # But a manual refresh is safer to confirm it's gone.
-        self.after(500, self.refresh_list)
+        self.after(1500, self.refresh_list)
 
     def _run_bidder_process(self, filepath):
         try:

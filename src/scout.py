@@ -15,8 +15,8 @@ def scout_routine():
             context = None
             try:
                 logging.info("Launching browser...")
-                # Launch browser (headless by default in this env)
-                browser = p.chromium.launch(headless=True)
+                # Launch browser (headless by default in this env, but using --headless=new for RAM savings)
+                browser = p.chromium.launch(headless=True, args=["--headless=new"])
                 context = browser.new_context()
                 page = context.new_page()
 
