@@ -141,11 +141,10 @@ def run_bot():
     # Set drop_pending_updates=True to ignore old updates that might cause conflicts or loops
     # Set allowed_updates to only what we need
     # Adjust poll_interval to be less aggressive if needed
+    # read_timeout and connect_timeout are removed because they are not valid arguments for run_polling in v20+
     try:
         application.run_polling(
             drop_pending_updates=True,
-            read_timeout=30,  # Increase timeout for slow connections
-            connect_timeout=30,
             poll_interval=2.0 # Slightly less aggressive polling
         )
     except Conflict:
