@@ -142,7 +142,12 @@ def run_bot():
     # Set allowed_updates to only what we need
     # Adjust poll_interval to be less aggressive if needed
     try:
-        application.run_polling(drop_pending_updates=True)
+        application.run_polling(
+            drop_pending_updates=True,
+            read_timeout=30,  # Increase timeout for slow connections
+            connect_timeout=30,
+            poll_interval=2.0 # Slightly less aggressive polling
+        )
     except Conflict:
         print("CRITICAL ERROR: Conflict - terminated by other getUpdates request.")
         print("Make sure only one bot instance is running.")

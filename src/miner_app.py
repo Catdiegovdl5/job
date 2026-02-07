@@ -97,9 +97,10 @@ class FreelancerScout:
         }
 
         try:
+            print(f"Sending Telegram Alert for: {job['title']}")
             response = requests.post(url, json=payload, timeout=10)
             if response.status_code == 200:
-                print(f"Telegram Alert sent for: {job['title']}")
+                print(f"Telegram Alert sent successfully.")
             else:
                 print(f"Failed to send Telegram alert: {response.status_code} - {response.text}")
         except Exception as e:

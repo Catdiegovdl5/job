@@ -4,6 +4,8 @@ import subprocess
 import threading
 import sys
 import os
+import psutil
+import time
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -31,6 +33,9 @@ class SniperGUI:
         self.btn_telegram = tk.Button(self.btn_frame, text="Start Telegram Bot", command=self.start_telegram, bg="blue", fg="white")
         self.btn_telegram.pack(side=tk.LEFT, padx=10)
 
+        self.btn_test = tk.Button(self.btn_frame, text="Test Telegram", command=self.test_telegram, bg="gray", fg="white")
+        self.btn_test.pack(side=tk.LEFT, padx=10)
+
         self.btn_kill = tk.Button(self.btn_frame, text="🛑 STOP ALL", command=self.kill_all, bg="red", fg="white")
         self.btn_kill.pack(side=tk.LEFT, padx=10)
 
@@ -41,19 +46,41 @@ class SniperGUI:
 
     def kill_all(self):
         self.log("Stopping all managed processes...")
+        # 1. Kill tracked subprocesses
         for name, process in self.processes.items():
             if process.poll() is None:  # If running
-                process.terminate()
-                self.log(f"Terminated {name}")
+                try:
+                    process.terminate()
+                    self.log(f"Terminated tracked process: {name}")
+                except Exception as e:
+                    self.log(f"Error terminating {name}: {e}")
 
-        # Hard kill for zombie python processes related to our app
+        # 2. Hard kill for zombie python processes using psutil (More robust)
         try:
-            # Unix-like kill
-            subprocess.run(["pkill", "-f", "src/telegram_commander.py"])
-            subprocess.run(["pkill", "-f", "src/miner_app.py"])
-            self.log("Force killed potential zombies (pkill).")
+            current_pid = os.getpid()
+            for proc in psutil.process_iter(['pid', 'name', 'cmdline']):
+                try:
+                    # Check if process is Python and running one of our scripts
+                    cmdline = proc.info['cmdline']
+                    if cmdline and 'python' in proc.info['name']:
+                        script_name = None
+                        if any("src/telegram_commander.py" in arg for arg in cmdline):
+                            script_name = "Telegram Commander"
+                        elif any("src/miner_app.py" in arg for arg in cmdline):
+                            script_name = "Miner App"
+
+                        if script_name and proc.info['pid'] != current_pid:
+                            self.log(f"Found zombie {script_name} (PID: {proc.info['pid']}). Killing...")
+                            proc.kill()
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    pass
+
+            # Brief pause to ensure OS releases resources
+            time.sleep(1)
+            self.log("Zombie cleanup complete.")
+
         except Exception as e:
-            self.log(f"Pkill failed (might be on Windows?): {e}")
+            self.log(f"Advanced kill failed: {e}")
 
     def log(self, message):
         self.log_area.insert(tk.END, message + "\n")
@@ -69,6 +96,28 @@ class SniperGUI:
         self.log("Starting Telegram Commander...")
         # Pointing to src/telegram_commander.py
         threading.Thread(target=self._run_process, args=("src/telegram_commander.py", "Telegram", []), daemon=True).start()
+
+    def test_telegram(self):
+        """Sends a single test message to verify credentials."""
+        self.log("Testing Telegram Connection...")
+        import requests
+        token = os.getenv("TELEGRAM_TOKEN")
+        chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+        if not token or not chat_id:
+            self.log("ERROR: Missing Token or Chat ID in .env")
+            return
+
+        try:
+            url = f"https://api.telegram.org/bot{token}/sendMessage"
+            payload = {"chat_id": chat_id, "text": "✅ [TEST] Conexão com Telegram bem sucedida!"}
+            resp = requests.post(url, json=payload, timeout=10)
+            if resp.status_code == 200:
+                self.log("SUCCESS: Test message sent!")
+            else:
+                self.log(f"FAILURE: Telegram API Error {resp.status_code}: {resp.text}")
+        except Exception as e:
+            self.log(f"FAILURE: Connection Error: {e}")
 
     def start_bidder(self):
         self.log("Starting Bidder...")
