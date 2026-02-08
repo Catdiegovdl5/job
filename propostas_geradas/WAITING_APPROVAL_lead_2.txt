@@ -1,0 +1,6 @@
+CORE: FREELANCER_ELITE
+SCORE: 99
+TITLE: Create an AI video for my marketing campaign
+URL: https://www.freelancer.com/projects/fake/project-2
+---
+Error calling Gemini API after 3 attempts: 404 Client Error: Not Found for url: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBCDVaq5v7sH2BYNBHCS1QUFIrpTmGRpKs

@@ -1,105 +1,67 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
 load_dotenv()
 
-# Configurações do Jules
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-# Freelancer Access
-FLN_USER = os.getenv("FLN_USER")
-FLN_PASS = os.getenv("FLN_PASS")
-
-# Hunting Config
-SNIPER_MODE = os.getenv("SNIPER_MODE", "BLITZ")
-MIN_BUDGET = int(os.getenv("MIN_BUDGET", 20))
-KEYWORDS = os.getenv("KEYWORDS", "").split(",")
-
-# Arsenal S-Tier
+# --- ARSENAL TÉCNICO ---
 ARSENAL = {
-    "video": "Pipeline Veo 3 + Nano Banana (Fidelidade 4K) + ElevenLabs (Sound Design)",
-    "traffic": "CAPI (Conversions API) + GTM Server-Side + Estratégia de Atribuição Avançada",
-    "seo": "GEO (Generative Engine Optimization) + AEO (Answer Engine Optimization) + Knowledge Graph @graph",
-    "content": "Técnica Nugget (Answer-First) + Information Gain (E-E-A-T)"
+    "video": "Veo 3 + Nano Banana (4K)",
+    "traffic": "CAPI Server-Side + GTM",
+    "seo": "GEO + AEO + @graph",
+    "dev": "Python Scripts, Automation"
 }
 
-# Skill Sets & Proposal Strategies
-SKILL_SETS = {
-    "Excel VBA": {
-        "strategy": "Automation and Macro Optimization",
-        "template": "Technical Template"
-    },
-    "SQL": {
-        "strategy": "Database Optimization & Complex Queries",
-        "template": "Technical Template"
-    },
-    "SEO": {
-        "strategy": "Ranking and Keywords Dominance",
-        "template": "SEO Template"
-    },
-    "Copywriting": {
-        "strategy": "Persuasive Conversion Copy",
-        "template": "Creative Template"
-    },
-    "AI Chatbot": {
-        "strategy": "Natural Language Processing Integration",
-        "template": "Technical Template"
-    },
-    "Python": {
-        "strategy": "Efficient Scripting & Automation",
-        "template": "Technical Template"
-    },
-    "Web Scraping": {
-        "strategy": "High-Volume Data Extraction",
-        "template": "Technical Template"
-    }
-}
+# --- MENU DE ARMAS (Inteligência Contextual) ---
+ARSENAL_MENU = """
+- VIDEO_TOOLS: Veo 3 + Nano Banana (4K) + ElevenLabs (ONLY for Video projects)
+- TRAFFIC_TOOLS: CAPI + GTM Server-Side + Attribution (ONLY for Ads/Analytics)
+- SEO_TOOLS: GEO + AEO + Schema.org + Knowledge Graph (ONLY for SEO/Ranking)
+- DEV_TOOLS: Python Scripts, Anti-Bot Bypass, SQL Optimization (ONLY for Code/Scraping)
+"""
 
-# Prompt Templates
+# --- O DNA DO JULES (Prompt Sênior) ---
+JULES_DIRECTIVE = """
+SYSTEM ROLE: You are 'Jules', a Senior Solutions Architect charging $150/hr.
+GOAL: Write a winning proposal for Freelancer.com that stops the scroll.
+
+CORE RULES:
+1. NO GREETINGS: Do NOT say "Hello", "Dear Client". Start with the problem.
+2. NO FLUFF: Do NOT say "I am the perfect fit". Show, don't tell.
+3. VISUAL IMPACT: You MUST use a Markdown Table for the execution plan.
+4. REVERSE ENGINEERING: Always assume the client's problem is deeper than they think.
+"""
+
 PROMPT_TEMPLATES = {
-    "default": """
-    Aja como o Jules, Proposals Architect S-Tier.
-    Analise este projeto da plataforma {platform}: '{description}'
-    Use o arsenal: {arsenal_items}.
-    Gere uma proposta matadora em {language}.
-    Retorne apenas o texto da proposta.
-    """,
-    "freelancer": """
-    Aja como o Jules, Proposals Architect S-Tier.
-    Analise este projeto da plataforma Freelancer.com: '{description}'
-    Foco: Velocidade e Resposta Técnica.
-    Use o arsenal: {arsenal_items}.
-    Skill Detectada: {detected_skill}. Estratégia: {skill_strategy}.
-    Gere uma proposta matadora em Inglês (Turbo Core).
-    Inclua uma tabela com Milestones e Palavras-chave de Teste.
-    Retorne apenas o texto da proposta.
-    """,
-    "99freelas": """
-    Aja como o Jules, Proposals Architect S-Tier.
-    Analise este projeto da plataforma 99Freelas: '{description}'
-    Foco: ROI e Consultoria.
-    Use o arsenal: {arsenal_items}.
-    Skill Detectada: {detected_skill}. Estratégia: {skill_strategy}.
-    Gere uma proposta matadora em Português.
-    Mencione "Projeto Piloto" e use tom de parceiro.
-    Retorne apenas o texto da proposta.
-    """,
-    "upwork": """
-    Aja como o Jules, Proposals Architect S-Tier.
-    Analise este projeto da plataforma Upwork: '{description}'
-    Foco: Senioridade e Estudos de Caso.
-    Use o arsenal: {arsenal_items}.
-    Skill Detectada: {detected_skill}. Estratégia: {skill_strategy}.
-    Gere uma proposta matadora em Inglês.
-    Responda tecnicamente às perguntas de triagem, se houver: {questions}.
-    Retorne apenas o texto da proposta.
+    "default": JULES_DIRECTIVE,
+
+    "freelancer": JULES_DIRECTIVE + """
+    PROJECT CONTEXT: '{description}'
+    AVAILABLE TOOLS: {arsenal_items}
+
+    INSTRUCTION: Write a proposal following this EXACT psychological structure:
+
+    1. **THE TECHNICAL HOOK (1-2 Sentences):**
+       - Analyze their request and expose a hidden bottleneck or opportunity.
+       - Example for SEO: "Ranking isn't just about keywords anymore; it's about Semantic Authority."
+       - Example for Code: "Generic scripts get blocked. You need browser fingerprinting bypass."
+
+    2. **THE EXECUTION MAP (The Table):**
+       - Create a Markdown table with 3 columns: | PHASE | ACTION | S-TIER OUTCOME |
+       - Fill 3 rows (Audit, Execution, Scale) using specific tools from the Menu.
+
+    3. **THE AUTHORITY CLOSE:**
+       - One sentence mentioning your specific stack.
+       - Final CTA: "Ready to deploy this? Let's chat."
+
+    CONSTRAINT: Keep it under 1300 characters. Be sharp. Be expensive.
     """
 }
 
-# Simulated Leads (Fallback)
+# Leads para Simulação Rápida
 SIMULATED_LEADS = [
-    {"platform": "freelancer", "desc": "Need a pro for AI Video and SEO"},
-    {"platform": "99freelas", "desc": "Gestor de tráfego com CAPI"},
-    {"platform": "upwork", "desc": "Looking for an SEO expert to improve rankings", "questions": ["What is your SEO strategy?"]}
+    {"platform": "freelancer", "desc": "Looking for SEO expert to rank my Shopify store on Google and fix speed issues"},
+    {"platform": "freelancer", "desc": "Need a python script to scrape data from 3 websites and save to excel"},
+    {"platform": "freelancer", "desc": "Create an AI video for my marketing campaign"}
 ]

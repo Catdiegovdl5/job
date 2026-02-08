@@ -1,0 +1,6 @@
+CORE: FREELANCER_ELITE
+SCORE: 99
+TITLE: Looking for SEO expert to rank my Shopify store on Google an
+URL: https://www.freelancer.com/projects/fake/project-0
+---
+Error calling Gemini API after 3 attempts: 404 Client Error: Not Found for url: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBCDVaq5v7sH2BYNBHCS1QUFIrpTmGRpKs

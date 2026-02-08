@@ -1,0 +1,6 @@
+CORE: FREELANCER_ELITE
+SCORE: 99
+TITLE: Need a python script to scrape data from 3 websites and save
+URL: https://www.freelancer.com/projects/fake/project-1
+---
+Error calling Gemini API after 3 attempts: 404 Client Error: Not Found for url: https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyBCDVaq5v7sH2BYNBHCS1QUFIrpTmGRpKs

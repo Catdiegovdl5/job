@@ -1,68 +1,47 @@
 import os
-import json
 import logging
-from datetime import datetime
 from src.proposal_generator import generate_proposal
 from src.config import SIMULATED_LEADS
 
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger("Sentinel")
 
-def fetch_leads():
-    """
-    Fetches leads from 'leads_input.json' if it exists, otherwise uses simulated leads.
-    """
-    input_file = "leads_input.json"
-    if os.path.exists(input_file):
-        try:
-            with open(input_file, "r", encoding='utf-8') as f:
-                leads = json.load(f)
-            logger.info(f"Loaded {len(leads)} leads from {input_file}.")
-            return leads
-        except Exception as e:
-            logger.error(f"Error reading {input_file}: {e}. Falling back to simulation.")
-
-    logger.info("Using simulated leads.")
-    return SIMULATED_LEADS
-
 def process_leads():
-    """
-    Orchestrates the lead processing: Fetch -> Generate -> Save.
-    """
-    leads = fetch_leads()
-    results = []
+    # Carrega leads simulados (Futuramente aqui entra o RSS do Freelancer)
+    leads = SIMULATED_LEADS
 
-    for lead in leads:
-        platform = lead.get("platform", "unknown")
-        desc = lead.get("desc") or lead.get("description", "")
-        questions = lead.get("questions")
+    # Cria pasta se não existir
+    if not os.path.exists("propostas_geradas"):
+        os.makedirs("propostas_geradas")
 
-        if not desc:
-            logger.warning(f"Skipping lead for {platform}: No description provided.")
+    # Limpa propostas antigas para evitar confusão
+    for f in os.listdir("propostas_geradas"):
+        if f.startswith("WAITING_APPROVAL"):
+            os.remove(os.path.join("propostas_geradas", f))
+
+    for i, lead in enumerate(leads):
+        platform = lead.get("platform", "unknown").lower()
+
+        # Filtro Absoluto: Só Freelancer.com
+        if "freelancer" not in platform:
             continue
 
-        logger.info(f"Processing lead for {platform}...")
-        try:
-            # Always try to use AI first (handled by generate_proposal with use_ai=True)
-            proposal = generate_proposal(platform, desc, questions, use_ai=True)
+        desc = lead.get("desc", "")
 
-            results.append({
-                "timestamp": datetime.now().isoformat(),
-                "platform": platform,
-                "description": desc,
-                "proposal": proposal
-            })
-        except Exception as e:
-            logger.error(f"Failed to process lead for {platform}: {e}")
+        # Gera a proposta
+        proposal = generate_proposal(platform, desc, use_ai=True)
 
-    output_file = "leads_ready.json"
-    try:
-        with open(output_file, "w", encoding='utf-8') as f:
-            json.dump(results, f, indent=4, ensure_ascii=False)
-        logger.info(f"Successfully processed {len(results)} leads. Results saved to {output_file}.")
-    except Exception as e:
-        logger.error(f"Failed to save results to {output_file}: {e}")
+        # Salva o arquivo pronto para o Bidder
+        filename = f"propostas_geradas/WAITING_APPROVAL_lead_{i}.txt"
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(f"CORE: FREELANCER_ELITE\n")
+            f.write(f"SCORE: 99\n")
+            f.write(f"TITLE: {desc[:60]}\n")
+            f.write(f"URL: https://www.freelancer.com/projects/fake/project-{i}\n")
+            f.write("---\n")
+            f.write(proposal)
+
+        logger.info(f"✅ Munição Pronta: {filename}")
 
 if __name__ == "__main__":
     process_leads()
