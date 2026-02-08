@@ -6,7 +6,7 @@ import os
 # Add root to sys.path so we can import src as a package
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from src.proposal_generator import generate_proposal
+from src.proposal_generator import generate_proposal, detect_skill
 
 class TestProposalGenerator(unittest.TestCase):
 
@@ -40,24 +40,12 @@ class TestProposalGenerator(unittest.TestCase):
     @patch('src.proposal_generator.GEMINI_API_KEY', 'fake_key')
     @patch('src.proposal_generator.JulesAI')
     def test_ai_generation_success(self, mock_jules_ai):
-        # Only mock_jules_ai is passed because GEMINI_API_KEY uses 'new' argument (implicit position)
-        # Wait, order of decorators matters.
-        # Top decorator is last argument?
-        # @patch('A') -> arg1
-        # @patch('B') -> arg2
-        # def test(self, arg1, arg2)
-        # Here:
-        # @patch('GEMINI_API_KEY', 'fake_key') -> Not passed
-        # @patch('JulesAI') -> Passed as mock_jules_ai
-        # So signature is correct: (self, mock_jules_ai)
-
         mock_client = MagicMock()
         mock_client.generate_content.return_value = "AI Generated Proposal"
         mock_jules_ai.return_value = mock_client
 
         proposal = generate_proposal("freelancer", "Test desc", use_ai=True)
         self.assertEqual(proposal, "AI Generated Proposal")
-        # Check if generate_content was called
         mock_client.generate_content.assert_called_once()
 
     @patch('src.proposal_generator.GEMINI_API_KEY', 'fake_key')
@@ -67,15 +55,35 @@ class TestProposalGenerator(unittest.TestCase):
         mock_client.generate_content.side_effect = Exception("AI Error")
         mock_jules_ai.return_value = mock_client
 
-        # Should fallback to template which contains "### Proposal for Freelancer.com"
         proposal = generate_proposal("freelancer", "Test desc", use_ai=True)
         self.assertIn("### Proposal for Freelancer.com", proposal)
 
     @patch('src.proposal_generator.GEMINI_API_KEY', None)
     def test_ai_generation_no_key(self):
-        # Should fallback to template immediately
         proposal = generate_proposal("freelancer", "Test desc", use_ai=True)
         self.assertIn("### Proposal for Freelancer.com", proposal)
+
+    def test_skill_detection(self):
+        desc = "I need an Excel VBA expert to automate my sheet"
+        skill, strategy = detect_skill(desc)
+        self.assertEqual(skill, "Excel VBA")
+        self.assertEqual(strategy, "Automation and Macro Optimization")
+
+        desc_seo = "Improve my SEO ranking"
+        skill, strategy = detect_skill(desc_seo)
+        self.assertEqual(skill, "SEO")
+        self.assertEqual(strategy, "Ranking and Keywords Dominance")
+
+        desc_generic = "Help me with something"
+        skill, strategy = detect_skill(desc_generic)
+        self.assertEqual(skill, "General")
+
+    def test_proposal_customization_with_skill(self):
+        desc = "Need help with SQL queries"
+        proposal = generate_proposal("freelancer", desc, use_ai=False)
+        # Should contain "Core Strategy: Database Optimization..."
+        self.assertIn("Core Strategy: Database Optimization", proposal)
+        self.assertIn("Skill: SQL", proposal)
 
 if __name__ == "__main__":
     unittest.main()

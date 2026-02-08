@@ -3,16 +3,26 @@ import sys
 import logging
 
 try:
-    from .config import ARSENAL, PROMPT_TEMPLATES, GEMINI_API_KEY
+    from .config import ARSENAL, PROMPT_TEMPLATES, GEMINI_API_KEY, SKILL_SETS
     from .ai_client import JulesAI
 except ImportError:
     # Fallback for when running as script directly (though better to run as module)
-    from config import ARSENAL, PROMPT_TEMPLATES, GEMINI_API_KEY
+    from config import ARSENAL, PROMPT_TEMPLATES, GEMINI_API_KEY, SKILL_SETS
     from ai_client import JulesAI
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+def detect_skill(description):
+    """
+    Detects the primary skill from the project description based on SKILL_SETS keys.
+    """
+    desc_lower = description.lower()
+    for skill, data in SKILL_SETS.items():
+        if skill.lower() in desc_lower:
+            return skill, data["strategy"]
+    return "General", "High-Value Execution"
 
 def generate_proposal_with_ai(platform, description, questions=None):
     """
@@ -39,12 +49,16 @@ def generate_proposal_with_ai(platform, description, questions=None):
     questions_str = "\n".join([f"- {q}" for q in questions]) if questions else "None"
     language = "Português" if platform_key == "99freelas" else "Inglês"
 
+    detected_skill, skill_strategy = detect_skill(description)
+
     prompt = template.format(
         platform=platform,
         description=description,
         arsenal_items=arsenal_items,
         questions=questions_str,
-        language=language
+        language=language,
+        detected_skill=detected_skill,
+        skill_strategy=skill_strategy
     )
 
     client = JulesAI()
@@ -67,16 +81,19 @@ def generate_proposal(platform, description, questions=None, use_ai=False):
     platform = platform.lower().strip()
     proposal = []
 
+    detected_skill, skill_strategy = detect_skill(description)
+
     if "freelancer" in platform:
         proposal.append("### Proposal for Freelancer.com (Focus: Speed & Technical)")
         proposal.append("Language: English\n")
         proposal.append("Hello,")
         proposal.append(f"I have reverse-engineered your project: '{description}'.")
+        proposal.append(f"Core Strategy: {skill_strategy} (Skill: {detected_skill})")
         proposal.append("Here is the technical roadmap to solve your pain points immediately:\n")
         proposal.append("| Phase | Milestone | Deliverable |")
         proposal.append("|-------|-----------|-------------|")
         proposal.append("| 1 | Technical Audit & Reverse Engineering | Gap Analysis |")
-        proposal.append("| 2 | Arsenal Integration (Video/Traffic/SEO) | Technical Solution |")
+        proposal.append(f"| 2 | {skill_strategy} Implementation | Technical Solution |")
         proposal.append("| 3 | Performance Scaling & ROI Tracking | Performance Report |\n")
         proposal.append("Technical Stack:")
         proposal.append(f"- Video: {ARSENAL['video']}")
@@ -90,6 +107,7 @@ def generate_proposal(platform, description, questions=None, use_ai=False):
         proposal.append("Idioma: Português\n")
         proposal.append("Olá,")
         proposal.append(f"Analisei seu projeto '{description}' e identifiquei os gargalos que estão travando seus resultados.")
+        proposal.append(f"Estratégia Central: {skill_strategy} (Skill: {detected_skill})")
         proposal.append("Minha abordagem foca em ROI real e consultoria estratégica, não apenas execução técnica.\n")
         proposal.append("Sugiro começarmos com um **Projeto Piloto** focado em validação rápida.")
         proposal.append("\nNosso Arsenal Técnico Diferenciado:")
@@ -104,6 +122,7 @@ def generate_proposal(platform, description, questions=None, use_ai=False):
         proposal.append("Language: English\n")
         proposal.append("Dear Hiring Manager,")
         proposal.append(f"After reviewing your project description ('{description}'), I've applied a reverse-engineering lens to identify the core business objectives.")
+        proposal.append(f"Focus: {skill_strategy} (Skill: {detected_skill})")
         proposal.append("My senior approach ensures that every technical decision is backed by ROI and high-fidelity standards.\n")
         proposal.append("Strategy Highlights:")
         proposal.append(f"- High-Fidelity Production: {ARSENAL['video']}")
