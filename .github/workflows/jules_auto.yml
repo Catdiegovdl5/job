@@ -1,0 +1,36 @@
+name: Jules Global Sentinel
+on:
+  schedule:
+    - cron: '*/15 * * * *' # Roda a cada 15 minutos
+  workflow_dispatch: # Botão manual
+
+jobs:
+  hunt_projects:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+          
+      - name: Install Arsenal
+        run: |
+          pip install requests python-dotenv
+          
+      - name: Run Sentinel
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python sentinel.py
+        
+      - name: Save Loot (Commit Output)
+        run: |
+          git config --local user.email "jules@sniper.bot"
+          git config --local user.name "Jules Sniper"
+          # Adiciona a pasta output (onde estão os txts novos)
+          git add output/
+          git commit -m "🎯 Alvo Abatido: Novas propostas geradas" || echo "Nenhum alvo novo."
+          git push
