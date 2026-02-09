@@ -1,5 +1,5 @@
 
---- [MODO MANUAL - SEGURANÇA] ---
-ALVO: Extrair contatos de CEOs de imobiliárias em SP....
-STATUS: O Google bloqueou a automação temporariamente.
-AÇÃO: Copiar e colar esta proposta manualmente.
+--- [MODO MANUAL] ---
+ALVO: Extrair contatos de CEOs de imobiliárias em SP.
+ERRO: IA Indisponível.
+RECOMENDAÇÃO: Enviar proposta template manual.

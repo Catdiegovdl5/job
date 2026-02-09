@@ -1,5 +1,5 @@
 
---- [MODO MANUAL - SEGURANÇA] ---
-ALVO: Preciso de um bot que pegue preços diários de note...
-STATUS: O Google bloqueou a automação temporariamente.
-AÇÃO: Copiar e colar esta proposta manualmente.
+--- [MODO MANUAL] ---
+ALVO: Preciso de um bot que pegue preços diários de notebooks.
+ERRO: IA Indisponível.
+RECOMENDAÇÃO: Enviar proposta template manual.

@@ -1,5 +1,5 @@
 
---- [MODO MANUAL - SEGURANÇA] ---
-ALVO: Automatizar relatórios mensais de 50 planilhas de ...
-STATUS: O Google bloqueou a automação temporariamente.
-AÇÃO: Copiar e colar esta proposta manualmente.
+--- [MODO MANUAL] ---
+ALVO: Automatizar relatórios mensais de 50 planilhas de vendas.
+ERRO: IA Indisponível.
+RECOMENDAÇÃO: Enviar proposta template manual.
