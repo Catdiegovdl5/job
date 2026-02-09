@@ -1,0 +1,8 @@
+ID: 40212214
+TITLE: Data Verification Automation
+
+
+--- [MODO MANUAL] ---
+ALVO: Data Verification Automation: I will create a custom Python automation that runs hourly inside a single Docker container on your V
+ERRO: IA Indisponível.
+RECOMENDAÇÃO: Enviar proposta template manual.
