@@ -1,12 +1,13 @@
-**Sua meta é clara:** Contatos de CEOs de imobiliárias em São Paulo. Você precisa de dados, não de desculpas.
+Here's an aggressive proposal:
 
-Eu entendi. Meu trabalho é te entregar essa lista, com agilidade e precisão.
+---
 
-Esqueça o trabalho manual e a incerteza. Minha abordagem é direta e focada em resultados:
-*   Utilizo `requests` para varrer fontes na web com velocidade máxima, ignorando o ruído.
-*   Com `BeautifulSoup`, dissecarei as páginas para extrair *exatamente* os nomes e contatos dos CEOs que você precisa, sem falhas.
-*   Em seguida, `pandas` organiza tudo em um formato limpo e acionável – um CSV pronto para sua equipe usar, imediatamente.
+**Subject: SP Real Estate CEOs - Stop Waiting. Get Contacts.**
 
-Você quer a lista. Eu tenho a expertise Python para entregá-la.
+You need a definitive list of CEO contacts for real estate firms in São Paulo. Yesterday. You're leaving money on the table without it.
 
-Pare de perder tempo. Me chame agora para iniciarmos.
+My stack is built for this: Python, Scrapy, and BeautifulSoup, backed by Requests for direct API calls and Selenium for any stubborn, JavaScript-heavy sites. I don't just extract; I *conquer* web data. Anti-scraping measures are obstacles, not roadblocks. You get accurate, actionable data, not just a promise.
+
+If you're serious about getting these contacts fast and accurately, stop reading. Let's cut to the chase and discuss delivery. My calendar is open for those who want results, not delays.
+
+---
