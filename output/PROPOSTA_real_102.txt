@@ -1,7 +1,23 @@
-**ASSUNTO: CEOs Imobiliários SP: Sua Próxima Jogada, Nossos Dados.**
+## Proposta Freelance: Extração Cirúrgica de Contatos (CEOs SP)
 
-Você não precisa de uma lista qualquer de imobiliárias em SP. Você precisa dos *contatos diretos* dos CEOs. Os tomadores de decisão. Ponto final. Chega de gastar tempo com leads inúteis. Você quer inteligência cirúrgica para fechar negócios, e quer para *agora*.
+---
 
-Minha ferramenta? Python. Meu método? Implacável. Eu uso `requests` para varrer a web, `BeautifulSoup` para dissecar o HTML e `pandas` para entregar esses contatos em uma bandeja de prata – limpos, estruturados e prontos para ação. Se o site for um campo minado de JavaScript, `Selenium` entra para explodir as barreiras.
+### HOOK
+**Pare de caçar listas genéricas.** Você não precisa de secretárias; você precisa dos contatos diretos e validados dos CEOs das principais imobiliárias de São Paulo. Você precisava desses dados ontem. Eu entrego amanhã.
 
-A concorrência não espera. Você também não deveria. Pronto para ter esses nomes em mãos? Me chame. Agora.
+### SOLUTION (O Arsenal)
+Esta não é uma raspagem amadora. É uma operação cirúrgica de *data mining* focada na hierarquia e localização (SP).
+
+Implementaremos um workflow Python robusto para garantir velocidade e qualidade de dados:
+
+1.  **Scrapy:** O *framework* de extração high-volume, configurado para lidar com bloqueios e extrair dados de fontes complexas (LinkedIn, websites institucionais, etc.) de forma assíncrona.
+2.  **Requests/BeautifulSoup:** Usados como *fallback* ou para alvos específicos onde a automação do Scrapy possa ser excessiva.
+3.  **Pandas:** Essencial para normalização, limpeza (remoção de e-mails inválidos/genéricos), e validação cruzada do CEP/Localização (SP).
+4.  **Data Quality Layer:** O resultado será um arquivo estruturado e desduplicado, focado em **Nome do CEO**, **Empresa**, **E-mail Corporativo** e **Telefone de Contato**.
+
+**Resultado:** Dados limpos, estruturados e prontos para sua equipe de vendas.
+
+### CTA
+Minha *setup* básica já está pronta. Envie o escopo exato (número de alvos ou nicho) e o orçamento agora.
+
+**Vamos fechar isso e começar a extração em 60 minutos.**
