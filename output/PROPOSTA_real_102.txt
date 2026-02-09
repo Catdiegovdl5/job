@@ -1,5 +1,5 @@
 
---- [FALHA NA IA - MODO SIMULAÇÃO] ---
+--- [MODO OFFLINE] ---
 ALVO: Extrair contatos de CEOs de imobiliárias em SP....
-ERRO: API não respondeu.
+ERRO: Falha na conexão API.
 CTA: "Automação pronta. Vamos conversar?"

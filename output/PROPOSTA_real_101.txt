@@ -1,5 +1,5 @@
 
---- [FALHA NA IA - MODO SIMULAÇÃO] ---
+--- [MODO OFFLINE] ---
 ALVO: Preciso de um bot que pegue preços diários de note...
-ERRO: API não respondeu.
+ERRO: Falha na conexão API.
 CTA: "Automação pronta. Vamos conversar?"
