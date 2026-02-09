@@ -1,9 +1,7 @@
-Okay, here's a short, aggressive proposal designed to cut through the noise.
+Subject: STOP SEARCHING. GET SP REAL ESTATE CEO CONTACTS.
 
----
+You need a precise, actionable list of Real Estate CEOs in São Paulo. Manual collection is a drain on resources and time you don't have. This is precisely the problem I solve, quickly and efficiently.
 
-**You need the direct contacts for every real estate CEO in São Paulo, and you need them yesterday.** Forget cold calls and LinkedIn dead ends. The data is out there.
+I build robust, high-performance Python solutions. Leveraging **Scrapy** for deep, targeted web crawling, coupled with **BeautifulSoup** and **Requests** for surgical data extraction and parsing, I deliver clean, verified contact data – not just raw links. Your competitive advantage is waiting.
 
-My arsenal is built for this: `Requests` for raw speed, `BeautifulSoup` for surgical parsing, and `Selenium` to smash through any JavaScript-driven walls. Data will be pristine, formatted via `Pandas`, with intelligent proxy rotation and retry logic ensuring no lead escapes.
-
-Your competitors aren't waiting. Stop talking, start acting. DM me. Let's get this done.
+Stop planning, start acting. Let's connect to initiate this project immediately.
