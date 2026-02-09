@@ -1,13 +1,7 @@
-Here's an aggressive proposal:
+**ASSUNTO: CEOs Imobiliários SP: Sua Próxima Jogada, Nossos Dados.**
 
----
+Você não precisa de uma lista qualquer de imobiliárias em SP. Você precisa dos *contatos diretos* dos CEOs. Os tomadores de decisão. Ponto final. Chega de gastar tempo com leads inúteis. Você quer inteligência cirúrgica para fechar negócios, e quer para *agora*.
 
-**Subject: SP Real Estate CEOs - Stop Waiting. Get Contacts.**
+Minha ferramenta? Python. Meu método? Implacável. Eu uso `requests` para varrer a web, `BeautifulSoup` para dissecar o HTML e `pandas` para entregar esses contatos em uma bandeja de prata – limpos, estruturados e prontos para ação. Se o site for um campo minado de JavaScript, `Selenium` entra para explodir as barreiras.
 
-You need a definitive list of CEO contacts for real estate firms in São Paulo. Yesterday. You're leaving money on the table without it.
-
-My stack is built for this: Python, Scrapy, and BeautifulSoup, backed by Requests for direct API calls and Selenium for any stubborn, JavaScript-heavy sites. I don't just extract; I *conquer* web data. Anti-scraping measures are obstacles, not roadblocks. You get accurate, actionable data, not just a promise.
-
-If you're serious about getting these contacts fast and accurately, stop reading. Let's cut to the chase and discuss delivery. My calendar is open for those who want results, not delays.
-
----
+A concorrência não espera. Você também não deveria. Pronto para ter esses nomes em mãos? Me chame. Agora.
