@@ -1,5 +1,7 @@
+Aqui está uma proposta:
 
---- [MODO MANUAL] ---
-ALVO: Automatizar relatórios mensais de 50 planilhas de vendas.
-ERRO: IA Indisponível.
-RECOMENDAÇÃO: Enviar proposta template manual.
+Seus relatórios mensais de 50 planilhas de vendas não são um "processo". São um dreno de recursos, uma sangria de tempo e um gargalo que sufoca sua equipe. E você sabe disso.
+
+A solução é direta e brutalmente eficiente: Python. Com `Pandas` para uma agregação de dados implacável e `Openpyxl` para uma interação com Excel à prova de balas, vou construir um pipeline de automação que entrega esses relatórios com precisão cirúrgica, sem falhas e sem atrasos.
+
+Chega de perder tempo. Agende 15 minutos. Vamos resolver isso de uma vez por todas.
