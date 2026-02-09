@@ -9,8 +9,9 @@ import telebot
 from telebot import types
 from src.proposal_generator import generate_proposal
 from freelancersdk.session import Session
-from freelancersdk.resources.projects.projects import search_projects
+from freelancersdk.resources.projects.projects import search_projects, place_project_bid
 from freelancersdk.resources.projects.helpers import create_search_projects_filter
+from freelancersdk.resources.users.users import get_self_user_id
 
 # Configure Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -106,7 +107,11 @@ def process_radar():
                 title = p.get('title')
                 desc = p.get('preview_description')
                 link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
-                budget = f"{p.get('currency', {}).get('code')} {p.get('budget', {}).get('minimum')} - {p.get('budget', {}).get('maximum')}"
+                budget_info = p.get('budget', {})
+                min_budget = budget_info.get('minimum', 30)
+                max_budget = budget_info.get('maximum', 100)
+                currency = p.get('currency', {}).get('code', 'USD')
+                budget_str = f"{currency} {min_budget} - {max_budget}"
                 
                 logger.info(f"🎯 NEW TARGET: {title}")
                 
@@ -115,12 +120,12 @@ def process_radar():
                     proposal = generate_proposal("freelancer", f"{title}: {desc}", use_ai=True)
                 except Exception as e:
                     logger.error(f"⚠️ AI Gen Error: {e}")
-                    proposal = "AI Generation Failed."
+                    proposal = f"I am an expert in Python automation and can deliver this project. {desc}"
 
-                # Save locally
+                # Save locally with metadata for bidding
                 filename = f"output/REAL_JOB_{project_id}.txt"
                 with open(filename, "w", encoding="utf-8") as f_out:
-                    f_out.write(f"ID: {project_id}\nTITLE: {title}\nLINK: {link}\nBUDGET: {budget}\n\n{proposal}")
+                    f_out.write(f"ID: {project_id}\nTITLE: {title}\nBUDGET_MIN: {min_budget}\nLINK: {link}\n\n{proposal}")
                 
                 # Update Memory
                 save_seen_project(project_id)
@@ -133,13 +138,13 @@ def process_radar():
                     btn_ignore = types.InlineKeyboardButton("❌ Recusar", callback_data=f"ignore_{project_id}")
                     markup.add(btn_send, btn_ignore)
 
-                    msg = f"🎯 *ALVO DETECTADO*\n\n*Title:* {title}\n*Budget:* {budget}\n\n[View Project]({link})"
+                    msg = f"🎯 *ALVO DETECTADO*\n\n*Title:* {title}\n*Budget:* {budget_str}\n\n[View Project]({link})"
                     try:
                         bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=markup)
                     except Exception as e:
                         logger.error(f"⚠️ Telegram Send Error: {e}")
 
-                time.sleep(15) # Rate limit to avoid API bans
+                time.sleep(15) # Rate limit
 
             if new_count > 0:
                 sync_to_github()
@@ -163,15 +168,68 @@ if bot:
             if call.data.startswith("ignore_"):
                 project_id = call.data.split("_")[1]
                 logger.info(f"❌ Project {project_id} ignored by user.")
-                bot.answer_callback_query(call.id, "Projeto ignorado.")
-                bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+                try:
+                    bot.answer_callback_query(call.id, "Projeto ignorado.")
+                    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+                except Exception as e:
+                     logger.warning(f"⚠️ UI Update Error: {e}")
+
             elif call.data.startswith("send_"):
-                project_id = call.data.split("_")[1]
-                logger.info(f"🚀 Project {project_id} approved for sending.")
-                bot.answer_callback_query(call.id, "Proposta enviada! (Simulado)")
-                bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+                project_id = int(call.data.split("_")[1])
+                logger.info(f"🚀 Initiating LIVE BID Protocol for Project {project_id}...")
+
+                # 1. Retrieve Proposal Data
+                proposal_text = ""
+                bid_amount = 30 # Fallback
+                try:
+                    with open(f"output/REAL_JOB_{project_id}.txt", "r") as f:
+                        content = f.read()
+                        # Extract proposal (last part after double newline)
+                        parts = content.split("\n\n")
+                        if len(parts) > 1:
+                            proposal_text = parts[-1]
+                        else:
+                            proposal_text = content
+
+                        # Try to parse budget min from file header
+                        for line in content.splitlines():
+                            if line.startswith("BUDGET_MIN:"):
+                                try:
+                                    bid_amount = float(line.split(":")[1].strip())
+                                except:
+                                    pass
+                except Exception as e:
+                    logger.warning(f"⚠️ Proposal retrieval failed ({e}). Using emergency fallback.")
+                    proposal_text = "I am an expert in Python automation and I can complete this task perfectly. Please check my profile."
+
+                # 2. Execute LIVE BID via API
+                try:
+                    token = os.environ.get("FLN_OAUTH_TOKEN")
+                    session = Session(oauth_token=token, url="https://www.freelancer.com")
+                    my_user_id = get_self_user_id(session)
+
+                    logger.info(f"💸 Placing Bid: {bid_amount} on Project {project_id} for User {my_user_id}")
+
+                    place_project_bid(
+                        session,
+                        project_id=project_id,
+                        bidder_id=my_user_id,
+                        amount=bid_amount,
+                        period=7,
+                        milestone_percentage=100,
+                        description=proposal_text
+                    )
+
+                    bot.answer_callback_query(call.id, "✅ CONQUISTADO! Proposta enviada.")
+                    bot.edit_message_text(f"✅ *LANCE ENVIADO!* (ID: {project_id})\nAmount: {bid_amount}", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
+                    logger.info(f"💰 Bid placed successfully for project {project_id}")
+
+                except Exception as e:
+                    logger.error(f"❌ FATAL BID ERROR: {e}")
+                    bot.answer_callback_query(call.id, f"❌ Erro: {str(e)[:50]}")
+
         except Exception as e:
-            logger.error(f"⚠️ Callback Error: {e}")
+            logger.error(f"⚠️ Callback Logic Error: {e}")
 
 if __name__ == "__main__":
     # Start HTTP Server Thread
@@ -184,21 +242,19 @@ if __name__ == "__main__":
 
     # Start Bot Polling (Main Loop)
     if bot:
-        logger.info("🤖 Jules Sniper S-Tier: ONLINE")
+        logger.info("🤖 Jules Sniper S-Tier: LIVE FIRE MODE ENGAGED")
         if CHAT_ID:
             try:
-                bot.send_message(CHAT_ID, "🦅 *Jules Sniper S-Tier: ONLINE*\nReady to hunt.", parse_mode="Markdown")
+                bot.send_message(CHAT_ID, "🦅 *Jules Sniper S-Tier: LIVE FIRE MODE ONLINE*\nReady to earn.", parse_mode="Markdown")
             except Exception as e:
                 logger.warning(f"⚠️ Startup Msg Failed: {e}")
         try:
             bot.infinity_polling()
         except Exception as e:
             logger.error(f"❌ Polling Error: {e}")
-            # If polling fails, keep the script alive for the HTTP server
             while True:
                 time.sleep(60)
     else:
         logger.error("❌ Bot not configured. Exiting.")
-        # Keep alive for HTTP server even if bot fails?
         while True:
             time.sleep(60)
