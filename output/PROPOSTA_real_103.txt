@@ -1,9 +1,10 @@
-Aqui está sua proposta:
+**Assunto:** Chega de Afogar em Planilhas: Automação Python AGORA.
 
----
+**Hook:**
+Você está perdendo horas valiosas, talvez dias, *todo mês*, afogado em 50 planilhas de vendas para montar um relatório manual. Isso não é "trabalho"; é um *custo* insuportável e um dreno na sua produtividade. Eu entendi perfeitamente.
 
-**50 sales spreadsheets, monthly reports, manual grind.** Eu sei precisamente onde está o gargalo – e está matando a produtividade da sua equipe. Você não precisa de mais pessoas, precisa de **automação**.
+**Solution:**
+Vou erradicar essa dor de cabeça mensal com um script Python robusto e cirúrgico. Utilizando o poder do `pandas` para agregação de dados ultrarrápida e `openpyxl` para geração de relatórios impecáveis e prontos para uso, transformarei semanas de trabalho em *minutos*. Seus relatórios serão precisos, automatizados e entregues no prazo, sempre.
 
-Minha solução não é mágica; é Python robusto. Vou utilizar **`pandas`** para agregação e análise de dados em velocidade de luz, **`openpyxl`** para extrair dados sem falhas dessas 50 planilhas e scripts personalizados para gerar esses relatórios com erro humano zero. Esqueça copiar e colar; pense em automação à prova de balas.
-
-Seu tempo é dinheiro. Pare de desperdiçá-lo. **Vamos conversar sobre os detalhes – e começar a automatizar.**
+**CTA:**
+Pare de sangrar tempo e dinheiro. Vamos agendar uma ligação *esta semana*. Vou te mostrar exatamente como este pesadelo desaparece.
