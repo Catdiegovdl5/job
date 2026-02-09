@@ -1,5 +1,5 @@
 
 --- [MODO OFFLINE] ---
 ALVO: Automatizar relatórios mensais de 50 planilhas de ...
-ERRO: Falha na conexão API.
+ERRO: Conexão com IA falhou.
 CTA: "Automação pronta. Vamos conversar?"
