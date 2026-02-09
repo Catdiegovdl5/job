@@ -1,69 +1,204 @@
-
 import time
 import logging
 import subprocess
 import os
+import threading
+import http.server
+import socketserver
+import telebot
+from telebot import types
 from src.proposal_generator import generate_proposal
 from freelancersdk.session import Session
 from freelancersdk.resources.projects.projects import search_projects
 from freelancersdk.resources.projects.helpers import create_search_projects_filter
 
+# Configure Logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger("SentinelReal")
 
-def sync_to_github():
-    logger.info("🚀 Enviando alvos reais para o GitHub...")
+# Telegram Configuration
+TG_TOKEN = os.environ.get("TG_TOKEN")
+CHAT_ID = os.environ.get("TG_CHAT_ID")
+
+bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
+
+# Memory Handling
+SEEN_FILE = "seen_projects.txt"
+
+def load_seen_projects():
+    if not os.path.exists(SEEN_FILE):
+        return set()
     try:
-        subprocess.run("git add output/*.txt", shell=True)
-        subprocess.run("git commit -m 'Sniper Report: Alvos Reais Localizados'", shell=True)
+        with open(SEEN_FILE, "r") as f:
+            return set(line.strip() for line in f if line.strip())
+    except:
+        return set()
+
+def save_seen_project(project_id):
+    try:
+        with open(SEEN_FILE, "a") as f:
+            f.write(f"{project_id}\n")
+    except Exception as e:
+        logger.error(f"⚠️ Failed to save seen project: {e}")
+
+def sync_to_github():
+    logger.info("🚀 Syncing to GitHub...")
+    try:
+        subprocess.run("git add output/*.txt seen_projects.txt", shell=True)
+        subprocess.run("git commit -m 'Sniper Report: Sync'", shell=True)
         subprocess.run("git push origin main", shell=True)
-        logger.info("✅ Sincronização concluída!")
+        logger.info("✅ Sync complete!")
     except Exception as e:
         logger.warning(f"⚠️ Git Sync: {e}")
 
+# HTTP Server for Render Port Binding
+PORT = int(os.environ.get("PORT", 8080))
+
+class HealthCheckHandler(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'text/plain')
+        self.end_headers()
+        self.wfile.write(b"JULES Sniper S-Tier: ONLINE")
+
+def start_server():
+    logger.info(f"🌍 Starting Health Check Server on port {PORT}")
+    socketserver.TCPServer.allow_reuse_address = True
+    try:
+        with socketserver.TCPServer(("", PORT), HealthCheckHandler) as httpd:
+            httpd.serve_forever()
+    except Exception as e:
+        logger.error(f"❌ HTTP Server Error: {e}")
+
+# Radar Logic
 def process_radar():
+    if not bot:
+        logger.error("❌ Bot not initialized. Skipping radar.")
+        return
+
     token = os.environ.get("FLN_OAUTH_TOKEN")
+    if not token:
+        logger.error("❌ FLN_OAUTH_TOKEN missing.")
+        return
+
     if not os.path.exists("output"): os.makedirs("output")
 
-    logger.info("📡 CONECTANDO AO RADAR DO FREELANCER.COM...")
+    logger.info("📡 Scanning Freelancer.com Radar...")
     
     try:
         session = Session(oauth_token=token, url="https://www.freelancer.com")
         
-        # Filtro de Busca: Projetos de Python, Scraping e Automação
         query = "python scraping automation"
         search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
         
         result = search_projects(session, query=query, search_filter=search_filter)
         
         if result and 'projects' in result:
-            projects = result['projects'][:3] # Analisar os 3 mais recentes
-            logger.info(f"🎯 {len(projects)} ALVOS REAIS ENCONTRADOS!")
+            projects = result['projects'][:5] # Check top 5
+            seen = load_seen_projects()
             
-            for i, p in enumerate(projects):
+            new_count = 0
+            for p in projects:
+                project_id = str(p.get('id'))
+                if project_id in seen:
+                    continue
+
                 title = p.get('title')
                 desc = p.get('preview_description')
-                project_id = p.get('id')
+                link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
+                budget = f"{p.get('currency', {}).get('code')} {p.get('budget', {}).get('minimum')} - {p.get('budget', {}).get('maximum')}"
                 
-                logger.info(f"--------------------------------------------------")
-                logger.info(f"🎯 ALVO REAL: {title}")
+                logger.info(f"🎯 NEW TARGET: {title}")
                 
-                # Inteligência Artificial escrevendo a proposta
-                proposal = generate_proposal("freelancer", f"{title}: {desc}", use_ai=True)
-                
+                # Generate Proposal (AI)
+                try:
+                    proposal = generate_proposal("freelancer", f"{title}: {desc}", use_ai=True)
+                except Exception as e:
+                    logger.error(f"⚠️ AI Gen Error: {e}")
+                    proposal = "AI Generation Failed."
+
+                # Save locally
                 filename = f"output/REAL_JOB_{project_id}.txt"
                 with open(filename, "w", encoding="utf-8") as f_out:
-                    f_out.write(f"ID: {project_id}\nTITLE: {title}\n\n{proposal}")
+                    f_out.write(f"ID: {project_id}\nTITLE: {title}\nLINK: {link}\nBUDGET: {budget}\n\n{proposal}")
                 
-                logger.info(f"✅ Proposta salva: {filename}")
-                time.sleep(15) # Evitar 429 na IA
+                # Update Memory
+                save_seen_project(project_id)
+                new_count += 1
                 
-            sync_to_github()
-        else:
-            logger.info("⏳ Nenhum projeto novo encontrado no radar. Tentando novamente em breve.")
+                # Send to Telegram
+                if CHAT_ID:
+                    markup = types.InlineKeyboardMarkup()
+                    btn_send = types.InlineKeyboardButton("🚀 Enviar", callback_data=f"send_{project_id}")
+                    btn_ignore = types.InlineKeyboardButton("❌ Recusar", callback_data=f"ignore_{project_id}")
+                    markup.add(btn_send, btn_ignore)
+
+                    msg = f"🎯 *ALVO DETECTADO*\n\n*Title:* {title}\n*Budget:* {budget}\n\n[View Project]({link})"
+                    try:
+                        bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=markup)
+                    except Exception as e:
+                        logger.error(f"⚠️ Telegram Send Error: {e}")
+
+                time.sleep(15) # Rate limit to avoid API bans
+
+            if new_count > 0:
+                sync_to_github()
+            else:
+                logger.info("⏳ No new targets.")
 
     except Exception as e:
-        logger.error(f"❌ Falha no Radar Real: {e}")
+        logger.error(f"❌ Radar Error: {e}")
+
+def monitor_radar():
+    while True:
+        process_radar()
+        logger.info("💤 Sleeping 15 minutes...")
+        time.sleep(900)
+
+# Bot Handlers
+if bot:
+    @bot.callback_query_handler(func=lambda call: True)
+    def callback_query(call):
+        try:
+            if call.data.startswith("ignore_"):
+                project_id = call.data.split("_")[1]
+                logger.info(f"❌ Project {project_id} ignored by user.")
+                bot.answer_callback_query(call.id, "Projeto ignorado.")
+                bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+            elif call.data.startswith("send_"):
+                project_id = call.data.split("_")[1]
+                logger.info(f"🚀 Project {project_id} approved for sending.")
+                bot.answer_callback_query(call.id, "Proposta enviada! (Simulado)")
+                bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
+        except Exception as e:
+            logger.error(f"⚠️ Callback Error: {e}")
 
 if __name__ == "__main__":
-    process_radar()
+    # Start HTTP Server Thread
+    server_thread = threading.Thread(target=start_server, daemon=True)
+    server_thread.start()
+
+    # Start Radar Thread
+    radar_thread = threading.Thread(target=monitor_radar, daemon=True)
+    radar_thread.start()
+
+    # Start Bot Polling (Main Loop)
+    if bot:
+        logger.info("🤖 Jules Sniper S-Tier: ONLINE")
+        if CHAT_ID:
+            try:
+                bot.send_message(CHAT_ID, "🦅 *Jules Sniper S-Tier: ONLINE*\nReady to hunt.", parse_mode="Markdown")
+            except Exception as e:
+                logger.warning(f"⚠️ Startup Msg Failed: {e}")
+        try:
+            bot.infinity_polling()
+        except Exception as e:
+            logger.error(f"❌ Polling Error: {e}")
+            # If polling fails, keep the script alive for the HTTP server
+            while True:
+                time.sleep(60)
+    else:
+        logger.error("❌ Bot not configured. Exiting.")
+        # Keep alive for HTTP server even if bot fails?
+        while True:
+            time.sleep(60)
