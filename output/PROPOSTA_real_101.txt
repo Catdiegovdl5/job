@@ -1,25 +1,5 @@
-## PROPOSTA: Automação de Cotação de Notebooks
 
-**[HOOK]**
-
-**Pegar preços diários de notebooks não é um desafio, é uma rotina. Você precisa de dados precisos e diários, não de desculpas ou de scripts amadores.** Entendi o que precisa ser feito.
-
-**[SOLUTION – TECNOLOGIA DEFINITIVA]**
-
-A solução será robusta, escalável e entregue para rodar em produção. Não farei um protótipo; farei um produto.
-
-Em no máximo **48 horas úteis** após o aceite do escopo, o seu bot estará pronto. Usaremos o stack que garante performance e resiliência:
-
-1.  **Scrapy/BeautifulSoup:** Para estruturar o pipeline de coleta de dados e garantir a velocidade da extração.
-2.  **Playwright/Selenium:** Para contornar proteções anti-bot, capturar dados de sites pesados em JavaScript e simular comportamento humano.
-3.  **Pandas:** Para o tratamento, limpeza e entrega final dos dados em formatos prontos para consumo (CSV, JSON ou API).
-
-**O seu problema é de execução. Eu executo.**
-
-**[CTA – AÇÃO IMEDIATA]**
-
-Não gaste tempo com testes ou negociações longas. **Me envie a lista exata dos marketplaces e o formato final de entrega dos dados AGORA.**
-
-Seu bot estará rodando antes que a concorrência saiba o que está acontecendo. Fale comigo, ou continue perdendo tempo.
-
-**Respondo em 5 minutos.**
+--- [MODO MANUAL] ---
+ALVO: Preciso de um bot que pegue preços diários de notebooks.
+ERRO: IA Indisponível.
+RECOMENDAÇÃO: Enviar proposta template manual.
