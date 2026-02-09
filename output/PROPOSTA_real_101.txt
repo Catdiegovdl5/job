@@ -1,5 +1,5 @@
 
---- [MODO OFFLINE] ---
+--- [MODO MANUAL - SEGURANÇA] ---
 ALVO: Preciso de um bot que pegue preços diários de note...
-ERRO: Conexão com IA falhou.
-CTA: "Automação pronta. Vamos conversar?"
+STATUS: O Google bloqueou a automação temporariamente.
+AÇÃO: Copiar e colar esta proposta manualmente.

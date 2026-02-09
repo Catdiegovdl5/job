@@ -1,5 +1,5 @@
 
---- [MODO OFFLINE] ---
+--- [MODO MANUAL - SEGURANÇA] ---
 ALVO: Extrair contatos de CEOs de imobiliárias em SP....
-ERRO: Conexão com IA falhou.
-CTA: "Automação pronta. Vamos conversar?"
+STATUS: O Google bloqueou a automação temporariamente.
+AÇÃO: Copiar e colar esta proposta manualmente.
