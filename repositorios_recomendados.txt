@@ -1,0 +1,55 @@
+# Repositórios Recomendados para o Ecossistema Sentinel
+
+Este documento lista repositórios open-source selecionados para acelerar o desenvolvimento do Sentinel, focando em automação de leads, inteligência artificial e execução de tarefas nos "Nichos de Ouro".
+
+---
+
+## 1. Aquisição de Leads (Freelancer.com & Upwork)
+
+### Nome: Freelancer.com SDK Python (Oficial)
+- **URL:** https://github.com/freelancer/freelancer-sdk-python
+- **Descrição:** Biblioteca oficial para interagir com a API do Freelancer.com. Essencial para buscar projetos de forma segura e estruturada, evitando bloqueios comuns de scraping direto. Permite filtrar por orçamento, habilidades e status.
+
+### Nome: Upwork Scraper (TrueMan777)
+- **URL:** https://github.com/TrueMan777/upwork_scraper
+- **Descrição:** Um scraper robusto para Upwork que utiliza Selenium-driverless (indetectável). Permite buscar jobs com critérios específicos e salvar em JSON/CSV. Ideal para expandir o alcance do Sentinel para além do Freelancer.com.
+
+---
+
+## 2. Inteligência Artificial (Gemini & Prompts)
+
+### Nome: Google Generative AI SDK (Oficial)
+- **URL:** https://github.com/googleapis/python-genai
+- **Descrição:** A biblioteca oficial do Google para Python. É a base para conectar o Sentinel ao modelo Gemini (1.5 Flash/Pro). Garante acesso às últimas features e melhor performance de conexão.
+
+### Nome: Prompt Template (Goldziher)
+- **URL:** https://github.com/Goldziher/prompt-template
+- **Descrição:** Uma biblioteca extremamente leve (zero dependências) para gerenciar templates de prompts. Permite criar estruturas reutilizáveis e dinâmicas para suas propostas ("Turbo Core"), facilitando a manutenção e a troca de estratégias sem mexer no código principal.
+
+---
+
+## 3. Execução "Golden Niches" (Scraping & Automação)
+
+### Nome: Playwright Python (Microsoft)
+- **URL:** https://github.com/microsoft/playwright-python
+- **Descrição:** A ferramenta definitiva para automação web moderna e confiável. Diferente do Selenium, é mais rápido e lida melhor com sites dinâmicos (React/Vue). Perfeito para os projetos de "Web Scraping" que você venderá.
+
+### Nome: DomHarvest Playwright Template
+- **URL:** https://github.com/domharvest/domharvest-playwright
+- **Descrição:** Um template "production-ready" para scrapers com Playwright. Já vem com estrutura para tratamento de erros, extração de dados e organização de código. Acelera muito o início de novos projetos de scraping para clientes.
+
+### Nome: xlwings (Excel Automation)
+- **URL:** https://github.com/xlwings/xlwings
+- **Descrição:** A ponte definitiva entre Python e Excel. Permite substituir macros VBA complexas por Python limpo. Essencial para os projetos de "Automação de Planilhas" de alto valor. Permite que você entregue planilhas "turbinadas" com Python embutido.
+
+### Nome: TinyWorkflow
+- **URL:** https://github.com/scionoftech/tinyworkflow
+- **Descrição:** Um orquestrador de workflows leve e focado em aprendizado/simplicidade. Ótimo para gerenciar sequências de tarefas complexas (ex: "Buscar Lead -> Gerar Proposta -> Enviar Telegram") sem a complexidade de ferramentas pesadas como Airflow.
+
+---
+
+## 4. Infraestrutura (Telegram Commander)
+
+### Nome: Aiogram Bot Template
+- **URL:** https://github.com/welel/aiogram-bot-template
+- **Descrição:** Um template moderno e assíncrono para bots de Telegram usando a biblioteca `aiogram`. Já vem configurado com estrutura de handlers, middlewares e estados. Ideal para construir o seu "Telegram Commander" de forma rápida e profissional.
