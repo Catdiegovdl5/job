@@ -1,0 +1,9 @@
+PROJETO ORIGINAL: Tenho uma planilha de Excel com 50.000 linhas de vendas bagunçadas. Preciso limpar duplicatas, padronizar nomes e criar um gráfico de vendas por mês.
+
+--------------------
+
+
+--- [MODO MANUAL] ---
+ALVO: Tenho uma planilha de Excel com 50.000 linhas de vendas bagunçadas. Preciso limpar duplicatas, padronizar nomes e criar um gráfico de vendas por mês.
+ERRO: IA Indisponível.
+RECOMENDAÇÃO: Enviar proposta template manual.

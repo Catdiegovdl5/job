@@ -1,0 +1,9 @@
+PROJETO ORIGINAL: I need a Telegram Bot that automatically forwards messages from a private channel to a public group. It must handle images and videos, not just text.
+
+--------------------
+
+
+--- [MODO MANUAL] ---
+ALVO: I need a Telegram Bot that automatically forwards messages from a private channel to a public group. It must handle images and videos, not just text.
+ERRO: IA Indisponível.
+RECOMENDAÇÃO: Enviar proposta template manual.
