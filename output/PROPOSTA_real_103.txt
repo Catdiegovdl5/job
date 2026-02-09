@@ -1,10 +1,5 @@
-**Assunto:** Chega de Afogar em Planilhas: Automação Python AGORA.
 
-**Hook:**
-Você está perdendo horas valiosas, talvez dias, *todo mês*, afogado em 50 planilhas de vendas para montar um relatório manual. Isso não é "trabalho"; é um *custo* insuportável e um dreno na sua produtividade. Eu entendi perfeitamente.
-
-**Solution:**
-Vou erradicar essa dor de cabeça mensal com um script Python robusto e cirúrgico. Utilizando o poder do `pandas` para agregação de dados ultrarrápida e `openpyxl` para geração de relatórios impecáveis e prontos para uso, transformarei semanas de trabalho em *minutos*. Seus relatórios serão precisos, automatizados e entregues no prazo, sempre.
-
-**CTA:**
-Pare de sangrar tempo e dinheiro. Vamos agendar uma ligação *esta semana*. Vou te mostrar exatamente como este pesadelo desaparece.
+--- [MODO MANUAL] ---
+ALVO: Automatizar relatórios mensais de 50 planilhas de vendas.
+ERRO: IA Indisponível.
+RECOMENDAÇÃO: Enviar proposta template manual.

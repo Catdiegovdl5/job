@@ -1,7 +1,5 @@
-Subject: SP Real Estate CEO Contacts? Consider it Done.
 
-You need high-value contacts: CEOs of real estate firms in São Paulo. Yesterday. Don't waste another second.
-
-I'll deploy a custom, high-efficiency Python stack: `Selenium` for dynamic targets, `BeautifulSoup` for surgical data extraction, and `pandas` to deliver clean, actionable lists. No amateur work, just data.
-
-Stop reading proposals. Start getting contacts. My calendar is open for serious inquiries.
+--- [MODO MANUAL] ---
+ALVO: Extrair contatos de CEOs de imobiliárias em SP.
+ERRO: IA Indisponível.
+RECOMENDAÇÃO: Enviar proposta template manual.
