@@ -1,5 +1,5 @@
 
---- [MODO DE SEGURANÇA - SIMULAÇÃO] ---
+--- [FALHA NA IA - MODO SIMULAÇÃO] ---
 ALVO: Automatizar relatórios mensais de 50 planilhas de ...
-ERRO: API falhou ou chave inválida.
-CTA: "Vamos agendar uma call?"
+ERRO: API não respondeu.
+CTA: "Automação pronta. Vamos conversar?"
