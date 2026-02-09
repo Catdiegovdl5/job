@@ -1,91 +1,36 @@
-import argparse
-import sys
 
-def generate_proposal(platform, description, questions=None):
-    """
-    Generates a proposal based on the platform and project description.
+def generate_simulation_proposal(description):
+    return f"""
+--- [MODO SIMULAÇÃO S-TIER ATIVO] ---
+ALVO: {description[:50]}...
 
-    Arsenal:
-    - Video: Pipeline Veo 3 + Nano Banana (Fidelidade 4K) + ElevenLabs (Sound Design).
-    - Traffic: CAPI (Conversions API) + GTM Server-Side + Estratégia de Atribuição Avançada.
-    - SEO: GEO (Generative Engine Optimization) + AEO (Answer Engine Optimization) + Knowledge Graph @graph.
-    - Content: Técnica Nugget (Answer-First) + Information Gain (E-E-A-T).
-    """
-    arsenal = {
-        "video": "Pipeline Veo 3 + Nano Banana (Fidelidade 4K) + ElevenLabs (Sound Design)",
-        "traffic": "CAPI (Conversions API) + GTM Server-Side + Estratégia de Atribuição Avançada",
-        "seo": "GEO (Generative Engine Optimization) + AEO (Answer Engine Optimization) + Knowledge Graph @graph",
-        "content": "Técnica Nugget (Answer-First) + Information Gain (E-E-A-T)"
-    }
+1. O GANCHO TÉCNICO (The Hook):
+Identificamos a necessidade de automação robusta. Usaremos Playwright para evitar detecção.
 
-    platform = platform.lower().strip()
-    proposal = []
+2. PROVA DE CÓDIGO:
+import asyncio
+from playwright.async_api import async_playwright
+# Lógica Stealth ativada para este alvo.
 
-    if "freelancer" in platform:
-        proposal.append("### Proposal for Freelancer.com (Focus: Speed & Technical)")
-        proposal.append("Language: English\n")
-        proposal.append("Hello,")
-        proposal.append(f"I have reverse-engineered your project: '{description}'.")
-        proposal.append("Here is the technical roadmap to solve your pain points immediately:\n")
-        proposal.append("| Phase | Milestone | Deliverable |")
-        proposal.append("|-------|-----------|-------------|")
-        proposal.append("| 1 | Technical Audit & Reverse Engineering | Gap Analysis |")
-        proposal.append("| 2 | Arsenal Integration (Video/Traffic/SEO) | Technical Solution |")
-        proposal.append("| 3 | Performance Scaling & ROI Tracking | Performance Report |\n")
-        proposal.append("Technical Stack:")
-        proposal.append(f"- Video: {arsenal['video']}")
-        proposal.append(f"- Traffic: {arsenal['traffic']}")
-        proposal.append(f"- SEO: {arsenal['seo']}")
-        proposal.append(f"- Content: {arsenal['content']}\n")
-        proposal.append("Test Keywords: [REVERSE-ENGINEERING], [4K-PIPELINE], [CAPI-OPTIMIZATION].")
+3. ROADMAP:
+Fase 1: Setup & Bypass | Fase 2: Extração | Fase 3: Deploy.
 
-    elif "99freelas" in platform:
-        proposal.append("### Proposta para 99Freelas (Foco: ROI & Consultoria)")
-        proposal.append("Idioma: Português\n")
-        proposal.append("Olá,")
-        proposal.append(f"Analisei seu projeto '{description}' e identifiquei os gargalos que estão travando seus resultados.")
-        proposal.append("Minha abordagem foca em ROI real e consultoria estratégica, não apenas execução técnica.\n")
-        proposal.append("Sugiro começarmos com um **Projeto Piloto** focado em validação rápida.")
-        proposal.append("\nNosso Arsenal Técnico Diferenciado:")
-        proposal.append(f"- Vídeo: {arsenal['video']}")
-        proposal.append(f"- Tráfego: {arsenal['traffic']}")
-        proposal.append(f"- SEO: {arsenal['seo']}")
-        proposal.append(f"- Conteúdo: {arsenal['content']}\n")
-        proposal.append("Podemos agendar uma conversa para eu te mostrar como aplicaremos isso no seu caso?")
+ROI: Redução estimada de 90% no esforço manual.
+CTA: "Ambiente pronto para teste. Vamos conversar?"
+"""
 
-    elif "upwork" in platform:
-        proposal.append("### Proposal for Upwork (Focus: Seniority & Case Studies)")
-        proposal.append("Language: English\n")
-        proposal.append("Dear Hiring Manager,")
-        proposal.append(f"After reviewing your project description ('{description}'), I've applied a reverse-engineering lens to identify the core business objectives.")
-        proposal.append("My senior approach ensures that every technical decision is backed by ROI and high-fidelity standards.\n")
-        proposal.append("Strategy Highlights:")
-        proposal.append(f"- High-Fidelity Production: {arsenal['video']}")
-        proposal.append(f"- Data Attribution: {arsenal['traffic']}")
-        proposal.append(f"- Generative Search Dominance: {arsenal['seo']}")
-        proposal.append(f"- Authority Building: {arsenal['content']}\n")
-
-        if questions:
-            proposal.append("#### Screening Questions:")
-            for i, q in enumerate(questions):
-                proposal.append(f"Q{i+1}: {q}")
-                proposal.append(f"A: [Detailed technical response addressing '{q}' using {arsenal['traffic']} and {arsenal['seo']} principles.]\n")
-
-        proposal.append("I have successfully implemented similar strategies in past cases. Looking forward to discussing how we can replicate those results for you.")
-
-    else:
-        return "Error: Unsupported platform. Use 'freelancer', '99freelas', or 'upwork'."
-
-    return "\n".join(proposal)
-
-def main():
-    parser = argparse.ArgumentParser(description='Generate S-Tier Proposals')
-    parser.add_argument('--platform', required=True, help='Platform: freelancer, 99freelas, upwork')
-    parser.add_argument('--description', required=True, help='Project description')
-    parser.add_argument('--questions', nargs='*', help='Screening questions (for Upwork)')
-
-    args = parser.parse_args()
-    print(generate_proposal(args.platform, args.description, args.questions))
-
-if __name__ == "__main__":
-    main()
+def generate_proposal(platform, description, questions=None, use_ai=False):
+    # Tenta carregar IA, se falhar ou não tiver chave, vai para Simulação
+    try:
+        from src.ai_client import JulesAI
+        from src.config import GEMINI_API_KEY
+        
+        if use_ai and GEMINI_API_KEY:
+            ai = JulesAI()
+            # Prompt simplificado para o teste
+            prompt = f"Gere uma proposta para: {description}"
+            return ai.generate_content(prompt)
+    except Exception:
+        pass
+        
+    return generate_simulation_proposal(description)
