@@ -13,7 +13,7 @@ from freelancersdk.resources.projects.helpers import create_search_projects_filt
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV16")
+logger = logging.getLogger("JulesV17")
 
 # Credenciais
 TG_TOKEN = os.environ.get("TG_TOKEN")
@@ -24,13 +24,14 @@ GROQ_KEY = os.environ.get("GROQ_API_KEY")
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
 client = Groq(api_key=GROQ_KEY) if GROQ_KEY else None
 
-# Memória temporária
-propostas_cache = {}
+# RASTREADOR DE MENSAGENS (Para apagar o par: Botão + Texto)
+# Formato: {'project_id': [msg_id_painel, msg_id_texto]}
+message_tracker = {}
 
 def gerar_proposta_groq(titulo, desc):
     if not client: return "⚠️ Configure GROQ_API_KEY."
     try:
-        # PROMPT OTIMIZADO V16
+        # Prompt V16 (Otimizado: Curto e sem placeholders)
         prompt = (
             f"Write a professional, persuasive bid for project: '{titulo}'. "
             f"Description: {desc}. "
@@ -60,7 +61,7 @@ def criar_painel_controle(project_id, link):
 
 def scan_radar():
     if not bot or not FLN_TOKEN: return
-    logger.info("📡 Varredura V16 (Texto Curto) iniciada...")
+    logger.info("📡 Varredura V17 (Limpeza Automática) iniciada...")
     
     try:
         session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
@@ -70,25 +71,34 @@ def scan_radar():
         
         if result and 'projects' in result:
             for p in result['projects'][:2]:
-                pid = p.get('id')
+                pid = str(p.get('id'))
+                
+                # Evita duplicar se já processamos (opcional, mas bom pra evitar spam)
+                if pid in message_tracker: continue
+
                 if p.get('budget', {}).get('minimum', 0) < 15: continue
                 
                 title = p.get('title')
                 desc = p.get('preview_description', '')
                 link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
                 
-                # Gera proposta
                 texto_proposta = gerar_proposta_groq(title, desc)
                 
-                msg = (
+                msg_painel_texto = (
                     f"🎯 *ALVO NA MIRA*\n\n"
                     f"📝 *Projeto:* {title}\n"
                     f"💰 *Valor:* {p.get('budget', {}).get('minimum')} USD\n\n"
                     f"👇 *Escolha uma ação:*"
                 )
                 
-                bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
-                bot.send_message(CHAT_ID, f"```\n{texto_proposta}\n```", parse_mode="Markdown")
+                # 1. Envia Painel e guarda o objeto da mensagem
+                sent_painel = bot.send_message(CHAT_ID, msg_painel_texto, parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
+                
+                # 2. Envia Proposta e guarda o objeto da mensagem
+                sent_proposta = bot.send_message(CHAT_ID, f"```\n{texto_proposta}\n```", parse_mode="Markdown")
+                
+                # 3. Salva os DOIS IDs no rastreador
+                message_tracker[pid] = [sent_painel.message_id, sent_proposta.message_id]
                 
                 time.sleep(5) 
                 
@@ -102,12 +112,36 @@ def callback_handler(call):
         action, pid = call.data.split("_")
         
         if action == "approve":
-            bot.answer_callback_query(call.id, "✅ Copie o texto abaixo e envie!")
-            bot.edit_message_text(f"✅ *APROVADO*\n(Copie a proposta abaixo e envie)", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
+            bot.answer_callback_query(call.id, "✅ Aprovado! Copie o texto abaixo.")
+            # Edita o painel para mostrar que foi aprovado
+            bot.edit_message_text(
+                f"✅ *APROVADO*\nProjeto ID: {pid}\n(Texto disponível abaixo)", 
+                chat_id=call.message.chat.id, 
+                message_id=call.message.message_id, 
+                parse_mode="Markdown"
+            )
+            # Removemos do rastreador para não apagar mais tarde sem querer
+            if pid in message_tracker:
+                del message_tracker[pid]
             
         elif action == "ignore":
-            bot.answer_callback_query(call.id, "❌ Descartado")
-            bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+            bot.answer_callback_query(call.id, "❌ Apagando tudo...")
+            
+            # Lógica de Limpeza Dupla
+            if pid in message_tracker:
+                msg_ids = message_tracker[pid]
+                for mid in msg_ids:
+                    try:
+                        bot.delete_message(chat_id=call.message.chat.id, message_id=mid)
+                    except Exception as e:
+                        logger.error(f"Erro ao apagar msg {mid}: {e}")
+                # Remove da memória
+                del message_tracker[pid]
+            else:
+                # Fallback: Se o bot reiniciou e perdeu a memória, apaga pelo menos o botão
+                try:
+                    bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+                except: pass
             
     except Exception as e:
         logger.error(f"Erro botão: {e}")
@@ -127,5 +161,5 @@ if __name__ == "__main__":
     threading.Thread(target=lambda: socketserver.TCPServer(("", PORT), Health).serve_forever(), daemon=True).start()
     threading.Thread(target=monitor, daemon=True).start()
     if bot:
-        logger.info("🤖 Jules V16 ONLINE")
+        logger.info("🤖 Jules V17 ONLINE")
         bot.infinity_polling(timeout=10, long_polling_timeout=5)
