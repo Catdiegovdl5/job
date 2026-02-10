@@ -2,4 +2,4 @@ pyTelegramBotAPI
 freelancersdk
 gunicorn
 requests
-google-generativeai
+groq

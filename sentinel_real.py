@@ -5,7 +5,7 @@ import threading
 import http.server
 import socketserver
 import telebot
-import google.generativeai as genai
+from groq import Groq
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from freelancersdk.session import Session
 from freelancersdk.resources.projects.projects import search_projects
@@ -13,96 +13,83 @@ from freelancersdk.resources.projects.helpers import create_search_projects_filt
 
 # --- CONFIGURAÇÃO ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV13")
+logger = logging.getLogger("JulesGroq")
 
 TG_TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
 FLN_TOKEN = os.environ.get("FLN_OAUTH_TOKEN")
-GEMINI_KEY = os.environ.get("GEMINI_API_KEY")
+GROQ_KEY = os.environ.get("GROQ_API_KEY")
 
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
-
-# Configura o Gemini (Se tiver chave)
-if GEMINI_KEY:
-    try:
-        genai.configure(api_key=GEMINI_KEY)
-        model = genai.GenerativeModel('gemini-1.5-flash') # Modelo mais rápido e barato
-    except:
-        model = None
+client = Groq(api_key=GROQ_KEY) if GROQ_KEY else None
 
 def gerar_proposta_ia(titulo, desc):
-    if not GEMINI_KEY or not model: return "⚠️ Configure a GEMINI_API_KEY no Render para gerar propostas."
+    if not client: return "⚠️ Configure a GROQ_API_KEY no Render."
     
     prompt = f"""
-    Atue como um Freelancer Expert Top 1%.
-    Escreva uma proposta curta e persuasiva (em Inglês) para este projeto:
-    Projeto: {titulo}
-    Descrição: {desc}
+    You are a Top 1% Freelancer. Write a short, punchy bid (in English) for this project:
+    Project: {titulo}
+    Context: {desc}
     
-    A proposta deve ter:
-    1. Saudação profissional.
-    2. Mencionar experiência relevante.
-    3. Call to Action (Chamar para o chat).
-    NÃO coloque placeholders como [Your Name]. Assine como 'Jules'.
+    Structure:
+    1. Professional greeting.
+    2. One sentence on why you are the best fit (mention Python/Automation).
+    3. Call to Action (Let's discuss).
+    Sign as 'Jules'. No placeholders.
     """
     try:
-        response = model.generate_content(prompt)
-        return response.text
+        chat_completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+        )
+        return chat_completion.choices[0].message.content
     except Exception as e:
-        return f"Erro na IA: {e}"
+        return f"Erro no Groq: {e}"
 
-# --- BOTÕES ---
 def criar_botoes(link):
     markup = InlineKeyboardMarkup()
     btn_link = InlineKeyboardButton("🔗 Ver no Site", url=link)
     markup.add(btn_link)
     return markup
 
-# --- RADAR ---
 def scan_fast_cash():
     if not bot or not FLN_TOKEN: return
 
-    logger.info("📡 Varredura V13 (Com IA) iniciada...")
-    search_queries = ["python automation scraping", "market research competitor", "video creation tiktok ai"]
+    logger.info("📡 Varredura Groq iniciada...")
+    # Seus nichos favoritos
+    queries = ["python automation scraping", "market research", "video creation ai"]
 
     try:
         session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
         
-        for query in search_queries:
-            # Busca projetos recentes
+        for q in queries:
             search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
-            result = search_projects(session, query=query, search_filter=search_filter)
+            result = search_projects(session, query=q, search_filter=search_filter)
 
             if result and 'projects' in result:
-                for p in result['projects'][:2]: # Pega só os 2 mais recentes
-                    
+                for p in result['projects'][:2]:
                     min_b = p.get('budget', {}).get('minimum')
                     curr = p.get('currency', {}).get('code', 'UNK')
                     
-                    # Filtros de dinheiro e moeda
                     if min_b is None or min_b < 15: continue
                     if curr not in ['USD', 'EUR', 'GBP', 'AUD', 'CAD']: continue 
 
                     title = p.get('title')
-                    # Limita a descrição para não estourar o prompt
-                    desc = p.get('preview_description', '')[:400]
+                    desc = p.get('preview_description', '')[:300]
                     link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
 
-                    # 🧠 GERA A PROPOSTA AUTOMATICAMENTE
-                    logger.info(f"🧠 Gerando proposta para: {title}")
+                    logger.info(f"⚡ Groq gerando proposta para: {title}")
                     proposta = gerar_proposta_ia(title, desc)
 
                     msg = (
-                        f"🚀 *NOVO ALVO + PROPOSTA*\n\n"
+                        f"🚀 *ALVO DETECTADO*\n\n"
                         f"📝 *Projeto:* {title}\n"
                         f"💰 *Valor:* {min_b} {curr}\n\n"
-                        f"🤖 *PROPOSTA SUGERIDA (Copie Abaixo):*\n"
-                        f"```\n{proposta}\n```"
+                        f"⚡ *PROPOSTA GROQ:*\n```\n{proposta}\n```"
                     )
 
                     bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=criar_botoes(link))
-                    time.sleep(3) # Pausa para a IA pensar e não travar
-            
+                    time.sleep(2)
             time.sleep(1)
 
     except Exception as e:
