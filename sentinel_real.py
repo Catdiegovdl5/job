@@ -14,7 +14,7 @@ from freelancersdk.resources.users.users import get_self_user_id
 
 # --- CONFIGURAÇÃO ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesGroq")
+logger = logging.getLogger("JulesElite")
 
 TG_TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
