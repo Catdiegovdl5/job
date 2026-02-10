@@ -1,0 +1,6 @@
+ID: 40217821
+TITLE: Full-Stack Developer for No-Code AI Educational Web App (Peptide Longevity Tool)
+BUDGET_MIN: 1500.0
+LINK: https://www.freelancer.com/projects/ai-development/Full-Stack-Developer-for-Code
+
+I am an expert in Python automation and can deliver this project. I'm looking for an experienced freelancer to build a complete, low-maintenance web-based educational

@@ -1,0 +1,6 @@
+ID: 40212214
+TITLE: Data Verification Automation
+BUDGET_MIN: 150.0
+LINK: https://www.freelancer.com/projects/api-integration/Data-Verification-Automation
+
+I am an expert in Python automation and can deliver this project. I will create a custom Python automation that runs hourly inside a single Docker container on your V

@@ -1,0 +1,6 @@
+ID: 40202365
+TITLE: Daily OTC Financial Report Scraper
+BUDGET_MIN: 30.0
+LINK: https://www.freelancer.com/projects/beautifulsoup/Daily-OTC-Financial-Report-Scraper
+
+I am an expert in Python automation and can deliver this project. I track a long list of OTC tickers and need a hands-off way to grab every historical and new financi
