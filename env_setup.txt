@@ -1,0 +1,17 @@
+# Setup Instructions for Environment Variables
+
+## Linux / macOS (Bash/Zsh)
+export TG_TOKEN="seu_token_do_botfather"
+export TG_CHAT_ID="seu_id_numerico_telegram"
+export FLN_OAUTH_TOKEN="seu_token_freelancer_com"
+export GROQ_API_KEY="sua_chave_groq"
+export GEMINI_API_KEY="sua_chave_gemini"
+export HF_TOKEN="sua_chave_huggingface"
+
+## Windows (PowerShell)
+$env:TG_TOKEN="seu_token_do_botfather"
+$env:TG_CHAT_ID="seu_id_numerico_telegram"
+$env:FLN_OAUTH_TOKEN="seu_token_freelancer_com"
+$env:GROQ_API_KEY="sua_chave_groq"
+$env:GEMINI_API_KEY="sua_chave_gemini"
+$env:HF_TOKEN="sua_chave_huggingface"
