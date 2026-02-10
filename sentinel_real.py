@@ -117,6 +117,7 @@ def process_radar():
                 
                 # Generate Proposal (AI)
                 try:
+                    # Note: use_ai=True removed as per fix request
                     proposal = generate_proposal("freelancer", f"{title}: {desc}")
                 except Exception as e:
                     logger.error(f"⚠️ AI Gen Error: {e}")
