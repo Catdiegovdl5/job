@@ -13,7 +13,7 @@ from freelancersdk.resources.projects.helpers import create_search_projects_filt
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV15")
+logger = logging.getLogger("JulesV16")
 
 # Credenciais
 TG_TOKEN = os.environ.get("TG_TOKEN")
@@ -30,10 +30,17 @@ propostas_cache = {}
 def gerar_proposta_groq(titulo, desc):
     if not client: return "⚠️ Configure GROQ_API_KEY."
     try:
+        # PROMPT OTIMIZADO V16
         prompt = (
             f"Write a professional, persuasive bid for project: '{titulo}'. "
             f"Description: {desc}. "
-            "Output ONLY the bid body. Start with 'Dear Client,'. Sign as 'Jules'."
+            "Constraints: "
+            "1. Output ONLY the bid body. "
+            "2. Start with 'Dear Client,'. "
+            "3. Keep it under 1500 characters. "
+            "4. NEVER use placeholders like '[X]' or brackets. "
+            "5. If budget/timeline is unknown, use generic phrases like 'negotiable' or 'to be discussed'. "
+            "Sign as 'Jules'."
         )
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -45,9 +52,7 @@ def gerar_proposta_groq(titulo, desc):
 
 def criar_painel_controle(project_id, link):
     markup = InlineKeyboardMarkup()
-    # Botão 1: Link
     markup.add(InlineKeyboardButton("🔗 Ver no Site", url=link))
-    # Botão 2 e 3: Ação
     btn_approve = InlineKeyboardButton("✅ Aprovar", callback_data=f"approve_{project_id}")
     btn_reject = InlineKeyboardButton("❌ Ignorar", callback_data=f"ignore_{project_id}")
     markup.row(btn_approve, btn_reject)
@@ -55,7 +60,7 @@ def criar_painel_controle(project_id, link):
 
 def scan_radar():
     if not bot or not FLN_TOKEN: return
-    logger.info("📡 Varredura V15 (Painel de Controle) iniciada...")
+    logger.info("📡 Varredura V16 (Texto Curto) iniciada...")
     
     try:
         session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
@@ -76,15 +81,13 @@ def scan_radar():
                 texto_proposta = gerar_proposta_groq(title, desc)
                 
                 msg = (
-                    f"🎯 *ALVO DETECTADO*\n\n"
+                    f"🎯 *ALVO NA MIRA*\n\n"
                     f"📝 *Projeto:* {title}\n"
                     f"💰 *Valor:* {p.get('budget', {}).get('minimum')} USD\n\n"
                     f"👇 *Escolha uma ação:*"
                 )
                 
-                # Envia Painel
                 bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
-                # Envia Texto Separado (para copiar fácil)
                 bot.send_message(CHAT_ID, f"```\n{texto_proposta}\n```", parse_mode="Markdown")
                 
                 time.sleep(5) 
@@ -92,7 +95,6 @@ def scan_radar():
     except Exception as e:
         logger.error(f"❌ Erro no Radar: {e}")
 
-# OUVINTE DE CLIQUES (AQUI ESTÃO SEUS BOTÕES)
 @bot.callback_query_handler(func=lambda call: True)
 def callback_handler(call):
     try:
@@ -101,7 +103,7 @@ def callback_handler(call):
         
         if action == "approve":
             bot.answer_callback_query(call.id, "✅ Copie o texto abaixo e envie!")
-            bot.edit_message_text(f"✅ *VOCÊ APROVOU ESTE PROJETO*\n(Vá ao site e envie a proposta)", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
+            bot.edit_message_text(f"✅ *APROVADO*\n(Copie a proposta abaixo e envie)", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
             
         elif action == "ignore":
             bot.answer_callback_query(call.id, "❌ Descartado")
@@ -125,5 +127,5 @@ if __name__ == "__main__":
     threading.Thread(target=lambda: socketserver.TCPServer(("", PORT), Health).serve_forever(), daemon=True).start()
     threading.Thread(target=monitor, daemon=True).start()
     if bot:
-        logger.info("🤖 Jules V15 ONLINE")
+        logger.info("🤖 Jules V16 ONLINE")
         bot.infinity_polling(timeout=10, long_polling_timeout=5)
