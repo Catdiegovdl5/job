@@ -1,4 +1,5 @@
-requests
-freelancersdk
 pyTelegramBotAPI
-groq
+freelancersdk
+gunicorn
+requests
+google-generativeai
