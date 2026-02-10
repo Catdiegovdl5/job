@@ -32,16 +32,17 @@ def gerar_proposta_groq(titulo, desc):
     if not client: return "⚠️ Configure GROQ_API_KEY."
     try:
         prompt = (
-            f"Act as an expert Python Automation Architect named Diego. "
-            f"Write a high-converting, professional, and direct bid for this project: '{titulo}'. "
-            f"Project Description: {desc}. "
-            "Guidelines: "
-            "1. Be concise and value-focused. No fluff. "
-            "2. Highlight relevant skills (Python, Scraping, Automation) immediately. "
-            "3. Propose a concrete approach or solution. "
-            "4. Output ONLY the bid text body. "
-            "5. Start with 'Hello,' or 'Hi there,'. "
-            "6. Sign strictly as 'Diego'."
+            f"Aja como um Arquiteto de Automação Python especialista chamado Diego. "
+            f"Escreva uma proposta profissional, direta e de alta conversão para este projeto: '{titulo}'. "
+            f"Descrição do projeto: {desc}. "
+            "Diretrizes Obrigatórias: "
+            "Seja conciso e focado no valor (máximo 1500 caracteres). Sem enrolação ('fluff'). "
+            "Destaque habilidades relevantes (Python, Scraping, Automação) logo na primeira frase. "
+            "Proponha uma abordagem técnica concreta (ex: 'Vou usar Docker', 'Vou criar um script que roda a cada hora'). "
+            "SAÍDA: Apenas o corpo do texto da proposta. Nada mais. "
+            "Comece com 'Hello,' ou 'Hi there,'. "
+            "Assine estritamente como 'Diego'. "
+            "PROIBIDO: Jamais use espaços reservados como [X], [Date] ou colchetes. Se não souber o prazo ou valor, use frases genéricas como 'negotiable' ou 'to be discussed'."
         )
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
