@@ -100,5 +100,8 @@ if __name__ == "__main__":
     
     if bot:
         logger.info("🤖 Jules V13 ONLINE")
-        # Polling infinito
-        bot.infinity_polling(timeout=10, long_polling_timeout=5)
+        try:
+            bot.infinity_polling(timeout=10, long_polling_timeout=5)
+        except Exception as e:
+            logger.error(f"Erro Polling: {e}")
+            time.sleep(5)
