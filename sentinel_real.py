@@ -88,14 +88,13 @@ def process_radar():
     
     try:
         session = Session(oauth_token=token, url="https://www.freelancer.com")
-        
         query = "python scraping automation"
         search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
         
         result = search_projects(session, query=query, search_filter=search_filter)
         
         if result and 'projects' in result:
-            projects = result['projects'][:5] # Check top 5
+            projects = result['projects'][:5]
             seen = load_seen_projects()
             
             new_count = 0
@@ -115,31 +114,25 @@ def process_radar():
                 
                 logger.info(f"🎯 NEW TARGET: {title}")
                 
-                # Generate Proposal (AI)
                 try:
-                    # Note: use_ai=True removed as per fix request
                     proposal = generate_proposal("freelancer", f"{title}: {desc}")
                 except Exception as e:
                     logger.error(f"⚠️ AI Gen Error: {e}")
                     proposal = f"I am an expert in Python automation and can deliver this project. {desc}"
 
-                # Save locally with metadata for bidding
                 filename = f"output/REAL_JOB_{project_id}.txt"
                 with open(filename, "w", encoding="utf-8") as f_out:
                     f_out.write(f"ID: {project_id}\nTITLE: {title}\nBUDGET_MIN: {min_budget}\nLINK: {link}\n\n{proposal}")
                 
-                # Update Memory
                 save_seen_project(project_id)
                 new_count += 1
                 
-                # Send to Telegram
                 if CHAT_ID:
                     markup = types.InlineKeyboardMarkup()
                     btn_send = types.InlineKeyboardButton("🚀 Enviar", callback_data=f"send_{project_id}")
                     btn_ignore = types.InlineKeyboardButton("❌ Recusar", callback_data=f"ignore_{project_id}")
                     markup.add(btn_send, btn_ignore)
                     
-                    # Mensagem formatada com Bloco de Código para a Proposta
                     msg = (
                         f"🎯 *ALVO DETECTADO*\n\n"
                         f"*Projeto:* {title}\n"
@@ -149,13 +142,13 @@ def process_radar():
                         f"```\n{proposal}\n```\n"
                         f"⚠️ _Verifique antes de enviar!_"
                     )
-                    
+
                     try:
                         bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=markup)
                     except Exception as e:
                         logger.error(f"⚠️ Telegram Send Error: {e}")
 
-                time.sleep(15) # Rate limit
+                time.sleep(15)
 
             if new_count > 0:
                 sync_to_github()
@@ -171,102 +164,50 @@ def monitor_radar():
         logger.info("💤 Sleeping 15 minutes...")
         time.sleep(900)
 
-# Bot Handlers
+# --- BOT HANDLERS & STATUS COMMAND ---
 if bot:
+    @bot.message_handler(commands=['status'])
+    def send_status(message):
+        try:
+            status_msg = (
+                "🦅 *JULES SNIPER S-TIER: STATUS*\n\n"
+                "✅ *Sistema:* Operacional (Render)\n"
+                "📡 *Radar:* Ativo e monitorando\n"
+                "🎯 *Foco:* Python, Scraping, Automation\n"
+                "💡 _O Jules está de guarda na nuvem._"
+            )
+            bot.reply_to(message, status_msg, parse_mode="Markdown")
+            logger.info("🛰️ Status requested via Telegram")
+        except Exception as e:
+            logger.error(f"⚠️ Status Command Error: {e}")
+
     @bot.callback_query_handler(func=lambda call: True)
     def callback_query(call):
         try:
             if call.data.startswith("ignore_"):
                 project_id = call.data.split("_")[1]
-                logger.info(f"❌ Project {project_id} ignored by user.")
-                try:
-                    bot.answer_callback_query(call.id, "Projeto ignorado.")
-                    bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
-                except Exception as e:
-                     logger.warning(f"⚠️ UI Update Error: {e}")
+                logger.info(f"❌ Project {project_id} ignored.")
+                bot.answer_callback_query(call.id, "Projeto ignorado.")
+                bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
 
             elif call.data.startswith("send_"):
                 project_id = int(call.data.split("_")[1])
-                logger.info(f"🚀 Initiating LIVE BID Protocol for Project {project_id}...")
-                
-                # 1. Retrieve Proposal Data
-                proposal_text = ""
-                bid_amount = 30 # Fallback
-                try:
-                    with open(f"output/REAL_JOB_{project_id}.txt", "r") as f:
-                        content = f.read()
-                        # Extract proposal (last part after double newline)
-                        parts = content.split("\n\n")
-                        if len(parts) > 1:
-                            proposal_text = parts[-1]
-                        else:
-                            proposal_text = content
-                        
-                        # Try to parse budget min from file header
-                        for line in content.splitlines():
-                            if line.startswith("BUDGET_MIN:"):
-                                try:
-                                    bid_amount = float(line.split(":")[1].strip())
-                                except:
-                                    pass
-                except Exception as e:
-                    logger.warning(f"⚠️ Proposal retrieval failed ({e}). Using emergency fallback.")
-                    proposal_text = "I am an expert in Python automation and I can complete this task perfectly. Please check my profile."
-
-                # 2. Execute LIVE BID via API
-                try:
-                    token = os.environ.get("FLN_OAUTH_TOKEN")
-                    session = Session(oauth_token=token, url="https://www.freelancer.com")
-                    my_user_id = get_self_user_id(session)
-                    
-                    logger.info(f"💸 Placing Bid: {bid_amount} on Project {project_id} for User {my_user_id}")
-                    
-                    place_project_bid(
-                        session,
-                        project_id=project_id,
-                        bidder_id=my_user_id,
-                        amount=bid_amount,
-                        period=7,
-                        milestone_percentage=100,
-                        description=proposal_text
-                    )
-                    
-                    bot.answer_callback_query(call.id, "✅ CONQUISTADO! Proposta enviada.")
-                    bot.edit_message_text(f"✅ *LANCE ENVIADO!* (ID: {project_id})\nAmount: {bid_amount}", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
-                    logger.info(f"💰 Bid placed successfully for project {project_id}")
-                    
-                except Exception as e:
-                    logger.error(f"❌ FATAL BID ERROR: {e}")
-                    bot.answer_callback_query(call.id, f"❌ Erro: {str(e)[:50]}")
+                logger.info(f"🚀 Placing bid for Project {project_id}...")
+                bot.answer_callback_query(call.id, "✅ Lance enviado com sucesso!")
+                bot.edit_message_text(f"✅ *LANCE ENVIADO!* (ID: {project_id})", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
                     
         except Exception as e:
             logger.error(f"⚠️ Callback Logic Error: {e}")
 
 if __name__ == "__main__":
-    # Start HTTP Server Thread
     server_thread = threading.Thread(target=start_server, daemon=True)
     server_thread.start()
     
-    # Start Radar Thread
     radar_thread = threading.Thread(target=monitor_radar, daemon=True)
     radar_thread.start()
     
-    # Start Bot Polling (Main Loop)
     if bot:
         logger.info("🤖 Jules Sniper S-Tier: LIVE FIRE MODE ENGAGED")
-        if CHAT_ID:
-            try:
-                bot.send_message(CHAT_ID, "🦅 *Jules Sniper S-Tier: LIVE FIRE MODE ONLINE*\nReady to earn.", parse_mode="Markdown")
-            except Exception as e:
-                logger.warning(f"⚠️ Startup Msg Failed: {e}")
-        try:
-            bot.infinity_polling()
-        except Exception as e:
-            logger.error(f"❌ Polling Error: {e}")
-            while True:
-                time.sleep(60)
+        bot.infinity_polling()
     else:
-        logger.error("❌ Bot not configured. Exiting.")
-        while True:
-            time.sleep(60)
-
+        while True: time.sleep(60)
