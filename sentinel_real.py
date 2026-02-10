@@ -13,7 +13,7 @@ from freelancersdk.resources.projects.helpers import create_search_projects_filt
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV14")
+logger = logging.getLogger("JulesV15")
 
 # Credenciais
 TG_TOKEN = os.environ.get("TG_TOKEN")
@@ -24,15 +24,16 @@ GROQ_KEY = os.environ.get("GROQ_API_KEY")
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
 client = Groq(api_key=GROQ_KEY) if GROQ_KEY else None
 
+# Memória temporária para guardar propostas antes de enviar
+propostas_cache = {}
+
 def gerar_proposta_groq(titulo, desc):
-    if not client: return "⚠️ Configure a GROQ_API_KEY no Render."
+    if not client: return "⚠️ Configure GROQ_API_KEY."
     try:
-        # Prompt ajustado para ser DIRETO (sem enrolação)
         prompt = (
-            f"Act as a top-tier freelancer. Write a professional, persuasive bid for this project: '{titulo}'. "
+            f"Write a professional, persuasive bid for project: '{titulo}'. "
             f"Description: {desc}. "
-            "Output ONLY the bid text. Do not write 'Here is the bid'. Start with 'Dear Client,' or similar. "
-            "Sign as 'Jules'."
+            "Output ONLY the bid body. Start with 'Dear Client,'. Sign as 'Jules'."
         )
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -42,15 +43,19 @@ def gerar_proposta_groq(titulo, desc):
     except Exception as e:
         return f"Erro Groq: {e}"
 
-def criar_botao(link):
+def criar_painel_controle(project_id, link):
     markup = InlineKeyboardMarkup()
-    btn = InlineKeyboardButton("🔗 Ver no Site", url=link)
-    markup.add(btn)
+    # Botão 1: Ver no Site
+    markup.add(InlineKeyboardButton("🔗 Ver no Site", url=link))
+    # Botão 2 e 3: Aprovar ou Recusar
+    btn_approve = InlineKeyboardButton("✅ Aprovar Proposta", callback_data=f"approve_{project_id}")
+    btn_reject = InlineKeyboardButton("❌ Ignorar", callback_data=f"ignore_{project_id}")
+    markup.row(btn_approve, btn_reject)
     return markup
 
 def scan_radar():
     if not bot or not FLN_TOKEN: return
-    logger.info("📡 Varredura V14 (Botões Ativos) iniciada...")
+    logger.info("📡 Varredura V15 (Comando Manual) iniciada...")
 
     try:
         session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
@@ -60,30 +65,53 @@ def scan_radar():
 
         if result and 'projects' in result:
             for p in result['projects'][:2]:
-                # Filtro de orçamento ($15+)
+                pid = p.get('id')
                 if p.get('budget', {}).get('minimum', 0) < 15: continue
 
                 title = p.get('title')
                 desc = p.get('preview_description', '')
                 link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
 
-                # Gera proposta
-                proposta = gerar_proposta_groq(title, desc)
+                # Gera proposta e guarda na memória
+                texto_proposta = gerar_proposta_groq(title, desc)
+                propostas_cache[str(pid)] = texto_proposta
 
-                # Monta a mensagem
                 msg = (
-                    f"🚀 *ALVO DETECTADO*\n\n"
+                    f"🎯 *ALVO NA MIRA*\n\n"
                     f"📝 *Projeto:* {title}\n"
                     f"💰 *Valor:* {p.get('budget', {}).get('minimum')} USD\n\n"
-                    f"⚡ *PROPOSTA GROQ:*\n```\n{proposta}\n```"
+                    f"👀 *Analise a proposta abaixo antes de enviar:*"
                 )
 
-                # Envia COM O BOTÃO (AQUI ESTÁ A CORREÇÃO)
-                bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=criar_botao(link))
+                # Envia apenas o alerta primeiro
+                bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
+
+                # Manda a proposta num bloco separado para facilitar leitura
+                bot.send_message(CHAT_ID, f"```\n{texto_proposta}\n```", parse_mode="Markdown")
+
                 time.sleep(5)
 
     except Exception as e:
         logger.error(f"❌ Erro no Radar: {e}")
+
+# Lógica dos Botões
+@bot.callback_query_handler(func=lambda call: True)
+def callback_handler(call):
+    try:
+        pid = call.data.split("_")[1]
+
+        if call.data.startswith("approve_"):
+            # Aqui você poderia automatizar o envio real para o site no futuro
+            # Por enquanto, confirmamos que você copiou
+            bot.answer_callback_query(call.id, "✅ Proposta Aprovada! (Copie e envie no site)")
+            bot.edit_message_text(f"✅ *VOCÊ APROVOU ESTE PROJETO*\nID: {pid}", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
+
+        elif call.data.startswith("ignore_"):
+            bot.answer_callback_query(call.id, "❌ Projeto Descartado")
+            bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+
+    except Exception as e:
+        logger.error(f"Erro botão: {e}")
 
 def monitor():
     while True:
@@ -91,7 +119,6 @@ def monitor():
         logger.info("💤 Dormindo 15min...")
         time.sleep(900)
 
-# Servidor para manter o Render vivo
 PORT = int(os.environ.get("PORT", 10000))
 class Health(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -100,11 +127,6 @@ class Health(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     threading.Thread(target=lambda: socketserver.TCPServer(("", PORT), Health).serve_forever(), daemon=True).start()
     threading.Thread(target=monitor, daemon=True).start()
-
     if bot:
-        logger.info("🤖 Jules V14 ONLINE")
-        try:
-            bot.infinity_polling(timeout=10, long_polling_timeout=5)
-        except Exception as e:
-            logger.error(f"Erro Polling: {e}")
-            time.sleep(5)
+        logger.info("🤖 Jules V15 ONLINE")
+        bot.infinity_polling(timeout=10, long_polling_timeout=5)
