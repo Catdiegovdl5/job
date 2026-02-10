@@ -117,7 +117,7 @@ def process_radar():
                 
                 # Generate Proposal (AI)
                 try:
-                    proposal = generate_proposal("freelancer", f"{title}: {desc}", use_ai=True)
+                    proposal = generate_proposal("freelancer", f"{title}: {desc}")
                 except Exception as e:
                     logger.error(f"⚠️ AI Gen Error: {e}")
                     proposal = f"I am an expert in Python automation and can deliver this project. {desc}"
@@ -138,7 +138,17 @@ def process_radar():
                     btn_ignore = types.InlineKeyboardButton("❌ Recusar", callback_data=f"ignore_{project_id}")
                     markup.add(btn_send, btn_ignore)
 
-                    msg = f"🎯 *ALVO DETECTADO*\n\n*Title:* {title}\n*Budget:* {budget_str}\n\n[View Project]({link})"
+                    # Mensagem formatada com Bloco de Código para a Proposta
+                    msg = (
+                        f"🎯 *ALVO DETECTADO*\n\n"
+                        f"*Projeto:* {title}\n"
+                        f"*Budget:* {budget_str}\n"
+                        f"[Ver no Freelancer]({link})\n\n"
+                        f"📝 *PROPOSTA SUGERIDA:*\n"
+                        f"```\n{proposal}\n```\n"
+                        f"⚠️ _Verifique antes de enviar!_"
+                    )
+
                     try:
                         bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=markup)
                     except Exception as e:
