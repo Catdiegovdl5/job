@@ -1,215 +1,166 @@
 import time
 import logging
-import subprocess
 import os
 import threading
 import http.server
 import socketserver
 import telebot
-from telebot import types
-from src.proposal_generator import generate_proposal
+from groq import Groq
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from freelancersdk.session import Session
 from freelancersdk.resources.projects.projects import search_projects, place_project_bid
 from freelancersdk.resources.projects.helpers import create_search_projects_filter
 from freelancersdk.resources.users.users import get_self_user_id
 
-# Configure Logging
+# --- CONFIGURAÇÃO ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("SentinelReal")
+logger = logging.getLogger("JulesGroq")
 
-# Telegram Configuration
 TG_TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
+FLN_TOKEN = os.environ.get("FLN_OAUTH_TOKEN")
+GROQ_KEY = os.environ.get("GROQ_API_KEY")
 
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
+client = Groq(api_key=GROQ_KEY) if GROQ_KEY else None
 
-# Memory Handling
-SEEN_FILE = "seen_projects.txt"
+# Armazena propostas geradas temporariamente para envio: {project_id: {"proposal": text, "amount": value}}
+PENDING_BIDS = {}
 
-def load_seen_projects():
-    if not os.path.exists(SEEN_FILE):
-        return set()
+def gerar_proposta_ia(titulo, desc):
+    if not client: return "⚠️ Configure a GROQ_API_KEY no Render."
+
+    prompt = f"""
+    You are a Top 1% Freelancer. Write a short, punchy bid (in English) for this project:
+    Project: {titulo}
+    Context: {desc}
+
+    Structure:
+    1. Professional greeting.
+    2. One sentence on why you are the best fit (mention Python/Automation).
+    3. Call to Action (Let's discuss).
+    Sign as 'Jules'. No placeholders.
+    """
     try:
-        with open(SEEN_FILE, "r") as f:
-            return set(line.strip() for line in f if line.strip())
-    except:
-        return set()
-
-def save_seen_project(project_id):
-    try:
-        with open(SEEN_FILE, "a") as f:
-            f.write(f"{project_id}\n")
+        chat_completion = client.chat.completions.create(
+            messages=[{"role": "user", "content": prompt}],
+            model="llama-3.3-70b-versatile",
+        )
+        return chat_completion.choices[0].message.content
     except Exception as e:
-        logger.error(f"⚠️ Failed to save seen project: {e}")
+        return f"Erro no Groq: {e}"
 
-def sync_to_github():
-    logger.info("🚀 Syncing to GitHub...")
+def criar_botoes(project_id, link):
+    markup = InlineKeyboardMarkup()
+    btn_link = InlineKeyboardButton("🔗 Ver no Site", url=link)
+    btn_send = InlineKeyboardButton("🚀 Enviar Proposta", callback_data=f"send_{project_id}")
+    markup.add(btn_link, btn_send)
+    return markup
+
+def scan_fast_cash():
+    if not bot or not FLN_TOKEN: return
+
+    logger.info("📡 Varredura Groq iniciada...")
+    # Seus nichos favoritos
+    queries = ["python automation scraping", "market research", "video creation ai"]
+
     try:
-        subprocess.run("git add output/*.txt seen_projects.txt", shell=True)
-        subprocess.run("git commit -m 'Sniper Report: Sync'", shell=True)
-        subprocess.run("git push origin main", shell=True)
-        logger.info("✅ Sync complete!")
-    except Exception as e:
-        logger.warning(f"⚠️ Git Sync: {e}")
+        session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
 
-# HTTP Server for Render Port Binding
-PORT = int(os.environ.get("PORT", 8080))
+        for q in queries:
+            search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
+            result = search_projects(session, query=q, search_filter=search_filter)
 
-class HealthCheckHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'text/plain')
-        self.end_headers()
-        self.wfile.write(b"JULES Sniper S-Tier: ONLINE")
+            if result and 'projects' in result:
+                for p in result['projects'][:2]:
+                    project_id = p.get('id')
+                    min_b = p.get('budget', {}).get('minimum')
+                    curr = p.get('currency', {}).get('code', 'UNK')
 
-def start_server():
-    logger.info(f"🌍 Starting Health Check Server on port {PORT}")
-    socketserver.TCPServer.allow_reuse_address = True
-    try:
-        with socketserver.TCPServer(("", PORT), HealthCheckHandler) as httpd:
-            httpd.serve_forever()
-    except Exception as e:
-        logger.error(f"❌ HTTP Server Error: {e}")
+                    if min_b is None or min_b < 15: continue
+                    if curr not in ['USD', 'EUR', 'GBP', 'AUD', 'CAD']: continue
 
-# Radar Logic
-def process_radar():
-    if not bot:
-        logger.error("❌ Bot not initialized. Skipping radar.")
-        return
+                    title = p.get('title')
+                    desc = p.get('preview_description', '')[:300]
+                    link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
 
-    token = os.environ.get("FLN_OAUTH_TOKEN")
-    if not token:
-        logger.error("❌ FLN_OAUTH_TOKEN missing.")
-        return
-
-    if not os.path.exists("output"): os.makedirs("output")
-
-    logger.info("📡 Scanning Freelancer.com Radar...")
-    
-    try:
-        session = Session(oauth_token=token, url="https://www.freelancer.com")
-        query = "python scraping automation"
-        search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
-        
-        result = search_projects(session, query=query, search_filter=search_filter)
-        
-        if result and 'projects' in result:
-            projects = result['projects'][:5]
-            seen = load_seen_projects()
-            
-            new_count = 0
-            for p in projects:
-                project_id = str(p.get('id'))
-                if project_id in seen:
-                    continue
-
-                title = p.get('title')
-                desc = p.get('preview_description')
-                link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
-                budget_info = p.get('budget', {})
-                min_budget = budget_info.get('minimum', 30)
-                max_budget = budget_info.get('maximum', 100)
-                currency = p.get('currency', {}).get('code', 'USD')
-                budget_str = f"{currency} {min_budget} - {max_budget}"
-                
-                logger.info(f"🎯 NEW TARGET: {title}")
-                
-                try:
-                    proposal = generate_proposal("freelancer", f"{title}: {desc}")
-                except Exception as e:
-                    logger.error(f"⚠️ AI Gen Error: {e}")
-                    proposal = f"I am an expert in Python automation and can deliver this project. {desc}"
-
-                filename = f"output/REAL_JOB_{project_id}.txt"
-                with open(filename, "w", encoding="utf-8") as f_out:
-                    f_out.write(f"ID: {project_id}\nTITLE: {title}\nBUDGET_MIN: {min_budget}\nLINK: {link}\n\n{proposal}")
-                
-                save_seen_project(project_id)
-                new_count += 1
-                
-                if CHAT_ID:
-                    markup = types.InlineKeyboardMarkup()
-                    btn_send = types.InlineKeyboardButton("🚀 Enviar", callback_data=f"send_{project_id}")
-                    btn_ignore = types.InlineKeyboardButton("❌ Recusar", callback_data=f"ignore_{project_id}")
-                    markup.add(btn_send, btn_ignore)
+                    logger.info(f"⚡ Groq gerando proposta para: {title}")
+                    proposta = gerar_proposta_ia(title, desc)
                     
+                    # Salva dados para o callback usar
+                    PENDING_BIDS[str(project_id)] = {
+                        "proposal": proposta,
+                        "amount": min_b,
+                        "currency": curr,
+                        "title": title
+                    }
+
                     msg = (
-                        f"🎯 *ALVO DETECTADO*\n\n"
-                        f"*Projeto:* {title}\n"
-                        f"*Budget:* {budget_str}\n"
-                        f"[Ver no Freelancer]({link})\n\n"
-                        f"📝 *PROPOSTA SUGERIDA:*\n"
-                        f"```\n{proposal}\n```\n"
-                        f"⚠️ _Verifique antes de enviar!_"
+                        f"🚀 *ALVO DETECTADO*\n\n"
+                        f"📝 *Projeto:* {title}\n"
+                        f"💰 *Valor:* {min_b} {curr}\n\n"
+                        f"⚡ *PROPOSTA GROQ:*\n```\n{proposta}\n```"
                     )
 
-                    try:
-                        bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=markup)
-                    except Exception as e:
-                        logger.error(f"⚠️ Telegram Send Error: {e}")
+                    bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=criar_botoes(project_id, link))
+                    time.sleep(2)
+            time.sleep(1)
 
-                time.sleep(15)
-
-            if new_count > 0:
-                sync_to_github()
-            else:
-                logger.info("⏳ No new targets.")
-                
     except Exception as e:
-        logger.error(f"❌ Radar Error: {e}")
+        logger.error(f"❌ Erro: {e}")
 
-def monitor_radar():
+if bot:
+    @bot.callback_query_handler(func=lambda call: call.data.startswith("send_"))
+    def callback_send_bid(call):
+        try:
+            project_id = call.data.split("_")[1]
+            bid_data = PENDING_BIDS.get(project_id)
+
+            if not bid_data:
+                bot.answer_callback_query(call.id, "⚠️ Dados da proposta expiraram.")
+                return
+
+            bot.answer_callback_query(call.id, "🚀 Enviando lance...")
+
+            session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
+            my_user_id = get_self_user_id(session)
+
+            place_project_bid(
+                session,
+                project_id=int(project_id),
+                bidder_id=my_user_id,
+                amount=bid_data["amount"],
+                period=7,
+                milestone_percentage=100,
+                description=bid_data["proposal"]
+            )
+
+            bot.edit_message_text(
+                f"✅ *LANCE ENVIADO COM SUCESSO!*\n\n"
+                f"🎯 *Projeto:* {bid_data['title']}\n"
+                f"💰 *Valor:* {bid_data['amount']} {bid_data['currency']}\n",
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                parse_mode="Markdown"
+            )
+            logger.info(f"✅ Lance enviado para projeto {project_id}")
+
+        except Exception as e:
+            logger.error(f"❌ Erro ao enviar lance: {e}")
+            bot.answer_callback_query(call.id, f"Erro: {str(e)[:50]}")
+
+def monitor_loop():
     while True:
-        process_radar()
-        logger.info("💤 Sleeping 15 minutes...")
+        scan_fast_cash()
+        logger.info("💤 Dormindo 15min...")
         time.sleep(900)
 
-# --- BOT HANDLERS & STATUS COMMAND ---
-if bot:
-    @bot.message_handler(commands=['status'])
-    def send_status(message):
-        try:
-            status_msg = (
-                "🦅 *JULES SNIPER S-TIER: STATUS*\n\n"
-                "✅ *Sistema:* Operacional (Render)\n"
-                "📡 *Radar:* Ativo e monitorando\n"
-                "🎯 *Foco:* Python, Scraping, Automation\n"
-                "💡 _O Jules está de guarda na nuvem._"
-            )
-            bot.reply_to(message, status_msg, parse_mode="Markdown")
-            logger.info("🛰️ Status requested via Telegram")
-        except Exception as e:
-            logger.error(f"⚠️ Status Command Error: {e}")
-
-    @bot.callback_query_handler(func=lambda call: True)
-    def callback_query(call):
-        try:
-            if call.data.startswith("ignore_"):
-                project_id = call.data.split("_")[1]
-                logger.info(f"❌ Project {project_id} ignored.")
-                bot.answer_callback_query(call.id, "Projeto ignorado.")
-                bot.edit_message_reply_markup(chat_id=call.message.chat.id, message_id=call.message.message_id, reply_markup=None)
-
-            elif call.data.startswith("send_"):
-                project_id = int(call.data.split("_")[1])
-                logger.info(f"🚀 Placing bid for Project {project_id}...")
-                
-                # Retrieve Data and Place Bid (Simulated here for brevity)
-                bot.answer_callback_query(call.id, "✅ Lance enviado com sucesso!")
-                bot.edit_message_text(f"✅ *LANCE ENVIADO!* (ID: {project_id})", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
-                    
-        except Exception as e:
-            logger.error(f"⚠️ Callback Logic Error: {e}")
+PORT = int(os.environ.get("PORT", 10000))
+class Health(http.server.SimpleHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200); self.end_headers(); self.wfile.write(b"ONLINE")
 
 if __name__ == "__main__":
-    server_thread = threading.Thread(target=start_server, daemon=True)
-    server_thread.start()
-    
-    radar_thread = threading.Thread(target=monitor_radar, daemon=True)
-    radar_thread.start()
-    
-    if bot:
-        logger.info("🤖 Jules Sniper S-Tier: LIVE FIRE MODE ENGAGED")
-        bot.infinity_polling()
-    else:
-        while True: time.sleep(60)
+    threading.Thread(target=lambda: socketserver.TCPServer(("", PORT), Health).serve_forever(), daemon=True).start()
+    threading.Thread(target=monitor_loop, daemon=True).start()
+    if bot: bot.infinity_polling()
