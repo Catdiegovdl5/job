@@ -32,9 +32,16 @@ def gerar_proposta_groq(titulo, desc):
     if not client: return "⚠️ Configure GROQ_API_KEY."
     try:
         prompt = (
-            f"Write a professional, persuasive bid for project: '{titulo}'. "
-            f"Description: {desc}. "
-            "Output ONLY the bid body. Start with 'Dear Client,'. Sign as 'Jules'."
+            f"Act as an expert Python Automation Architect named Diego. "
+            f"Write a high-converting, professional, and direct bid for this project: '{titulo}'. "
+            f"Project Description: {desc}. "
+            "Guidelines: "
+            "1. Be concise and value-focused. No fluff. "
+            "2. Highlight relevant skills (Python, Scraping, Automation) immediately. "
+            "3. Propose a concrete approach or solution. "
+            "4. Output ONLY the bid text body. "
+            "5. Start with 'Hello,' or 'Hi there,'. "
+            "6. Sign strictly as 'Diego'."
         )
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
