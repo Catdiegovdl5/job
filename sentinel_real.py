@@ -13,7 +13,7 @@ from freelancersdk.resources.projects.helpers import create_search_projects_filt
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV15")
+logger = logging.getLogger("JulesV15_Updated")
 
 # Credenciais
 TG_TOKEN = os.environ.get("TG_TOKEN")
@@ -24,8 +24,9 @@ GROQ_KEY = os.environ.get("GROQ_API_KEY")
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
 client = Groq(api_key=GROQ_KEY) if GROQ_KEY else None
 
-# Memória temporária para guardar propostas antes de enviar
-propostas_cache = {}
+# Memória temporária
+propostas_cache = {}    # {project_id: texto_proposta}
+proposal_msg_ids = {}   # {project_id: message_id_da_proposta}
 
 def gerar_proposta_groq(titulo, desc):
     if not client: return "⚠️ Configure GROQ_API_KEY."
@@ -65,8 +66,11 @@ def scan_radar():
 
         if result and 'projects' in result:
             for p in result['projects'][:2]:
-                pid = p.get('id')
+                pid = str(p.get('id'))
                 if p.get('budget', {}).get('minimum', 0) < 15: continue
+
+                # Evita duplicatas na mesma execução (simples, melhore com persistência se quiser)
+                if pid in propostas_cache: continue
 
                 title = p.get('title')
                 desc = p.get('preview_description', '')
@@ -74,7 +78,7 @@ def scan_radar():
 
                 # Gera proposta e guarda na memória
                 texto_proposta = gerar_proposta_groq(title, desc)
-                propostas_cache[str(pid)] = texto_proposta
+                propostas_cache[pid] = texto_proposta
 
                 msg = (
                     f"🎯 *ALVO NA MIRA*\n\n"
@@ -83,11 +87,12 @@ def scan_radar():
                     f"👀 *Analise a proposta abaixo antes de enviar:*"
                 )
 
-                # Envia apenas o alerta primeiro
+                # Envia o alerta com botões
                 bot.send_message(CHAT_ID, msg, parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
 
-                # Manda a proposta num bloco separado para facilitar leitura
-                bot.send_message(CHAT_ID, f"```\n{texto_proposta}\n```", parse_mode="Markdown")
+                # Envia a proposta separada e guarda o ID dela
+                sent_msg = bot.send_message(CHAT_ID, f"```\n{texto_proposta}\n```", parse_mode="Markdown")
+                proposal_msg_ids[pid] = sent_msg.message_id
 
                 time.sleep(5)
 
@@ -101,14 +106,26 @@ def callback_handler(call):
         pid = call.data.split("_")[1]
 
         if call.data.startswith("approve_"):
-            # Aqui você poderia automatizar o envio real para o site no futuro
-            # Por enquanto, confirmamos que você copiou
+            # Confirma que você copiou
             bot.answer_callback_query(call.id, "✅ Proposta Aprovada! (Copie e envie no site)")
             bot.edit_message_text(f"✅ *VOCÊ APROVOU ESTE PROJETO*\nID: {pid}", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
 
         elif call.data.startswith("ignore_"):
             bot.answer_callback_query(call.id, "❌ Projeto Descartado")
+
+            # Deleta a mensagem do alerta (onde está o botão)
             bot.delete_message(chat_id=call.message.chat.id, message_id=call.message.message_id)
+
+            # Tenta deletar a mensagem da proposta também
+            if pid in proposal_msg_ids:
+                try:
+                    bot.delete_message(chat_id=call.message.chat.id, message_id=proposal_msg_ids[pid])
+                    del proposal_msg_ids[pid] # Limpa da memória
+                except Exception as e:
+                    logger.warning(f"⚠️ Não consegui apagar a proposta {pid}: {e}")
+
+            if pid in propostas_cache:
+                del propostas_cache[pid] # Limpa cache de texto
 
     except Exception as e:
         logger.error(f"Erro botão: {e}")
@@ -129,4 +146,8 @@ if __name__ == "__main__":
     threading.Thread(target=monitor, daemon=True).start()
     if bot:
         logger.info("🤖 Jules V15 ONLINE")
-        bot.infinity_polling(timeout=10, long_polling_timeout=5)
+        try:
+            bot.infinity_polling(timeout=10, long_polling_timeout=5)
+        except Exception as e:
+            logger.error(f"Polling Error: {e}")
+            time.sleep(5)
