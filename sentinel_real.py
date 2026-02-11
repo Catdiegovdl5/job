@@ -47,56 +47,52 @@ def save_memory(data):
 memory = load_memory()
 
 def gerar_proposta_groq(titulo, desc):
-    # IMPLEMENTAÇÃO BLINDADA "DIEGO"
+    # IMPLEMENTAÇÃO BLINDADA "DIEGO" - V3 HUMANIZED
     if not GROQ_KEY: return "⚠️ Configure GROQ_API_KEY."
 
     prompt = f"""
-    ### SYSTEM OVERRIDE: PROTOCOLO SNIPER V2 ###
-    ROLE: You are NOT a freelancer. You are 'Diego', an Elite Python Automation Architect & Growth Hacker charging $150/hr. You close deals by exposing flaws in the client's request using Reverse Engineering.
+    ### SYSTEM OVERRIDE: PROTOCOLO SNIPER V3 (HUMAN MODE) ###
 
-    ### THE "ANTI-FLUFF" DIRECTIVE (STRICT):
-    1. NO greetings ("Hello", "Dear", "Hi"). Start with the DIAGNOSIS.
-    2. NO generic claims ("I have experience", "I can do this"). SHOW, don't tell.
-    3. NO placeholders ([X], [Date]). Use "TBD" or "Negotiable".
-    4. MAX LENGTH: 1200 chars. Concise & Brutal.
+    **ROLE:** You are 'Diego', an Elite Solutions Architect ($150/hr). You are busy, direct, and highly technical. You don't "apply" for jobs; you offer solutions to problems.
 
-    ### YOUR ARSENAL (SELECT ONLY RELEVANT TOOLS):
-    [IF SCRAPING/BOTS]: Use "Headless Browsers", "Anti-Detect Fingerprinting", "Dockerized Microservices", "Redis Queue".
-    [IF WEB/APP]: Use "React/Next.js", "Server-Side Rendering (SEO)", "Supabase", "Clean Architecture".
-    [IF DATA/MARKETING]: Use "CAPI (Conversions API)", "GTM Server-Side", "Snowflake", "Python Pandas".
-    [IF AI/LLM]: Use "RAG Pipeline", "Vector Database", "Fine-Tuning Llama-3", "LangChain".
+    **STRICT TONE RULES (THE HUMAN FILTER):**
+    1. **NO ROBOTIC HEADERS:** Do NOT use "The Diagnosis:", "The Blueprint:", or "Subject:". Just speak naturally.
+    2. **NO FLUFF:** Never say "I hope you are well", "I understand your project", or "I am the perfect fit".
+    3. **FIRST LINE HOOK:** Start immediately with a technical observation about their specific problem.
+    4. **SHOW, DON'T TELL:** Don't say "I have experience". Say "I've handled Akamai protections before...".
+    5. **FORMAT:** Use Markdown. Use bolding **like this** for emphasis. Keep paragraphs short.
 
-    ### EXECUTION STRUCTURE (MANDATORY MARKDOWN):
-    1. **The Diagnosis:** Identify the hidden risk or bottleneck in their description immediately. (e.g., "Your current approach will get blocked by Cloudflare...").
-    2. **The Blueprint (Table):**
-       | Phase | Technical Action | Business Impact (ROI) |
-       |-------|------------------|-----------------------|
-       | 1 | [Specific Tech] | [Specific Outcome] |
-       | 2 | [Specific Tech] | [Specific Outcome] |
-    3. **Why This Stack:** Briefly explain the selected Arsenal tools (max 2 lines).
-    4. **The Challenge (CTA):** "I have a Docker container ready to test this. Are you available for a 5-min demo?"
+    **YOUR STRATEGY (DYNAMIC ARSENAL):**
+    - IF SCRAPING: Focus on "Anti-Detect", "Residental Proxies", "Bypassing Cloudflare/Datadome".
+    - IF WEB APP: Focus on "Scalability", "Secure API Architecture", "React/Next.js Performance".
+    - IF DATA: Focus on "Clean Pipelines", "Pandas Optimization", "Error Handling".
+
+    **REQUIRED STRUCTURE:**
+    1. **The Hook:** A 2-sentence breakdown of why their current plan might fail (or how to make it bulletproof).
+    2. **The Fix (The Table):** A concise table showing the execution plan.
+       | Phase | Action | Outcome |
+    3. **The Tech:** A conversational sentence explaining why you chose this stack.
+    4. **The Close:** A direct challenge for a demo.
 
     ### INPUT DATA:
     Project: '{titulo}'
     Description: {desc}
 
-    >>> GENERATE PROPOSAL NOW (SIGN AS 'DIEGO'):
+    >>> WRITE THE PROPOSAL NOW (Natural, Professional, High-Impact English):
     """
     try:
-        # Usando biblioteca oficial Groq ou Requests direto para Llama-3
-        # Adaptando para a biblioteca 'groq' que já estava instalada
         client = Groq(api_key=GROQ_KEY)
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
+            temperature=0.7 # Aumentei um pouco para ficar mais natural
         )
         texto_final = completion.choices[0].message.content
 
-        # FILTRO DE HIGIENIZAÇÃO (Trava de Segurança)
+        # FILTRO FINAL DE LIMPEZA
         texto_final = texto_final.replace("Jules", "Diego")
-        texto_final = texto_final.replace("Dear Client,", "")
-        texto_final = texto_final.replace("I'm excited to bid", "I analyzed your requirements")
-        texto_final = texto_final.replace("[X]", "negotiable")
+        texto_final = texto_final.replace("Subject:", "") # Remove se a IA teimar em colocar
+        texto_final = texto_final.replace("[Client Name]", "")
 
         return texto_final.strip()
     except Exception as e:
