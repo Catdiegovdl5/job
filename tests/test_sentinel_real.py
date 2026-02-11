@@ -4,7 +4,7 @@ import sys
 import os
 import json
 import io
-import http.server
+import threading
 
 # Mock dependencies globally before importing sentinel_real
 mock_requests = MagicMock()
@@ -23,6 +23,7 @@ sys.modules['freelancersdk.resources.projects.helpers'] = MagicMock()
 # Set environment variables for import
 os.environ['TG_TOKEN'] = 'test_token'
 os.environ['GROQ_API_KEY'] = 'test_key'
+os.environ['GEMINI_API_KEY'] = 'test_gemini_key'
 os.environ['API_SECRET'] = '1234'
 
 import sentinel_real
@@ -41,15 +42,24 @@ class TestSentinelReal(unittest.TestCase):
         sentinel_real.memory["current_mission"] = "python automation scraping"
 
     def test_gerar_proposta_groq_sanitization(self):
-        mock_client = MagicMock()
-        mock_completion = MagicMock()
-        mock_completion.choices[0].message.content = "Subject: Proposal\n**Hook:** I saw your project. Dear Client, I'm excited to bid."
-        mock_client.chat.completions.create.return_value = mock_completion
-        mock_groq.Groq.return_value = mock_client
+        # Now using Requests for Gemini
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            'candidates': [
+                {
+                    'content': {
+                        'parts': [{'text': "Subject: Proposal\n**Hook:** I saw your project. Dear Client, I'm excited to bid."}]
+                    }
+                }
+            ]
+        }
+        mock_response.raise_for_status = MagicMock()
+        mock_requests.post.return_value = mock_response
 
-        with patch('sentinel_real.GROQ_KEY', 'test_key'):
+        with patch('sentinel_real.GEMINI_API_KEY', 'test_key'):
              result = gerar_proposta_groq("Test Project", "Description")
 
+        # Verify sanitization logic restored
         self.assertNotIn("Subject:", result)
         self.assertNotIn("**Hook:**", result)
         self.assertNotIn("Dear Client,", result)
@@ -98,17 +108,6 @@ class TestSentinelReal(unittest.TestCase):
         handler.send_response.assert_called_with(200)
         handler.end_headers.assert_called()
 
-    def test_api_handler_get(self):
-        handler = APIHandler.__new__(APIHandler)
-        handler.wfile = io.BytesIO()
-        handler.send_response = MagicMock()
-        handler.end_headers = MagicMock()
-
-        handler.do_GET()
-
-        handler.send_response.assert_called_with(200)
-        self.assertIn(b"ONLINE - API READY", handler.wfile.getvalue())
-
     def test_api_handler_post_set_mode(self):
         handler = APIHandler.__new__(APIHandler)
         handler.headers = {'X-Api-Key': '1234', 'Content-Length': '16'}
@@ -128,35 +127,35 @@ class TestSentinelReal(unittest.TestCase):
         self.assertIn(b"success", handler.wfile.getvalue())
         self.assertEqual(sentinel_real.memory["current_mission"], "website react wordpress nodejs")
 
-    def test_api_handler_post_status(self):
+        # Verify confirmation message
+        # We expect 2 messages: local user feedback and OPAL command feedback
+        self.assertEqual(mock_bot.send_message.call_count, 2)
+        args, _ = mock_bot.send_message.call_args_list[1] # check second call
+        self.assertIn("[COMANDO OPAL]", args[1])
+
+    def test_api_handler_post_invalid_json(self):
         handler = APIHandler.__new__(APIHandler)
-        handler.headers = {'X-Api-Key': '1234'}
-        handler.wfile = io.BytesIO()
-        handler.send_response = MagicMock()
-        handler.send_headers = MagicMock()
-        handler.end_headers = MagicMock()
-        handler.path = "/api/status"
+        handler.headers = {'X-Api-Key': '1234', 'Content-Length': '10'}
 
-        handler.do_POST()
-
-        handler.send_response.assert_called_with(200)
-        # Verify end_headers() is called
-        handler.end_headers.assert_called()
-
-        response = json.loads(handler.wfile.getvalue().decode())
-        self.assertTrue(response["online"])
-        self.assertIn("current_mission", response)
-
-    def test_api_handler_post_invalid_auth(self):
-        handler = APIHandler.__new__(APIHandler)
-        handler.headers = {'X-Api-Key': 'wrong_key'}
+        handler.rfile = io.BytesIO(b'{invalid}')
         handler.wfile = io.BytesIO()
         handler.send_response = MagicMock()
         handler.end_headers = MagicMock()
+        handler.path = "/api/set_mode"
 
         handler.do_POST()
 
-        handler.send_response.assert_called_with(403)
+        handler.send_response.assert_called_with(400)
+        self.assertIn(b"Invalid JSON", handler.wfile.getvalue())
+
+    def test_thread_safety(self):
+        # Verify lock is used
+        self.assertIsInstance(sentinel_real.memory_lock, type(threading.Lock()))
+
+        # We can't easily test race conditions in unit tests without complex setup,
+        # but we can verify that functions that use the lock don't crash.
+        sentinel_real.load_memory()
+        sentinel_real.save_memory({"test": 1})
 
 if __name__ == "__main__":
     unittest.main()

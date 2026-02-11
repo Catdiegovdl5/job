@@ -21,39 +21,43 @@ logger = logging.getLogger("JulesV17")
 TG_TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
 FLN_TOKEN = os.environ.get("FLN_OAUTH_TOKEN")
+# Note: Keeping GROQ_KEY variable for compatibility if needed elsewhere, but using GEMINI_API_KEY for proposal generation
 GROQ_KEY = os.environ.get("GROQ_API_KEY")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 API_SECRET = os.environ.get("API_SECRET", "1234")
 
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
 
-# Client Groq mantido para compatibilidade, mas usaremos requests para controle total se preferir,
-# ou a biblioteca oficial. Aqui ajustado para usar a lógica blindada.
+# Thread Safety
+memory_lock = threading.Lock()
 MEMORY_FILE = "memory.json"
 
 def load_memory():
-    if os.path.exists(MEMORY_FILE):
-        try:
-            with open(MEMORY_FILE, "r") as f:
-                data = json.load(f)
-                # Initialize default mission if missing
-                if "current_mission" not in data:
-                    data["current_mission"] = "python automation scraping"
-                return data
-        except: pass
-    return {"current_mission": "python automation scraping"}
+    with memory_lock:
+        if os.path.exists(MEMORY_FILE):
+            try:
+                with open(MEMORY_FILE, "r") as f:
+                    data = json.load(f)
+                    # Initialize default mission if missing
+                    if "current_mission" not in data:
+                        data["current_mission"] = "python automation scraping"
+                    return data
+            except: pass
+        return {"current_mission": "python automation scraping"}
 
 def save_memory(data):
-    try:
-        with open(MEMORY_FILE, "w") as f:
-            json.dump(data, f)
-    except Exception as e:
-        logger.error(f"Erro ao salvar memória: {e}")
+    with memory_lock:
+        try:
+            with open(MEMORY_FILE, "w") as f:
+                json.dump(data, f)
+        except Exception as e:
+            logger.error(f"Erro ao salvar memória: {e}")
 
 memory = load_memory()
 
 def gerar_proposta_groq(titulo, desc):
-    # IMPLEMENTAÇÃO "DIEGO" - V4 PLAIN TEXT (ZERO FORMATTING)
-    if not GROQ_KEY: return "⚠️ Configure GROQ_API_KEY."
+    # INTEGRATION DIEGO (GEMINI) - Maintaining function name for compatibility
+    if not GEMINI_API_KEY: return "⚠️ Configure GEMINI_API_KEY."
 
     prompt = f"""
     ### SYSTEM OVERRIDE: PROTOCOLO HUMANO PURO (NO MARKDOWN) ###
@@ -81,33 +85,36 @@ def gerar_proposta_groq(titulo, desc):
 
     >>> WRITE THE PROPOSAL NOW (PLAIN TEXT ONLY, NO SYMBOLS):
     """
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
+    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+
     try:
-        client = Groq(api_key=GROQ_KEY)
-        completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.6
-        )
-        texto_final = completion.choices[0].message.content
+        response = requests.post(url, json=payload)
+        response.raise_for_status()
+        data = response.json()
+        if 'candidates' in data and data['candidates']:
+            texto_final = data['candidates'][0]['content']['parts'][0]['text']
 
-        # --- LIMPEZA BRUTA DE SÍMBOLOS (SAFETY NET) ---
-        # Remove qualquer vestígio de Markdown que a IA teimar em colocar
-        texto_final = texto_final.replace("**", "")
-        texto_final = texto_final.replace("##", "")
-        texto_final = texto_final.replace("###", "")
-        texto_final = texto_final.replace("|", "")
-        texto_final = texto_final.replace("---", "")
-        texto_final = texto_final.replace("Subject:", "")
-        texto_final = texto_final.replace("[Client Name]", "")
+            # --- LIMPEZA BRUTA DE SÍMBOLOS (SAFETY NET) ---
+            texto_final = texto_final.replace("**", "")
+            texto_final = texto_final.replace("##", "")
+            texto_final = texto_final.replace("###", "")
+            texto_final = texto_final.replace("|", "")
+            texto_final = texto_final.replace("---", "")
+            texto_final = texto_final.replace("Subject:", "")
+            texto_final = texto_final.replace("[Client Name]", "")
 
-        # FILTRO DE HIGIENIZAÇÃO RESTAURADO (OBRIGATÓRIO)
-        texto_final = texto_final.replace("Jules", "Diego")
-        texto_final = texto_final.replace("Dear Client,", "")
-        texto_final = texto_final.replace("I'm excited to bid", "I analyzed your requirements")
+            # FILTRO DE HIGIENIZAÇÃO RESTAURADO (OBRIGATÓRIO)
+            texto_final = texto_final.replace("Jules", "Diego")
+            texto_final = texto_final.replace("Dear Client,", "")
+            texto_final = texto_final.replace("I'm excited to bid", "I analyzed your requirements")
 
-        return texto_final.strip()
+            return texto_final.strip()
+        else:
+            return f"Error: No candidates returned from API. Response: {json.dumps(data)}"
     except Exception as e:
-        return f"Erro Groq: {e}"
+        return f"Erro Gemini: {str(e)}"
 
 def criar_painel_controle(project_id, link):
     markup = InlineKeyboardMarkup()
@@ -118,11 +125,13 @@ def criar_painel_controle(project_id, link):
     return markup
 
 def scan_radar():
-    if not bot or not FLN_TOKEN: return
-    logger.info("📡 Varredura V17 iniciada...")
+    # Use lock only for reading configuration to minimize lock time
+    current_query = ""
+    with memory_lock:
+        if not bot or not FLN_TOKEN: return
+        current_query = memory.get("current_mission", "python automation scraping")
 
-    # Load dynamic mission
-    current_query = memory.get("current_mission", "python automation scraping")
+    logger.info("📡 Varredura V17 iniciada...")
 
     try:
         session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
@@ -133,7 +142,14 @@ def scan_radar():
             for p in result['projects'][:2]:
                 pid = str(p.get('id'))
                 if p.get('budget', {}).get('minimum', 0) < 15: continue
-                if pid in memory: continue
+
+                # Check memory safely
+                is_known = False
+                with memory_lock:
+                    if pid in memory: is_known = True
+
+                if is_known: continue
+
                 title = p.get('title')
                 link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
 
@@ -141,11 +157,17 @@ def scan_radar():
                 texto = gerar_proposta_groq(title, p.get('preview_description', ''))
 
                 msg1 = bot.send_message(CHAT_ID, f"🎯 *ALVO NA MIRA*\n\n📝 {title}\n💰 {p.get('budget', {}).get('minimum')} USD", parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
-                # CORREÇÃO AQUI: Preencher o corpo da mensagem
                 msg2 = bot.send_message(CHAT_ID, f"```\n{texto}\n```", parse_mode="Markdown")
 
-                memory[pid] = {'alert_id': msg1.message_id, 'prop_id': msg2.message_id}
-                save_memory(memory)
+                # Update memory safely
+                with memory_lock:
+                    memory[pid] = {'alert_id': msg1.message_id, 'prop_id': msg2.message_id}
+                    try:
+                        with open(MEMORY_FILE, "w") as f:
+                            json.dump(memory, f)
+                    except Exception as e:
+                        logger.error(f"Erro ao salvar memória: {e}")
+
                 time.sleep(5)
     except Exception as e:
         logger.error(f"Erro: {e}")
@@ -181,8 +203,14 @@ if bot:
                     mission_name = "🌐 Web Dev"
 
                 if new_mission:
-                    memory["current_mission"] = new_mission
-                    save_memory(memory)
+                    with memory_lock:
+                        memory["current_mission"] = new_mission
+                        try:
+                            with open(MEMORY_FILE, "w") as f:
+                                json.dump(memory, f)
+                        except Exception as e:
+                            logger.error(f"Erro ao salvar memória: {e}")
+
                     bot.answer_callback_query(call.id, f"Modo: {mission_name}")
                     bot.send_message(call.message.chat.id, f"✅ *Modo Alterado para: {mission_name}*", parse_mode="Markdown")
 
@@ -195,14 +223,25 @@ if bot:
                     bot.edit_message_text(f"✅ *APROVADO*\nID: {pid}", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
                 elif action == "ignore":
                     bot.answer_callback_query(call.id, "❌ Limpando...")
-                    ids = memory.get(pid)
+
+                    ids = None
+                    with memory_lock:
+                        ids = memory.get(pid)
+
                     if ids:
                         try: bot.delete_message(chat_id=call.message.chat.id, message_id=ids['alert_id'])
                         except: pass
                         try: bot.delete_message(chat_id=call.message.chat.id, message_id=ids['prop_id'])
                         except: pass
-                        del memory[pid]
-                        save_memory(memory)
+
+                        with memory_lock:
+                            if pid in memory:
+                                del memory[pid]
+                                try:
+                                    with open(MEMORY_FILE, "w") as f:
+                                        json.dump(memory, f)
+                                except Exception as e:
+                                    logger.error(f"Erro ao salvar memória: {e}")
         except Exception as e:
             logger.error(f"Erro no callback: {e}")
 
@@ -230,6 +269,7 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b"Forbidden")
             return
+
         # Rota: Alterar Modo de Missão
         if self.path == "/api/set_mode":
             content_len = int(self.headers.get('Content-Length', 0))
@@ -246,13 +286,21 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
                 }
 
                 if new_mode in mission_map:
-                    memory["current_mission"] = mission_map[new_mode]
-                    save_memory(memory)
+                    with memory_lock:
+                        memory["current_mission"] = mission_map[new_mode]
+                        try:
+                            with open(MEMORY_FILE, "w") as f:
+                                json.dump(memory, f)
+                        except Exception as e:
+                            logger.error(f"Erro ao salvar memória: {e}")
 
                     # Feedback no Log e Telegram
                     logger.info(f"API: Modo alterado para {new_mode}")
                     if bot:
                         bot.send_message(CHAT_ID, f"📡 *Comando Remoto Recebido*\nModo ativado: `{new_mode.upper()}`", parse_mode="Markdown")
+                        # Ping de Confirmação
+                        bot.send_message(CHAT_ID, f"📡 [COMANDO OPAL] - Modo alterado para: {new_mode.upper()}")
+
                     self.send_response(200)
                     self.end_headers()
                     self.wfile.write(json.dumps({"status": "success", "mode": new_mode}).encode())
@@ -260,6 +308,10 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
                     self.send_response(400)
                     self.end_headers()
                     self.wfile.write(b"Invalid mode")
+            except json.JSONDecodeError:
+                self.send_response(400)
+                self.end_headers()
+                self.wfile.write(b"Invalid JSON")
             except Exception as e:
                 logger.error(f"API Error: {e}")
                 self.send_response(500)
@@ -269,16 +321,21 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
         elif self.path == "/api/status":
             self.send_response(200)
             self.end_headers()
-            status = {
-                "online": True,
-                "current_mission": memory.get("current_mission"),
-                "projects_processed": len(memory)
-            }
-            self.wfile.write(json.dumps(status).encode())
+
+            status_data = {}
+            with memory_lock:
+                status_data = {
+                    "online": True,
+                    "current_mission": memory.get("current_mission"),
+                    "projects_processed": len(memory)
+                }
+
+            self.wfile.write(json.dumps(status_data).encode())
 
 PORT = int(os.environ.get("PORT", 10000))
 
 if __name__ == "__main__":
+    logger.info("🔒 Thread Lock ativado. Memória protegida.")
     threading.Thread(target=lambda: socketserver.TCPServer(("", PORT), APIHandler).serve_forever(), daemon=True).start()
     threading.Thread(target=monitor, daemon=True).start()
     if bot:
