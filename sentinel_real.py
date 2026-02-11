@@ -38,10 +38,10 @@ def load_memory():
             logger.error(f"Erro ao carregar memory.json: {e}")
     return {}
 
-def save_memory():
+def save_memory(data):
     try:
         with open(MEMORY_FILE, "w") as f:
-            json.dump(message_tracker, f)
+            json.dump(data, f)
     except Exception as e:
         logger.error(f"Erro ao salvar memory.json: {e}")
 
@@ -53,7 +53,7 @@ def gerar_proposta_groq(titulo, desc):
         # Prompt V16 (Otimizado: Curto e sem placeholders)
         prompt = (
             f"Write a technical, direct bid as Diego. Max 1500 chars. No intro, no fluff. Start with \"Hello,\". Focus on Python/Scraping. Sign ONLY as \"Diego\". NEVER use [X]. "
-            f"Project: \"{titulo}\". Description: {desc}."
+            f"Project: '{titulo}'. Description: {desc}."
         )
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -97,9 +97,9 @@ def scan_radar():
                 texto_proposta = gerar_proposta_groq(title, desc)
                 
                 msg_painel_texto = (
-                    f"🎯 *ALVO NA MIRA*\\n\\n"
-                    f"📝 *Projeto:* {title}\\n"
-                    f"💰 *Valor:* {p.get("budget", {}).get("minimum")} USD\\n\\n"
+                    f"🎯 *ALVO NA MIRA*\n\n"
+                    f"📝 *Projeto:* {title}\n"
+                    f"💰 *Valor:* {p.get('budget', {}).get('minimum')} USD\n\n"
                     f"👇 *Escolha uma ação:*"
                 )
                 
@@ -107,11 +107,11 @@ def scan_radar():
                 sent_painel = bot.send_message(CHAT_ID, msg_painel_texto, parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
                 
                 # 2. Envia Proposta e guarda o objeto da mensagem
-                sent_proposta = bot.send_message(CHAT_ID, f"```\\n{texto_proposta}\\n```", parse_mode="Markdown")
+                sent_proposta = bot.send_message(CHAT_ID, f"```\n{texto_proposta}\n```", parse_mode="Markdown")
                 
                 # 3. Salva os DOIS IDs no rastreador
                 message_tracker[pid] = [sent_painel.message_id, sent_proposta.message_id]
-                save_memory()
+                save_memory(message_tracker)
                 
                 time.sleep(5) 
                 
@@ -128,7 +128,7 @@ def callback_handler(call):
             bot.answer_callback_query(call.id, "✅ Aprovado! Copie o texto abaixo.")
             # Edita o painel para mostrar que foi aprovado
             bot.edit_message_text(
-                f"✅ *APROVADO*\\nProjeto ID: {pid}\\n(Texto disponível abaixo)",
+                f"✅ *APROVADO*\nProjeto ID: {pid}\n(Texto disponível abaixo)",
                 chat_id=call.message.chat.id, 
                 message_id=call.message.message_id, 
                 parse_mode="Markdown"
@@ -136,7 +136,7 @@ def callback_handler(call):
             # Removemos do rastreador para não apagar mais tarde sem querer
             if pid in message_tracker:
                 del message_tracker[pid]
-                save_memory()
+                save_memory(message_tracker)
             
         elif action == "ignore":
             bot.answer_callback_query(call.id, "❌ Apagando tudo...")
@@ -151,7 +151,7 @@ def callback_handler(call):
                         logger.error(f"Erro ao apagar msg {mid}: {e}")
                 # Remove da memória
                 del message_tracker[pid]
-                save_memory()
+                save_memory(message_tracker)
             else:
                 # Fallback: Se o bot reiniciou e perdeu a memória, apaga pelo menos o botão
                 try:
