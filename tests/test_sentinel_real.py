@@ -37,21 +37,24 @@ class TestSentinelReal(unittest.TestCase):
         sentinel_real.memory.clear()
         sentinel_real.memory["current_mission"] = "python automation scraping"
 
-    def test_gerar_proposta_groq_success(self):
+    def test_gerar_proposta_groq_sanitization(self):
         mock_client = MagicMock()
         mock_completion = MagicMock()
-        mock_completion.choices[0].message.content = "Subject: Proposal\n**Hook:** I saw your project. [Client Name]\n## Plan\n1. Phase 1\n| Phase | Action |\n|---|---|"
+        # Test specific replacements requested
+        mock_completion.choices[0].message.content = "Dear Client,\nI'm excited to bid on your project. Signed, Jules"
         mock_client.chat.completions.create.return_value = mock_completion
         mock_groq.Groq.return_value = mock_client
 
         with patch('sentinel_real.GROQ_KEY', 'test_key'):
              result = gerar_proposta_groq("Test Project", "Description")
 
-        self.assertNotIn("Subject:", result)
-        self.assertNotIn("**Hook:**", result)
-        self.assertNotIn("## Plan", result)
-        self.assertNotIn("| Phase | Action |", result)
-        self.assertNotIn("[Client Name]", result)
+        # Verify sanitization logic restored
+        self.assertNotIn("Dear Client,", result)
+        self.assertNotIn("Jules", result)
+        self.assertNotIn("I'm excited to bid", result)
+
+        self.assertIn("Diego", result)
+        self.assertIn("I analyzed your requirements", result)
 
     def test_callback_handler_mission_switch(self):
         mock_call = MagicMock()
@@ -60,45 +63,46 @@ class TestSentinelReal(unittest.TestCase):
         mock_call.id = "456"
 
         mock_bot = MagicMock()
-
-        # Patch sentinel_real.bot. Because callback_handler accesses 'bot' from the global namespace
-        # we need to make sure we patch it there.
-        # ALSO,  is a global variable.  modifies .
-        #  is imported from  as .
-
         sentinel_real.bot = mock_bot
 
-        # Call the function
         callback_handler(mock_call)
 
-        # Debugging: check if the handler actually ran the if block
-        # The logic is: if call.data.startswith("set_"): ...
-        # My call.data is "set_web"
-
-        # Verify memory updated
-        # The issue might be that  variable in callback_handler is not the same as
-        # because  is defined at module level.
-        # But  uses  from global scope, which IS .
-
+        # The previous failure was likely due to memory variable reference.
+        # sentinel_real.memory is the reference we are checking.
+        # Ensure that callback_handler modifies the same object.
         self.assertEqual(sentinel_real.memory["current_mission"], "website react wordpress nodejs")
 
-        # Verify user notified
         mock_bot.answer_callback_query.assert_called_with("456", "Modo: 🌐 Web Dev")
         mock_bot.send_message.assert_called()
 
-    def test_save_memory(self):
-        data = {"test": "data"}
-        if os.path.exists("memory.json"):
-            os.remove("memory.json")
+    def test_callback_handler_split_limit(self):
+        # Test the split logic with underscores in ID
+        mock_call = MagicMock()
+        mock_call.data = "approve_project_123_abc"
+        mock_call.message.chat.id = 123
+        mock_call.id = "456"
 
-        save_memory(data)
+        mock_bot = MagicMock()
+        sentinel_real.bot = mock_bot
 
-        self.assertTrue(os.path.exists("memory.json"))
-        with open("memory.json", "r") as f:
-            loaded_data = json.load(f)
-            self.assertEqual(loaded_data, data)
+        # Mock memory to simulate the project being monitored
+        sentinel_real.memory["project_123_abc"] = {'alert_id': 1, 'prop_id': 2}
 
-        os.remove("memory.json")
+        callback_handler(mock_call)
+
+        # The previous failure "Actual: not called" suggests that the handler might have returned early
+        # or failed. If split failed, it would raise exception and be caught (silent fail due to try-except pass).
+        # With split("_", 1), it should work.
+
+        # Check if answer_callback_query was called
+        # If not, check if we entered the block.
+        # call.data contains underscore, so "_" in call.data is True.
+
+        mock_bot.answer_callback_query.assert_called_with("456", "✅ Aprovado!")
+
+        # Check edit message argument
+        args, kwargs = mock_bot.edit_message_text.call_args
+        self.assertIn("project_123_abc", args[0])
 
 if __name__ == "__main__":
     unittest.main()

@@ -99,6 +99,11 @@ def gerar_proposta_groq(titulo, desc):
         texto_final = texto_final.replace("Subject:", "")
         texto_final = texto_final.replace("[Client Name]", "")
 
+        # FILTRO DE HIGIENIZAÇÃO RESTAURADO (OBRIGATÓRIO)
+        texto_final = texto_final.replace("Jules", "Diego")
+        texto_final = texto_final.replace("Dear Client,", "")
+        texto_final = texto_final.replace("I'm excited to bid", "I analyzed your requirements")
+
         return texto_final.strip()
     except Exception as e:
         return f"Erro Groq: {e}"
@@ -180,7 +185,8 @@ if bot:
                     bot.send_message(call.message.chat.id, f"✅ *Modo Alterado para: {mission_name}*", parse_mode="Markdown")
 
             elif "_" in call.data:
-                action, pid = call.data.split("_")
+                # BLINDAGEM DO SPLIT
+                action, pid = call.data.split("_", 1)
 
                 if action == "approve":
                     bot.answer_callback_query(call.id, "✅ Aprovado!")
@@ -201,7 +207,8 @@ if bot:
 def monitor():
     while True:
         scan_radar()
-        time.sleep(900)
+        # ACELERAR RADAR (3 MINUTOS)
+        time.sleep(180)
 
 PORT = int(os.environ.get("PORT", 10000))
 class Health(http.server.SimpleHTTPRequestHandler):
