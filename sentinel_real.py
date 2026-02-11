@@ -33,9 +33,13 @@ def load_memory():
     if os.path.exists(MEMORY_FILE):
         try:
             with open(MEMORY_FILE, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+                # Initialize default mission if missing
+                if "current_mission" not in data:
+                    data["current_mission"] = "python automation scraping"
+                return data
         except: pass
-    return {}
+    return {"current_mission": "python automation scraping"}
 
 def save_memory(data):
     try:
@@ -110,11 +114,14 @@ def criar_painel_controle(project_id, link):
 def scan_radar():
     if not bot or not FLN_TOKEN: return
     logger.info("📡 Varredura V17 iniciada...")
+
+    # Load dynamic mission
+    current_query = memory.get("current_mission", "python automation scraping")
+
     try:
         session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
-        query = "python automation scraping"
         search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
-        result = search_projects(session, query=query, search_filter=search_filter)
+        result = search_projects(session, query=current_query, search_filter=search_filter)
 
         if result and 'projects' in result:
             for p in result['projects'][:2]:
@@ -137,26 +144,59 @@ def scan_radar():
         logger.error(f"Erro: {e}")
 
 if bot:
+    @bot.message_handler(commands=['menu'])
+    def menu_command(message):
+        markup = InlineKeyboardMarkup()
+        btn_python = InlineKeyboardButton("🐍 Python Elite", callback_data="set_python")
+        btn_quick = InlineKeyboardButton("⚡ Caixa Rápido", callback_data="set_quick")
+        btn_web = InlineKeyboardButton("🌐 Web Dev", callback_data="set_web")
+        markup.add(btn_python)
+        markup.add(btn_quick)
+        markup.add(btn_web)
+        bot.send_message(message.chat.id, "🛠 *Painel de Controle Tático*\nEscolha o Tipo de Missão:", parse_mode="Markdown", reply_markup=markup)
+
     @bot.callback_query_handler(func=lambda call: True)
     def callback_handler(call):
         try:
-            if "_" not in call.data: return
-            action, pid = call.data.split("_")
+            # Mission Selection Handlers
+            if call.data.startswith("set_"):
+                new_mission = ""
+                mission_name = ""
 
-            if action == "approve":
-                bot.answer_callback_query(call.id, "✅ Aprovado!")
-                bot.edit_message_text(f"✅ *APROVADO*\nID: {pid}", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
-            elif action == "ignore":
-                bot.answer_callback_query(call.id, "❌ Limpando...")
-                ids = memory.get(pid)
-                if ids:
-                    try: bot.delete_message(chat_id=call.message.chat.id, message_id=ids['alert_id'])
-                    except: pass
-                    try: bot.delete_message(chat_id=call.message.chat.id, message_id=ids['prop_id'])
-                    except: pass
-                    del memory[pid]
+                if call.data == "set_python":
+                    new_mission = "python automation scraping"
+                    mission_name = "🐍 Python Elite"
+                elif call.data == "set_quick":
+                    new_mission = "scraping data entry excel vba script"
+                    mission_name = "⚡ Caixa Rápido"
+                elif call.data == "set_web":
+                    new_mission = "website react wordpress nodejs"
+                    mission_name = "🌐 Web Dev"
+
+                if new_mission:
+                    memory["current_mission"] = new_mission
                     save_memory(memory)
-        except: pass
+                    bot.answer_callback_query(call.id, f"Modo: {mission_name}")
+                    bot.send_message(call.message.chat.id, f"✅ *Modo Alterado para: {mission_name}*", parse_mode="Markdown")
+
+            elif "_" in call.data:
+                action, pid = call.data.split("_")
+
+                if action == "approve":
+                    bot.answer_callback_query(call.id, "✅ Aprovado!")
+                    bot.edit_message_text(f"✅ *APROVADO*\nID: {pid}", chat_id=call.message.chat.id, message_id=call.message.message_id, parse_mode="Markdown")
+                elif action == "ignore":
+                    bot.answer_callback_query(call.id, "❌ Limpando...")
+                    ids = memory.get(pid)
+                    if ids:
+                        try: bot.delete_message(chat_id=call.message.chat.id, message_id=ids['alert_id'])
+                        except: pass
+                        try: bot.delete_message(chat_id=call.message.chat.id, message_id=ids['prop_id'])
+                        except: pass
+                        del memory[pid]
+                        save_memory(memory)
+        except Exception as e:
+            logger.error(f"Erro no callback: {e}")
 
 def monitor():
     while True:
