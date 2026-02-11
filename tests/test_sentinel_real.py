@@ -37,7 +37,7 @@ class TestSentinelReal(unittest.TestCase):
         mock_client = MagicMock()
         mock_completion = MagicMock()
         # Mocking a response that might contain things to filter
-        mock_completion.choices[0].message.content = "Subject: Proposal\nI'm Jules. Here is the hook. [Client Name] should know this."
+        mock_completion.choices[0].message.content = "Subject: Proposal\n**Hook:** I saw your project. [Client Name]\n## Plan\n1. Phase 1\n| Phase | Action |\n|---|---|"
         mock_client.chat.completions.create.return_value = mock_completion
         mock_groq.Groq.return_value = mock_client
 
@@ -48,9 +48,10 @@ class TestSentinelReal(unittest.TestCase):
 
         # Verify sanitization logic
         self.assertNotIn("Subject:", result)
-        self.assertNotIn("Jules", result)
+        self.assertNotIn("**Hook:**", result) # Checks ** removal
+        self.assertNotIn("## Plan", result)   # Checks ## removal
+        self.assertNotIn("| Phase | Action |", result) # Checks | removal
         self.assertNotIn("[Client Name]", result)
-        self.assertIn("Diego", result) # Replaced Jules
 
     def test_save_memory(self):
         data = {"test": "data"}

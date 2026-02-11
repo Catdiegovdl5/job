@@ -47,51 +47,52 @@ def save_memory(data):
 memory = load_memory()
 
 def gerar_proposta_groq(titulo, desc):
-    # IMPLEMENTAÇÃO BLINDADA "DIEGO" - V3 HUMANIZED
+    # IMPLEMENTAÇÃO "DIEGO" - V4 PLAIN TEXT (ZERO FORMATTING)
     if not GROQ_KEY: return "⚠️ Configure GROQ_API_KEY."
 
     prompt = f"""
-    ### SYSTEM OVERRIDE: PROTOCOLO SNIPER V3 (HUMAN MODE) ###
+    ### SYSTEM OVERRIDE: PROTOCOLO HUMANO PURO (NO MARKDOWN) ###
 
-    **ROLE:** You are 'Diego', an Elite Solutions Architect ($150/hr). You are busy, direct, and highly technical. You don't "apply" for jobs; you offer solutions to problems.
+    **ROLE:** You are 'Diego', an Elite Solutions Architect. You are writing a quick, direct message to a client.
 
-    **STRICT TONE RULES (THE HUMAN FILTER):**
-    1. **NO ROBOTIC HEADERS:** Do NOT use "The Diagnosis:", "The Blueprint:", or "Subject:". Just speak naturally.
-    2. **NO FLUFF:** Never say "I hope you are well", "I understand your project", or "I am the perfect fit".
-    3. **FIRST LINE HOOK:** Start immediately with a technical observation about their specific problem.
-    4. **SHOW, DON'T TELL:** Don't say "I have experience". Say "I've handled Akamai protections before...".
-    5. **FORMAT:** Use Markdown. Use bolding **like this** for emphasis. Keep paragraphs short.
+    **CRITICAL FORMATTING RULES (STRICT):**
+    1. **ABSOLUTELY NO MARKDOWN:** Do NOT use asterisks (**bold**), underscores (_italic_), or hash signs (#).
+    2. **NO TABLES:** Do NOT use pipes (|) or dashes (---).
+    3. **NO BULLET POINTS:** Do NOT use lists with *. Use numbers (1.) or just line breaks.
+    4. **PLAIN TEXT ONLY:** Use only letters, numbers, commas, and periods.
 
-    **YOUR STRATEGY (DYNAMIC ARSENAL):**
-    - IF SCRAPING: Focus on "Anti-Detect", "Residental Proxies", "Bypassing Cloudflare/Datadome".
-    - IF WEB APP: Focus on "Scalability", "Secure API Architecture", "React/Next.js Performance".
-    - IF DATA: Focus on "Clean Pipelines", "Pandas Optimization", "Error Handling".
+    **TONE:** - Conversational, professional, slightly informal (like a senior expert).
+    - No "Sales" fluff.
 
-    **REQUIRED STRUCTURE:**
-    1. **The Hook:** A 2-sentence breakdown of why their current plan might fail (or how to make it bulletproof).
-    2. **The Fix (The Table):** A concise table showing the execution plan.
-       | Phase | Action | Outcome |
-    3. **The Tech:** A conversational sentence explaining why you chose this stack.
-    4. **The Close:** A direct challenge for a demo.
+    **STRUCTURE:**
+    1. **The Hook:** Start directly discussing their technical problem (e.g., "I saw your project regarding Loterias...").
+    2. **The Plan:** List 3 steps using this format: "Phase 1: Action - Outcome".
+    3. **The Stack:** One sentence on why you chose the tools.
+    4. **The Close:** Ask for a 5-min demo.
 
     ### INPUT DATA:
     Project: '{titulo}'
     Description: {desc}
 
-    >>> WRITE THE PROPOSAL NOW (Natural, Professional, High-Impact English):
+    >>> WRITE THE PROPOSAL NOW (PLAIN TEXT ONLY, NO SYMBOLS):
     """
     try:
         client = Groq(api_key=GROQ_KEY)
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[{"role": "user", "content": prompt}],
-            temperature=0.7 # Aumentei um pouco para ficar mais natural
+            temperature=0.6
         )
         texto_final = completion.choices[0].message.content
 
-        # FILTRO FINAL DE LIMPEZA
-        texto_final = texto_final.replace("Jules", "Diego")
-        texto_final = texto_final.replace("Subject:", "") # Remove se a IA teimar em colocar
+        # --- LIMPEZA BRUTA DE SÍMBOLOS (SAFETY NET) ---
+        # Remove qualquer vestígio de Markdown que a IA teimar em colocar
+        texto_final = texto_final.replace("**", "")
+        texto_final = texto_final.replace("##", "")
+        texto_final = texto_final.replace("###", "")
+        texto_final = texto_final.replace("|", "")
+        texto_final = texto_final.replace("---", "")
+        texto_final = texto_final.replace("Subject:", "")
         texto_final = texto_final.replace("[Client Name]", "")
 
         return texto_final.strip()
