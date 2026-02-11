@@ -1,1 +1,4 @@
 requests
+pyTelegramBotAPI
+freelancersdk
+groq
