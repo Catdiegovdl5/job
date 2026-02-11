@@ -5,6 +5,7 @@ import threading
 import http.server
 import socketserver
 import telebot
+import json
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from groq import Groq
 from freelancersdk.session import Session
@@ -12,7 +13,7 @@ from freelancersdk.resources.projects.projects import search_projects
 from freelancersdk.resources.projects.helpers import create_search_projects_filter
 
 # Configuração de Logs
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(message)s")
 logger = logging.getLogger("JulesV17")
 
 # Credenciais
@@ -25,23 +26,34 @@ bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
 client = Groq(api_key=GROQ_KEY) if GROQ_KEY else None
 
 # RASTREADOR DE MENSAGENS (Para apagar o par: Botão + Texto)
-# Formato: {'project_id': [msg_id_painel, msg_id_texto]}
-message_tracker = {}
+# Formato: {"project_id": [msg_id_painel, msg_id_texto]}
+MEMORY_FILE = "memory.json"
+
+def load_memory():
+    if os.path.exists(MEMORY_FILE):
+        try:
+            with open(MEMORY_FILE, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Erro ao carregar memory.json: {e}")
+    return {}
+
+def save_memory():
+    try:
+        with open(MEMORY_FILE, "w") as f:
+            json.dump(message_tracker, f)
+    except Exception as e:
+        logger.error(f"Erro ao salvar memory.json: {e}")
+
+message_tracker = load_memory()
 
 def gerar_proposta_groq(titulo, desc):
     if not client: return "⚠️ Configure GROQ_API_KEY."
     try:
         # Prompt V16 (Otimizado: Curto e sem placeholders)
         prompt = (
-            f"Write a professional, persuasive bid for project: '{titulo}'. "
-            f"Description: {desc}. "
-            "Constraints: "
-            "1. Output ONLY the bid body. "
-            "2. Start with 'Dear Client,'. "
-            "3. Keep it under 1500 characters. "
-            "4. NEVER use placeholders like '[X]' or brackets. "
-            "5. If budget/timeline is unknown, use generic phrases like 'negotiable' or 'to be discussed'. "
-            "Sign as 'Jules'."
+            f"Write a technical, direct bid as Diego. Max 1500 chars. No intro, no fluff. Start with \"Hello,\". Focus on Python/Scraping. Sign ONLY as \"Diego\". NEVER use [X]. "
+            f"Project: \"{titulo}\". Description: {desc}."
         )
         completion = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
@@ -66,28 +78,28 @@ def scan_radar():
     try:
         session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
         query = "python automation scraping"
-        search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
+        search_filter = create_search_projects_filter(sort_field="time_updated", project_types=["fixed"])
         result = search_projects(session, query=query, search_filter=search_filter)
         
-        if result and 'projects' in result:
-            for p in result['projects'][:2]:
-                pid = str(p.get('id'))
+        if result and "projects" in result:
+            for p in result["projects"][:2]:
+                pid = str(p.get("id"))
                 
                 # Evita duplicar se já processamos (opcional, mas bom pra evitar spam)
                 if pid in message_tracker: continue
 
-                if p.get('budget', {}).get('minimum', 0) < 15: continue
+                if p.get("budget", {}).get("minimum", 0) < 15: continue
                 
-                title = p.get('title')
-                desc = p.get('preview_description', '')
-                link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
+                title = p.get("title")
+                desc = p.get("preview_description", "")
+                link = f"https://www.freelancer.com/projects/{p.get("seo_url")}"
                 
                 texto_proposta = gerar_proposta_groq(title, desc)
                 
                 msg_painel_texto = (
-                    f"🎯 *ALVO NA MIRA*\n\n"
-                    f"📝 *Projeto:* {title}\n"
-                    f"💰 *Valor:* {p.get('budget', {}).get('minimum')} USD\n\n"
+                    f"🎯 *ALVO NA MIRA*\\n\\n"
+                    f"📝 *Projeto:* {title}\\n"
+                    f"💰 *Valor:* {p.get("budget", {}).get("minimum")} USD\\n\\n"
                     f"👇 *Escolha uma ação:*"
                 )
                 
@@ -95,10 +107,11 @@ def scan_radar():
                 sent_painel = bot.send_message(CHAT_ID, msg_painel_texto, parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
                 
                 # 2. Envia Proposta e guarda o objeto da mensagem
-                sent_proposta = bot.send_message(CHAT_ID, f"```\n{texto_proposta}\n```", parse_mode="Markdown")
+                sent_proposta = bot.send_message(CHAT_ID, f"```\\n{texto_proposta}\\n```", parse_mode="Markdown")
                 
                 # 3. Salva os DOIS IDs no rastreador
                 message_tracker[pid] = [sent_painel.message_id, sent_proposta.message_id]
+                save_memory()
                 
                 time.sleep(5) 
                 
@@ -115,7 +128,7 @@ def callback_handler(call):
             bot.answer_callback_query(call.id, "✅ Aprovado! Copie o texto abaixo.")
             # Edita o painel para mostrar que foi aprovado
             bot.edit_message_text(
-                f"✅ *APROVADO*\nProjeto ID: {pid}\n(Texto disponível abaixo)", 
+                f"✅ *APROVADO*\\nProjeto ID: {pid}\\n(Texto disponível abaixo)",
                 chat_id=call.message.chat.id, 
                 message_id=call.message.message_id, 
                 parse_mode="Markdown"
@@ -123,6 +136,7 @@ def callback_handler(call):
             # Removemos do rastreador para não apagar mais tarde sem querer
             if pid in message_tracker:
                 del message_tracker[pid]
+                save_memory()
             
         elif action == "ignore":
             bot.answer_callback_query(call.id, "❌ Apagando tudo...")
@@ -137,6 +151,7 @@ def callback_handler(call):
                         logger.error(f"Erro ao apagar msg {mid}: {e}")
                 # Remove da memória
                 del message_tracker[pid]
+                save_memory()
             else:
                 # Fallback: Se o bot reiniciou e perdeu a memória, apaga pelo menos o botão
                 try:
