@@ -141,7 +141,8 @@ def scan_radar():
                 texto = gerar_proposta_groq(title, p.get('preview_description', ''))
 
                 msg1 = bot.send_message(CHAT_ID, f"🎯 *ALVO NA MIRA*\n\n📝 {title}\n💰 {p.get('budget', {}).get('minimum')} USD", parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
-                msg2 = bot.send_message(CHAT_ID, f"", parse_mode="Markdown")
+                # CORREÇÃO AQUI: Preencher o corpo da mensagem
+                msg2 = bot.send_message(CHAT_ID, f"```\n{texto}\n```", parse_mode="Markdown")
 
                 memory[pid] = {'alert_id': msg1.message_id, 'prop_id': msg2.message_id}
                 save_memory(memory)
@@ -212,6 +213,10 @@ def monitor():
         time.sleep(180)
 
 class APIHandler(http.server.BaseHTTPRequestHandler):
+    def do_HEAD(self):
+        self.send_response(200)
+        self.end_headers()
+
     def do_GET(self):
         # Mantém o Health Check para o Render não matar o bot
         self.send_response(200)
@@ -247,7 +252,7 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
                     # Feedback no Log e Telegram
                     logger.info(f"API: Modo alterado para {new_mode}")
                     if bot:
-                        bot.send_message(CHAT_ID, f"📡 *Comando Remoto Recebido*\nModo ativado: ", parse_mode="Markdown")
+                        bot.send_message(CHAT_ID, f"📡 *Comando Remoto Recebido*\nModo ativado: `{new_mode.upper()}`", parse_mode="Markdown")
                     self.send_response(200)
                     self.end_headers()
                     self.wfile.write(json.dumps({"status": "success", "mode": new_mode}).encode())

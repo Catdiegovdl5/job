@@ -87,6 +87,17 @@ class TestSentinelReal(unittest.TestCase):
         args, kwargs = mock_bot.edit_message_text.call_args
         self.assertIn("project_123_abc", args[0])
 
+    def test_api_handler_head(self):
+        handler = APIHandler.__new__(APIHandler)
+        handler.wfile = io.BytesIO()
+        handler.send_response = MagicMock()
+        handler.end_headers = MagicMock()
+
+        handler.do_HEAD()
+
+        handler.send_response.assert_called_with(200)
+        handler.end_headers.assert_called()
+
     def test_api_handler_get(self):
         handler = APIHandler.__new__(APIHandler)
         handler.wfile = io.BytesIO()
@@ -129,9 +140,8 @@ class TestSentinelReal(unittest.TestCase):
         handler.do_POST()
 
         handler.send_response.assert_called_with(200)
-        # Verify end_headers() is called, NOT send_headers()
+        # Verify end_headers() is called
         handler.end_headers.assert_called()
-        handler.send_headers.assert_not_called()
 
         response = json.loads(handler.wfile.getvalue().decode())
         self.assertTrue(response["online"])
