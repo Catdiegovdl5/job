@@ -8,7 +8,6 @@ import json
 import telebot
 import requests
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from groq import Groq
 from freelancersdk.session import Session
 from freelancersdk.resources.projects.projects import search_projects
 from freelancersdk.resources.projects.helpers import create_search_projects_filter
@@ -21,8 +20,6 @@ logger = logging.getLogger("JulesV17")
 TG_TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
 FLN_TOKEN = os.environ.get("FLN_OAUTH_TOKEN")
-# Note: Keeping GROQ_KEY variable for compatibility if needed elsewhere, but using GEMINI_API_KEY for proposal generation
-GROQ_KEY = os.environ.get("GROQ_API_KEY")
 GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
 API_SECRET = os.environ.get("API_SECRET", "1234")
 

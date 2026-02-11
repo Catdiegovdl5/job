@@ -9,20 +9,18 @@ import threading
 # Mock dependencies globally before importing sentinel_real
 mock_requests = MagicMock()
 mock_telebot = MagicMock()
-mock_groq = MagicMock()
 mock_freelancersdk = MagicMock()
 
 sys.modules['requests'] = mock_requests
 sys.modules['telebot'] = mock_telebot
 sys.modules['telebot.types'] = MagicMock()
-sys.modules['groq'] = mock_groq
+# Removed groq mock
 sys.modules['freelancersdk.session'] = mock_freelancersdk
 sys.modules['freelancersdk.resources.projects.projects'] = MagicMock()
 sys.modules['freelancersdk.resources.projects.helpers'] = MagicMock()
 
 # Set environment variables for import
 os.environ['TG_TOKEN'] = 'test_token'
-os.environ['GROQ_API_KEY'] = 'test_key'
 os.environ['GEMINI_API_KEY'] = 'test_gemini_key'
 os.environ['API_SECRET'] = '1234'
 
@@ -33,7 +31,6 @@ class TestSentinelReal(unittest.TestCase):
 
     def setUp(self):
         # Reset the mock before each test
-        mock_groq.reset_mock()
         mock_requests.reset_mock()
         mock_telebot.reset_mock()
 
@@ -42,7 +39,7 @@ class TestSentinelReal(unittest.TestCase):
         sentinel_real.memory["current_mission"] = "python automation scraping"
 
     def test_gerar_proposta_sanitization(self):
-        # Now using Requests for Gemini (renamed test method)
+        # Now using Requests for Gemini
         mock_response = MagicMock()
         mock_response.json.return_value = {
             'candidates': [
