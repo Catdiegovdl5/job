@@ -3,21 +3,43 @@ import requests
 import json
 from datetime import datetime
 
-# Configurações do Jules (Use sua API Key do Google AI Studio)
+# Configurações do Diego (Use sua API Key do Google AI Studio)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
-def call_jules(project_desc, platform):
+def save_memory(data):
     """
-    Calls the Gemini API to generate a proposal based on the project description and platform.
+    Saves the leads/proposals data to a JSON file.
+    """
+    output_file = "leads_ready.json"
+    try:
+        with open(output_file, "w", encoding='utf-8') as f:
+            json.dump(data, f, indent=4, ensure_ascii=False)
+        print(f"Results saved to {output_file}")
+    except Exception as e:
+        print(f"Error saving memory: {e}")
+
+def gerar_proposta_groq(project_desc, platform):
+    """
+    Calls the AI API (currently Gemini acting as Diego) to generate a proposal.
     """
     prompt = f"""
-    Aja como o Jules, Proposals Architect S-Tier.
-    Analise este projeto da plataforma {platform}: '{project_desc}'
-    Use o arsenal: Veo 3, Nano Banana, CAPI, GEO, AEO.
-    Gere uma proposta matadora em {'Português' if platform == '99freelas' else 'Inglês'}.
-    Retorne apenas o texto da proposta.
+"Role: You are Diego, a Python Automation Architect. NOT an AI assistant."
+
+"Style: Turbo Core. Extremely direct, technical, and aggressive. No fluff, no 'Dear Client', no 'I am excited'."
+
+"Structure: Start immediately with the solution (e.g., 'I will automate this using Python/Docker...')."
+
+"Constraints: Max 1500 chars. NEVER use placeholders like [X] or [Date]. Use 'negotiable' if data is missing."
+
+"Signature: Sign STRICTLY as 'Diego'. Do NOT add 'Sincerely' or 'Best regards'."
+
+Project Description: '{project_desc}'
+Platform: {platform}
+Arsenal: Veo 3, Nano Banana, CAPI, GEO, AEO.
+Generate the proposal body now.
     """
-    # Chamada para API do Gemini (Jules)
+
+    # Chamada para API do Gemini
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
     payload = {"contents": [{"parts": [{"text": prompt}]}]}
 
@@ -36,7 +58,7 @@ def fetch_leads():
     """
     Simulates fetching leads from RSS feeds or alerts.
     """
-    # Exemplo: Simulação de captura (Aqui você conectaria RSS de Upwork/Freelancer)
+    # Exemplo: Simulação de captura
     leads = [
         {"platform": "freelancer", "desc": "Need a pro for AI Video and SEO"},
         {"platform": "99freelas", "desc": "Gestor de tráfego com CAPI"}
@@ -45,7 +67,7 @@ def fetch_leads():
     results = []
     for lead in leads:
         print(f"Generating proposal for {lead['platform']}...")
-        proposal = call_jules(lead['desc'], lead['platform'])
+        proposal = gerar_proposta_groq(lead['desc'], lead['platform'])
         results.append({
             "timestamp": datetime.now().isoformat(),
             "platform": lead['platform'],
@@ -53,10 +75,7 @@ def fetch_leads():
             "proposal": proposal
         })
 
-    output_file = "leads_ready.json"
-    with open(output_file, "w", encoding='utf-8') as f:
-        json.dump(results, f, indent=4, ensure_ascii=False)
-    print(f"Results saved to {output_file}")
+    save_memory(results)
 
 if __name__ == "__main__":
     fetch_leads()

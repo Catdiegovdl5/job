@@ -1,35 +1,44 @@
 import unittest
 from unittest.mock import patch, MagicMock
+import sys
 import os
 import json
-from sentinel import call_jules, fetch_leads
+
+# Mock requests module globally before importing sentinel
+mock_requests = MagicMock()
+sys.modules['requests'] = mock_requests
+
+from sentinel import gerar_proposta_groq, fetch_leads, save_memory
 
 class TestSentinel(unittest.TestCase):
 
-    @patch('requests.post')
-    def test_call_jules_success(self, mock_post):
-        # Mocking the Gemini API response
+    def setUp(self):
+        # Reset the mock before each test
+        mock_requests.reset_mock()
+
+    def test_gerar_proposta_groq_success(self):
+        # Configure the mock response
         mock_response = MagicMock()
         mock_response.json.return_value = {
             'candidates': [
                 {
                     'content': {
-                        'parts': [{'text': 'Generated Proposal'}]
+                        'parts': [{'text': 'Diego Proposal'}]
                     }
                 }
             ]
         }
         mock_response.raise_for_status = MagicMock()
-        mock_post.return_value = mock_response
+        mock_requests.post.return_value = mock_response
 
-        result = call_jules("Need video", "freelancer")
-        self.assertEqual(result, "Generated Proposal")
+        result = gerar_proposta_groq("Need video", "freelancer")
+        self.assertEqual(result, "Diego Proposal")
 
-    @patch('sentinel.call_jules')
-    def test_fetch_leads(self, mock_call_jules):
-        mock_call_jules.return_value = "Mocked Proposal"
+    @patch('sentinel.gerar_proposta_groq')
+    def test_fetch_leads(self, mock_gerar_proposta_groq):
+        mock_gerar_proposta_groq.return_value = "Mocked Proposal"
 
-        # Ensure the file doesn't exist before test
+        # Ensure file doesn't exist
         if os.path.exists("leads_ready.json"):
             os.remove("leads_ready.json")
 
@@ -40,6 +49,22 @@ class TestSentinel(unittest.TestCase):
             data = json.load(f)
             self.assertEqual(len(data), 2)
             self.assertEqual(data[0]['proposal'], "Mocked Proposal")
+
+        # Cleanup
+        os.remove("leads_ready.json")
+
+    def test_save_memory(self):
+        data = [{"test": "data"}]
+        # Ensure file doesn't exist
+        if os.path.exists("leads_ready.json"):
+            os.remove("leads_ready.json")
+
+        save_memory(data)
+
+        self.assertTrue(os.path.exists("leads_ready.json"))
+        with open("leads_ready.json", "r") as f:
+            loaded_data = json.load(f)
+            self.assertEqual(loaded_data, data)
 
         # Cleanup
         os.remove("leads_ready.json")
