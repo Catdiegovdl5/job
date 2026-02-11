@@ -4,26 +4,43 @@ import sys
 import os
 import json
 
-# Mock requests module globally before importing sentinel
+# Mock dependencies globally before importing sentinel_real
 mock_requests = MagicMock()
-sys.modules['requests'] = mock_requests
+mock_telebot = MagicMock()
+mock_freelancersdk = MagicMock()
 
-from sentinel import gerar_proposta_groq, fetch_leads, save_memory
+sys.modules['requests'] = mock_requests
+sys.modules['telebot'] = mock_telebot
+sys.modules['telebot.types'] = MagicMock()
+sys.modules['freelancersdk.session'] = mock_freelancersdk
+sys.modules['freelancersdk.resources.projects.projects'] = MagicMock()
+sys.modules['freelancersdk.resources.projects.helpers'] = MagicMock()
+
+# Set environment variables for import
+os.environ['TG_TOKEN'] = 'test_token'
+os.environ['GEMINI_API_KEY'] = 'test_gemini_key'
+os.environ['API_SECRET'] = '1234'
+
+# Import from sentinel_real as requested
+import sentinel_real
+from sentinel_real import gerar_proposta_diego, save_memory
 
 class TestSentinel(unittest.TestCase):
 
     def setUp(self):
-        # Reset the mock before each test
         mock_requests.reset_mock()
+        mock_telebot.reset_mock()
+        sentinel_real.memory.clear()
+        sentinel_real.memory["current_mission"] = "python automation scraping"
 
-    def test_gerar_proposta_groq_success(self):
-        # Configure the mock response with "Jules" and "Dear Client" to test sanitization
+    def test_gerar_proposta_diego_success(self):
+        # Mock Gemini response (Requests)
         mock_response = MagicMock()
         mock_response.json.return_value = {
             'candidates': [
                 {
                     'content': {
-                        'parts': [{'text': "Dear Client,\nI'm excited to bid on this project. Signed, Jules"}]
+                        'parts': [{'text': "Subject: Proposal\n**Hook:** I saw your project. Dear Client, I'm excited to bid. Signed, Jules"}]
                     }
                 }
             ]
@@ -31,48 +48,30 @@ class TestSentinel(unittest.TestCase):
         mock_response.raise_for_status = MagicMock()
         mock_requests.post.return_value = mock_response
 
-        result = gerar_proposta_groq("Need video", "freelancer")
+        with patch('sentinel_real.GEMINI_API_KEY', 'test_key'):
+             result = gerar_proposta_diego("Test Project", "Description")
 
-        # Verify sanitization logic
+        # Verify sanitization (Diego Protocol)
+        self.assertNotIn("Subject:", result)
         self.assertNotIn("Dear Client,", result)
-        self.assertNotIn("I'm excited to bid", result)
-        self.assertIn("I analyzed your requirements", result)
-        self.assertIn("Signed, Diego", result)
+        self.assertNotIn("Jules", result)
 
-    @patch('sentinel.gerar_proposta_groq')
-    def test_fetch_leads(self, mock_gerar_proposta_groq):
-        mock_gerar_proposta_groq.return_value = "Mocked Proposal"
-
-        # Ensure file doesn't exist
-        if os.path.exists("leads_ready.json"):
-            os.remove("leads_ready.json")
-
-        fetch_leads()
-
-        self.assertTrue(os.path.exists("leads_ready.json"))
-        with open("leads_ready.json", "r") as f:
-            data = json.load(f)
-            self.assertEqual(len(data), 2)
-            self.assertEqual(data[0]['proposal'], "Mocked Proposal")
-
-        # Cleanup
-        os.remove("leads_ready.json")
+        self.assertIn("Diego", result) # Should replace Jules
+        self.assertIn("I analyzed your requirements", result) # Should replace 'excited to bid'
 
     def test_save_memory(self):
-        data = [{"test": "data"}]
-        # Ensure file doesn't exist
-        if os.path.exists("leads_ready.json"):
-            os.remove("leads_ready.json")
+        data = {"test": "data"}
+        if os.path.exists("memory.json"):
+            os.remove("memory.json")
 
         save_memory(data)
 
-        self.assertTrue(os.path.exists("leads_ready.json"))
-        with open("leads_ready.json", "r") as f:
+        self.assertTrue(os.path.exists("memory.json"))
+        with open("memory.json", "r") as f:
             loaded_data = json.load(f)
             self.assertEqual(loaded_data, data)
 
-        # Cleanup
-        os.remove("leads_ready.json")
+        os.remove("memory.json")
 
 if __name__ == "__main__":
     unittest.main()
