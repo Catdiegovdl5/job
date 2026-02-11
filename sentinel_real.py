@@ -22,6 +22,7 @@ TG_TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
 FLN_TOKEN = os.environ.get("FLN_OAUTH_TOKEN")
 GROQ_KEY = os.environ.get("GROQ_API_KEY")
+API_SECRET = os.environ.get("API_SECRET", "1234")
 
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
 
@@ -210,13 +211,70 @@ def monitor():
         # ACELERAR RADAR (3 MINUTOS)
         time.sleep(180)
 
-PORT = int(os.environ.get("PORT", 10000))
-class Health(http.server.SimpleHTTPRequestHandler):
+class APIHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
-        self.send_response(200); self.end_headers(); self.wfile.write(b"ONLINE")
+        # Mantém o Health Check para o Render não matar o bot
+        self.send_response(200)
+        self.end_headers()
+        self.wfile.write(b"ONLINE - API READY")
+    def do_POST(self):
+        # Verifica a senha do Gem
+        auth_header = self.headers.get('X-Api-Key')
+        if auth_header != API_SECRET:
+            self.send_response(403)
+            self.end_headers()
+            self.wfile.write(b"Forbidden")
+            return
+        # Rota: Alterar Modo de Missão
+        if self.path == "/api/set_mode":
+            content_len = int(self.headers.get('Content-Length', 0))
+            post_body = self.rfile.read(content_len)
+            try:
+                data = json.loads(post_body)
+                new_mode = data.get("mode")
+
+                # Mapa de Modos
+                mission_map = {
+                    "python": "python automation scraping",
+                    "quick": "scraping data entry excel vba script",
+                    "web": "website react wordpress nodejs"
+                }
+
+                if new_mode in mission_map:
+                    memory["current_mission"] = mission_map[new_mode]
+                    save_memory(memory)
+
+                    # Feedback no Log e Telegram
+                    logger.info(f"API: Modo alterado para {new_mode}")
+                    if bot:
+                        bot.send_message(CHAT_ID, f"📡 *Comando Remoto Recebido*\nModo ativado: `{new_mode.upper()}`", parse_mode="Markdown")
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"status": "success", "mode": new_mode}).encode())
+                else:
+                    self.send_response(400)
+                    self.end_headers()
+                    self.wfile.write(b"Invalid mode")
+            except Exception as e:
+                logger.error(f"API Error: {e}")
+                self.send_response(500)
+                self.end_headers()
+
+        # Rota: Status Report
+        elif self.path == "/api/status":
+            self.send_response(200)
+            self.send_headers()
+            status = {
+                "online": True,
+                "current_mission": memory.get("current_mission"),
+                "projects_processed": len(memory)
+            }
+            self.wfile.write(json.dumps(status).encode())
+
+PORT = int(os.environ.get("PORT", 10000))
 
 if __name__ == "__main__":
-    threading.Thread(target=lambda: socketserver.TCPServer(("", PORT), Health).serve_forever(), daemon=True).start()
+    threading.Thread(target=lambda: socketserver.TCPServer(("", PORT), APIHandler).serve_forever(), daemon=True).start()
     threading.Thread(target=monitor, daemon=True).start()
     if bot:
         logger.info("🤖 Jules V17 (Diego Edition) ONLINE")
