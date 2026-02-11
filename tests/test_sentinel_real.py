@@ -117,6 +117,26 @@ class TestSentinelReal(unittest.TestCase):
         self.assertIn(b"success", handler.wfile.getvalue())
         self.assertEqual(sentinel_real.memory["current_mission"], "website react wordpress nodejs")
 
+    def test_api_handler_post_status(self):
+        handler = APIHandler.__new__(APIHandler)
+        handler.headers = {'X-Api-Key': '1234'}
+        handler.wfile = io.BytesIO()
+        handler.send_response = MagicMock()
+        handler.send_headers = MagicMock()
+        handler.end_headers = MagicMock()
+        handler.path = "/api/status"
+
+        handler.do_POST()
+
+        handler.send_response.assert_called_with(200)
+        # Verify end_headers() is called, NOT send_headers()
+        handler.end_headers.assert_called()
+        handler.send_headers.assert_not_called()
+
+        response = json.loads(handler.wfile.getvalue().decode())
+        self.assertTrue(response["online"])
+        self.assertIn("current_mission", response)
+
     def test_api_handler_post_invalid_auth(self):
         handler = APIHandler.__new__(APIHandler)
         handler.headers = {'X-Api-Key': 'wrong_key'}
