@@ -23,20 +23,12 @@ def gerar_proposta_groq(project_desc, platform):
     Calls the AI API (currently Gemini acting as Diego) to generate a proposal.
     """
     prompt = f"""
-"Role: You are Diego, a Python Automation Architect. NOT an AI assistant."
+SYSTEM OVERRIDE: You are DIEGO, a Python Architect. You represent a premium agency. You are NOT an AI. STOP acting like a generic freelancer.
 
-"Style: Turbo Core. Extremely direct, technical, and aggressive. No fluff, no 'Dear Client', no 'I am excited'."
+Write a bid for '{project_desc}'. START DIRECTLY with the technical solution (e.g., 'I will build a Dockerized Python script...'). NO greeting. NO fluff. Sign strictly as: 'Diego'.
 
-"Structure: Start immediately with the solution (e.g., 'I will automate this using Python/Docker...')."
-
-"Constraints: Max 1500 chars. NEVER use placeholders like [X] or [Date]. Use 'negotiable' if data is missing."
-
-"Signature: Sign STRICTLY as 'Diego'. Do NOT add 'Sincerely' or 'Best regards'."
-
-Project Description: '{project_desc}'
 Platform: {platform}
 Arsenal: Veo 3, Nano Banana, CAPI, GEO, AEO.
-Generate the proposal body now.
     """
 
     # Chamada para API do Gemini
@@ -48,7 +40,14 @@ Generate the proposal body now.
         response.raise_for_status()
         data = response.json()
         if 'candidates' in data and data['candidates']:
-            return data['candidates'][0]['content']['parts'][0]['text']
+            texto_final = data['candidates'][0]['content']['parts'][0]['text']
+
+            # Sanitization Filter (Post-Processing)
+            texto_final = texto_final.replace("Jules", "Diego")
+            texto_final = texto_final.replace("Dear Client,", "")
+            texto_final = texto_final.replace("I'm excited to bid", "I analyzed your requirements")
+
+            return texto_final.strip()
         else:
             return f"Error: No candidates returned from API. Response: {json.dumps(data)}"
     except Exception as e:

@@ -17,13 +17,13 @@ class TestSentinel(unittest.TestCase):
         mock_requests.reset_mock()
 
     def test_gerar_proposta_groq_success(self):
-        # Configure the mock response
+        # Configure the mock response with "Jules" and "Dear Client" to test sanitization
         mock_response = MagicMock()
         mock_response.json.return_value = {
             'candidates': [
                 {
                     'content': {
-                        'parts': [{'text': 'Diego Proposal'}]
+                        'parts': [{'text': "Dear Client,\nI'm excited to bid on this project. Signed, Jules"}]
                     }
                 }
             ]
@@ -32,7 +32,12 @@ class TestSentinel(unittest.TestCase):
         mock_requests.post.return_value = mock_response
 
         result = gerar_proposta_groq("Need video", "freelancer")
-        self.assertEqual(result, "Diego Proposal")
+
+        # Verify sanitization logic
+        self.assertNotIn("Dear Client,", result)
+        self.assertNotIn("I'm excited to bid", result)
+        self.assertIn("I analyzed your requirements", result)
+        self.assertIn("Signed, Diego", result)
 
     @patch('sentinel.gerar_proposta_groq')
     def test_fetch_leads(self, mock_gerar_proposta_groq):
