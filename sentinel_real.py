@@ -55,8 +55,8 @@ def save_memory(data):
 
 memory = load_memory()
 
-def gerar_proposta_groq(titulo, desc):
-    # INTEGRATION DIEGO (GEMINI) - Maintaining function name for compatibility
+def gerar_proposta_diego(titulo, desc):
+    # INTEGRATION DIEGO (GEMINI)
     if not GEMINI_API_KEY: return "⚠️ Configure GEMINI_API_KEY."
 
     prompt = f"""
@@ -143,7 +143,7 @@ def scan_radar():
                 pid = str(p.get('id'))
                 if p.get('budget', {}).get('minimum', 0) < 15: continue
 
-                # Check memory safely
+                # Check memory safely - CRITICAL RACE CONDITION FIX
                 is_known = False
                 with memory_lock:
                     if pid in memory: is_known = True
@@ -154,7 +154,7 @@ def scan_radar():
                 link = f"https://www.freelancer.com/projects/{p.get('seo_url')}"
 
                 # Gera proposta com a nova função blindada
-                texto = gerar_proposta_groq(title, p.get('preview_description', ''))
+                texto = gerar_proposta_diego(title, p.get('preview_description', ''))
 
                 msg1 = bot.send_message(CHAT_ID, f"🎯 *ALVO NA MIRA*\n\n📝 {title}\n💰 {p.get('budget', {}).get('minimum')} USD", parse_mode="Markdown", reply_markup=criar_painel_controle(pid, link))
                 msg2 = bot.send_message(CHAT_ID, f"```\n{texto}\n```", parse_mode="Markdown")

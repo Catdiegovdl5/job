@@ -27,7 +27,7 @@ os.environ['GEMINI_API_KEY'] = 'test_gemini_key'
 os.environ['API_SECRET'] = '1234'
 
 import sentinel_real
-from sentinel_real import gerar_proposta_groq, save_memory, scan_radar, callback_handler, APIHandler
+from sentinel_real import gerar_proposta_diego, save_memory, scan_radar, callback_handler, APIHandler
 
 class TestSentinelReal(unittest.TestCase):
 
@@ -41,8 +41,8 @@ class TestSentinelReal(unittest.TestCase):
         sentinel_real.memory.clear()
         sentinel_real.memory["current_mission"] = "python automation scraping"
 
-    def test_gerar_proposta_groq_sanitization(self):
-        # Now using Requests for Gemini
+    def test_gerar_proposta_sanitization(self):
+        # Now using Requests for Gemini (renamed test method)
         mock_response = MagicMock()
         mock_response.json.return_value = {
             'candidates': [
@@ -57,7 +57,7 @@ class TestSentinelReal(unittest.TestCase):
         mock_requests.post.return_value = mock_response
 
         with patch('sentinel_real.GEMINI_API_KEY', 'test_key'):
-             result = gerar_proposta_groq("Test Project", "Description")
+             result = gerar_proposta_diego("Test Project", "Description")
 
         # Verify sanitization logic restored
         self.assertNotIn("Subject:", result)
