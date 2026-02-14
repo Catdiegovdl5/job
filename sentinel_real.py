@@ -10,7 +10,7 @@ from freelancersdk.resources.projects.projects import search_projects
 from freelancersdk.resources.projects.helpers import create_search_projects_filter
 from dotenv import load_dotenv
 
-# Carrega chaves do arquivo .env (apenas para rodar local)
+# Carrega chaves do arquivo .env IMEDIATAMENTE (apenas para rodar local)
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -20,7 +20,7 @@ logger = logging.getLogger("JulesV17_Groq")
 def check_env_var(name):
     val = os.environ.get(name)
     if not val:
-        logger.error(f"❌ ERRO: Variável {name} não encontrada no .env")
+        logger.error(f"❌ ERRO CRITICO: Variável {name} não encontrada no .env ou sistema")
         return None
     return val
 
@@ -72,12 +72,19 @@ def gerar_proposta_diego(titulo, desc):
 def scan_radar():
     query = memory.get("current_mission", "python automation scraping")
 
-    try:
-        if not FLN_TOKEN:
-             logger.error("❌ ERRO: FLN_OAUTH_TOKEN ausente. Radar abortado.")
-             return
+    # Check token again just in case
+    if not FLN_TOKEN:
+         logger.error("❌ ERRO: FLN_OAUTH_TOKEN ausente. Radar abortado.")
+         return
 
-        session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
+    try:
+        # Robust Session Initialization
+        try:
+            session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
+        except Exception as session_error:
+            logger.error(f"❌ ERRO AO INICIAR SESSÃO FREELANCER: {session_error}. Verifique se o token é válido.")
+            return
+
         search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
         result = search_projects(session, query=query, search_filter=search_filter)
 
@@ -101,7 +108,7 @@ def scan_radar():
 
                 time.sleep(2)
     except Exception as e:
-        logger.error(f"Erro no Radar: {e}")
+        logger.error(f"Erro no Radar (Geral): {e}")
 
 if __name__ == "__main__":
     logger.info("🤖 Jules V17 (Groq Edition) ONLINE no PC DIEGO")

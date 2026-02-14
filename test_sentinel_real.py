@@ -1,10 +1,8 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import os
-import sys
 
-# We need to mock os.environ.get BEFORE importing sentinel_real
-# because it runs top-level code that calls check_env_var
+# Mock environment before importing sentinel_real
 mock_env = {
     "TG_TOKEN": "1234:testtoken",
     "TG_CHAT_ID": "12345",
@@ -46,10 +44,13 @@ class TestDiegoElite(unittest.TestCase):
 
     @patch('sentinel_real.logger')
     def test_check_env_var_missing(self, mock_logger):
+        # We need to reload the module or just test the function independently if possible
+        # Since check_env_var is defined at module level, we can call it directly
         with patch.dict(os.environ, {}, clear=True):
-             val = sentinel_real.check_env_var("MISSING_VAR")
+             val = sentinel_real.check_env_var("MISSING_VAR_TEST")
              self.assertIsNone(val)
-             mock_logger.error.assert_called_with("❌ ERRO: Variável MISSING_VAR não encontrada no .env")
+             # The log message was updated to include "ERRO CRITICO"
+             mock_logger.error.assert_called_with("❌ ERRO CRITICO: Variável MISSING_VAR_TEST não encontrada no .env ou sistema")
 
 if __name__ == "__main__":
     unittest.main()
