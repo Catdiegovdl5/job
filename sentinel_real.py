@@ -4,6 +4,7 @@ import os
 import threading
 import json
 import telebot
+import re
 from groq import Groq
 from freelancersdk.session import Session
 from freelancersdk.resources.projects.projects import search_projects
@@ -43,6 +44,12 @@ except Exception as e:
 memory_lock = threading.Lock()
 MEMORY_FILE = "memory.json"
 
+def escape_markdown(text):
+    if not text: return ""
+    # Remove caracteres que costumam quebrar o Markdown do Telegram
+    # Using proper escaping for backslashes in Python string within bash heredoc
+    return text.replace("_", "\\_").replace("*", "\\*").replace("[", "\\[").replace("`", "\\`")
+
 def load_memory():
     if os.path.exists(MEMORY_FILE):
         try:
@@ -66,10 +73,12 @@ def gerar_proposta_diego(titulo, desc):
                     "content": prompt,
                 }
             ],
-            model="llama3-70b-8192",
+            model="llama-3.3-70b-versatile",
             temperature=0.5,
         )
-        return chat_completion.choices[0].message.content.strip()
+        content = chat_completion.choices[0].message.content
+        # Reforço na regra de sanitização
+        return content.replace("**", "").replace("###", "").strip()
     except Exception as e:
         return f"Erro Groq: {str(e)}"
 
@@ -101,10 +110,14 @@ def scan_radar():
 
                 title = p.get('title')
                 logger.info(f"Processando alvo: {title}")
-                texto = gerar_proposta_diego(title, p.get('preview_description', ''))
+                raw_text = gerar_proposta_diego(title, p.get('preview_description', ''))
+
+                # Sanitização de Saída
+                safe_title = escape_markdown(title)
+                safe_text = escape_markdown(raw_text)
 
                 if bot:
-                    bot.send_message(CHAT_ID, f"🎯 *NOVO ALVO ENCONTRADO*\n\n📝 *Projeto:* {title}\n💰 {p.get('budget', {}).get('minimum', '?')} USD\n\n{texto}", parse_mode="Markdown")
+                    bot.send_message(CHAT_ID, f"🎯 *NOVO ALVO ENCONTRADO*\n\n📝 *Projeto:* {safe_title}\n💰 {p.get('budget', {}).get('minimum', '?')} USD\n\n{safe_text}", parse_mode="Markdown")
 
                 with memory_lock:
                     memory[pid] = True

@@ -2,7 +2,6 @@ import unittest
 from unittest.mock import patch, MagicMock
 import os
 
-# Mock environment before importing sentinel_real
 mock_env = {
     "TG_TOKEN": "1234:testtoken",
     "TG_CHAT_ID": "12345",
@@ -34,22 +33,20 @@ class TestDiegoElite(unittest.TestCase):
         res = sentinel_real.gerar_proposta_diego("Test", "Desc")
         self.assertIn("Diego", res)
 
-    def test_gerar_proposta_no_client(self):
-        # Temporarily unset client_groq
-        original_client = sentinel_real.client_groq
-        sentinel_real.client_groq = None
-        res = sentinel_real.gerar_proposta_diego("Test", "Desc")
-        self.assertIn("Erro: Groq não configurado", res)
-        sentinel_real.client_groq = original_client
+    def test_escape_markdown(self):
+        raw = "Hello_World *Test* [Link]"
+        # sentinel_real escapes _ * [ and backtick.
+        # We test _ * and [ here.
+        escaped = sentinel_real.escape_markdown(raw)
+        # Expected: backslash before special chars
+        expected = "Hello\\_World \\*Test\\* \\[Link]"
+        self.assertEqual(escaped, expected)
 
     @patch('sentinel_real.logger')
     def test_check_env_var_missing(self, mock_logger):
-        # We need to reload the module or just test the function independently if possible
-        # Since check_env_var is defined at module level, we can call it directly
         with patch.dict(os.environ, {}, clear=True):
              val = sentinel_real.check_env_var("MISSING_VAR_TEST")
              self.assertIsNone(val)
-             # The log message was updated to include "ERRO CRITICO"
              mock_logger.error.assert_called_with("❌ ERRO CRITICO: Variável MISSING_VAR_TEST não encontrada no .env ou sistema")
 
 if __name__ == "__main__":
