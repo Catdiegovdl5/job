@@ -1,5 +1,13 @@
 import unittest
-from unittest.mock import patch, MagicMock
+import sys
+from unittest.mock import MagicMock, patch
+
+# Mock requests before importing sentinel
+mock_requests = MagicMock()
+mock_requests.exceptions = MagicMock()
+mock_requests.exceptions.RequestException = Exception
+sys.modules["requests"] = mock_requests
+
 import os
 import json
 from sentinel import call_jules, fetch_leads
