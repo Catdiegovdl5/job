@@ -10,11 +10,15 @@ from freelancersdk.resources.projects.projects import search_projects
 from freelancersdk.resources.projects.helpers import create_search_projects_filter
 from dotenv import load_dotenv
 
-# Carrega chaves do arquivo .env IMEDIATAMENTE (apenas para rodar local)
-load_dotenv()
-
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger("JulesV17_Groq")
+
+# DIAGNOSTIC PROTOCOL: Log Absolute Path of .env
+env_path = os.path.abspath(".env")
+logger.info(f"🔎 DEBUG: Tentando carregar .env de: {env_path}")
+
+# Carrega chaves do arquivo .env IMEDIATAMENTE (apenas para rodar local)
+load_dotenv()
 
 # DIAGNOSTIC PROTOCOL: Verificar Variaveis
 def check_env_var(name):

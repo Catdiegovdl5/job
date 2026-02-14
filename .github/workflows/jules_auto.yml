@@ -14,15 +14,12 @@ jobs:
         with:
           python-version: '3.10'
       - name: Install dependencies
-        run: pip install requests
+        run: pip install -r requirements.txt
       - name: Run Jules Sentinel
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python sentinel.py
-      - name: Commit Results
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add leads_ready.json
-          git commit -m "Novas propostas geradas pelo Jules" || echo "No changes to commit"
-          git push
+          FLN_OAUTH_TOKEN: ${{ secrets.FLN_OAUTH_TOKEN }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT_ID: ${{ secrets.TG_CHAT_ID }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        run: python sentinel_real.py
