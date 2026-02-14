@@ -1,1 +1,5 @@
 requests
+pyTelegramBotAPI
+freelancersdk
+python-dotenv
+groq
