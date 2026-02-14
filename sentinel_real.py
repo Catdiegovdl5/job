@@ -16,10 +16,18 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger("JulesV17_Groq")
 
-TG_TOKEN = os.environ.get("TG_TOKEN")
-CHAT_ID = os.environ.get("TG_CHAT_ID")
-FLN_TOKEN = os.environ.get("FLN_OAUTH_TOKEN")
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+# DIAGNOSTIC PROTOCOL: Verificar Variaveis
+def check_env_var(name):
+    val = os.environ.get(name)
+    if not val:
+        logger.error(f"❌ ERRO: Variável {name} não encontrada no .env")
+        return None
+    return val
+
+TG_TOKEN = check_env_var("TG_TOKEN")
+CHAT_ID = check_env_var("TG_CHAT_ID")
+FLN_TOKEN = check_env_var("FLN_OAUTH_TOKEN")
+GROQ_API_KEY = check_env_var("GROQ_API_KEY")
 
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
 try:
@@ -65,6 +73,10 @@ def scan_radar():
     query = memory.get("current_mission", "python automation scraping")
 
     try:
+        if not FLN_TOKEN:
+             logger.error("❌ ERRO: FLN_OAUTH_TOKEN ausente. Radar abortado.")
+             return
+
         session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
         search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
         result = search_projects(session, query=query, search_filter=search_filter)
@@ -93,6 +105,14 @@ def scan_radar():
 
 if __name__ == "__main__":
     logger.info("🤖 Jules V17 (Groq Edition) ONLINE no PC DIEGO")
+
+    # Log de Inicio (Masked)
+    def mask(val): return f"{val[:4]}..." if val and len(val) > 4 else "MISSING"
+
+    logger.info(f"🔧 CONFIG LOADED: TG_TOKEN={mask(TG_TOKEN)}")
+    logger.info(f"🔧 CONFIG LOADED: FLN_TOKEN={mask(FLN_TOKEN)}")
+    logger.info(f"🔧 CONFIG LOADED: GROQ_KEY={mask(GROQ_API_KEY)}")
+
     while True:
         scan_radar()
         time.sleep(60)
