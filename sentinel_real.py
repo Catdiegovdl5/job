@@ -2,8 +2,6 @@ import time
 import logging
 import os
 import threading
-import http.server
-import socketserver
 import json
 import telebot
 from groq import Groq
@@ -16,39 +14,37 @@ from dotenv import load_dotenv
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV17")
+logger = logging.getLogger("JulesV17_Groq")
 
-# Configuração para GROQ EDITION (PC DIEGO)
-TG_TOKEN = os.environ.get("TG_TOKEN", "7724330024:AAFtoSLgXVDlvNmeyPCVMnkWIqbk4wvLSVg")
-CHAT_ID = os.environ.get("TG_CHAT_ID", "1501131002")
+TG_TOKEN = os.environ.get("TG_TOKEN")
+CHAT_ID = os.environ.get("TG_CHAT_ID")
 FLN_TOKEN = os.environ.get("FLN_OAUTH_TOKEN")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-API_SECRET = os.environ.get("API_SECRET", "1234")
 
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
+try:
+    client_groq = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+except Exception as e:
+    logger.error(f"Erro ao inicializar Groq: {e}")
+    client_groq = None
+
 memory_lock = threading.Lock()
 MEMORY_FILE = "memory.json"
 
 def load_memory():
-    with memory_lock:
-        if os.path.exists(MEMORY_FILE):
-            try:
-                with open(MEMORY_FILE, "r") as f:
-                    data = json.load(f)
-                    if "current_mission" not in data:
-                        data["current_mission"] = "python automation scraping"
-                    return data
-            except: pass
-        return {"current_mission": "python automation scraping"}
+    if os.path.exists(MEMORY_FILE):
+        try:
+            with open(MEMORY_FILE, "r") as f:
+                return json.load(f)
+        except: pass
+    return {"current_mission": "python automation scraping"}
 
 memory = load_memory()
 
 def gerar_proposta_diego(titulo, desc):
-    if not GROQ_API_KEY: return "⚠️ Configure GROQ_API_KEY."
+    if not client_groq: return "⚠️ Erro: Groq não configurado."
 
-    client_groq = Groq(api_key=GROQ_API_KEY)
-
-    prompt = f"Role: Diego, Solutions Architect. Task: Technical bid for '{titulo}'. Content: {desc}. Rules: No markdown, plain text only, start with technical solution, sign 'Diego'."
+    prompt = f"Role: Diego, Solutions Architect. Create a technical bid for: {titulo}. Description: {desc}. Rule: NO markdown, plain text only, be direct, sign 'Diego'."
 
     try:
         chat_completion = client_groq.chat.completions.create(
@@ -59,16 +55,14 @@ def gerar_proposta_diego(titulo, desc):
                 }
             ],
             model="llama3-70b-8192",
+            temperature=0.5,
         )
-        texto = chat_completion.choices[0].message.content
-        return texto.replace("**", "").replace("Jules", "Diego").strip()
+        return chat_completion.choices[0].message.content.strip()
     except Exception as e:
         return f"Erro Groq: {str(e)}"
 
 def scan_radar():
-    with memory_lock:
-        if not bot or not FLN_TOKEN: return
-        query = memory.get("current_mission")
+    query = memory.get("current_mission", "python automation scraping")
 
     try:
         session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
@@ -78,39 +72,27 @@ def scan_radar():
         if result and 'projects' in result:
             for p in result['projects'][:2]:
                 pid = str(p.get('id'))
+
                 with memory_lock:
                     if pid in memory: continue
 
                 title = p.get('title')
+                logger.info(f"Processando alvo: {title}")
                 texto = gerar_proposta_diego(title, p.get('preview_description', ''))
-                msg = bot.send_message(CHAT_ID, f"🎯 *ALVO*\n📝 {title}\n\n{texto}", parse_mode="Markdown")
+
+                if bot:
+                    bot.send_message(CHAT_ID, f"🎯 *NOVO ALVO ENCONTRADO*\n\n📝 *Projeto:* {title}\n💰 {p.get('budget', {}).get('minimum', '?')} USD\n\n{texto}", parse_mode="Markdown")
 
                 with memory_lock:
-                    memory[pid] = {'alert_id': msg.message_id}
+                    memory[pid] = True
                     with open(MEMORY_FILE, "w") as f: json.dump(memory, f)
-    except Exception as e: logger.error(f"Erro Radar: {e}")
 
-class APIHandler(http.server.BaseHTTPRequestHandler):
-    def do_POST(self):
-        if self.headers.get('X-Api-Key') != API_SECRET:
-            self.send_response(403); self.end_headers(); return
-        if self.path == "/api/set_mode":
-            content_len = int(self.headers.get('Content-Length', 0))
-            data = json.loads(self.rfile.read(content_len).decode('utf-8'))
-            new_mode = data.get("mode")
-            with memory_lock:
-                memory["current_mission"] = new_mode
-            bot.send_message(CHAT_ID, f"📡 [OPAL] Modo: {new_mode.upper()}")
-            self.send_response(200); self.end_headers()
+                time.sleep(2)
+    except Exception as e:
+        logger.error(f"Erro no Radar: {e}")
 
 if __name__ == "__main__":
-    if bot:
-        try:
-            bot.send_message(CHAT_ID, "🚀 Jules V17 (Groq Edition) ONLINE")
-        except Exception as e:
-            logger.error(f"Erro ao enviar mensagem de inicio: {e}")
-
-    threading.Thread(target=lambda: socketserver.TCPServer(("", int(os.environ.get("PORT", 10000))), APIHandler).serve_forever(), daemon=True).start()
+    logger.info("🤖 Jules V17 (Groq Edition) ONLINE no PC DIEGO")
     while True:
         scan_radar()
-        time.sleep(180)
+        time.sleep(60)
