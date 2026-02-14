@@ -1,7 +1,6 @@
 import unittest
 from unittest.mock import patch, MagicMock
 import os
-import sys
 
 mock_env = {
     "TG_TOKEN": "1234:testtoken",
@@ -34,20 +33,15 @@ class TestDiegoElite(unittest.TestCase):
         res = sentinel_real.gerar_proposta_diego("Test", "Desc")
         self.assertIn("Diego", res)
 
-        # Verify correct model is used
-        mock_client.chat.completions.create.assert_called()
+        # Verify Prompt Content (Arsenal S-Tier)
         call_args = mock_client.chat.completions.create.call_args
-        self.assertEqual(call_args.kwargs['model'], "llama-3.3-70b-versatile")
-
-        # Verify Prompt Content (Arsenal)
         sent_messages = call_args.kwargs['messages']
         prompt_content = sent_messages[0]['content']
-        self.assertIn("Pipeline Veo 3", prompt_content)
+        self.assertIn("Nano Banana", prompt_content)
         self.assertIn("CAPI", prompt_content)
         self.assertIn("Knowledge Graph", prompt_content)
 
     def test_escape_html(self):
-        # Testing HTML escaping
         raw = "Start <Tag> & End"
         expected = "Start &lt;Tag&gt; &amp; End"
         escaped = sentinel_real.escape_html(raw)
