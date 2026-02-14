@@ -4,7 +4,7 @@ import os
 import threading
 import json
 import telebot
-import re
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 from groq import Groq
 from freelancersdk.session import Session
 from freelancersdk.resources.projects.projects import search_projects
@@ -44,11 +44,10 @@ except Exception as e:
 memory_lock = threading.Lock()
 MEMORY_FILE = "memory.json"
 
-def escape_markdown(text):
+def escape_html(text):
     if not text: return ""
-    # Remove caracteres que costumam quebrar o Markdown do Telegram
-    # Using proper escaping for backslashes in Python string within bash heredoc
-    return text.replace("_", "\\_").replace("*", "\\*").replace("[", "\\[").replace("`", "\\`")
+    # Remove HTML-unsafe characters
+    return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 def load_memory():
     if os.path.exists(MEMORY_FILE):
@@ -63,7 +62,15 @@ memory = load_memory()
 def gerar_proposta_diego(titulo, desc):
     if not client_groq: return "⚠️ Erro: Groq não configurado."
 
-    prompt = f"Role: Diego, Solutions Architect. Create a technical bid for: {titulo}. Description: {desc}. Rule: NO markdown, plain text only, be direct, sign 'Diego'."
+    # ARSENAL INTEGRATION (AGENTS.md)
+    prompt = f"""Role: Diego, Solutions Architect. Create a technical bid for: {titulo}.
+    Description: {desc}.
+    Rules: NO markdown, plain text only, be direct, sign 'Diego'.
+    Include MUST-HAVE Technical Arsenal:
+    - Video: Pipeline Veo 3 + Nano Banana + ElevenLabs.
+    - Traffic: CAPI + GTM Server-Side.
+    - SEO: GEO + AEO + Knowledge Graph.
+    """
 
     try:
         chat_completion = client_groq.chat.completions.create(
@@ -109,15 +116,32 @@ def scan_radar():
                     if pid in memory: continue
 
                 title = p.get('title')
+                seo_url = p.get('seo_url')
+
+                # Construct Project URL
+                project_link = f"https://www.freelancer.com/projects/{seo_url}" if seo_url else f"https://www.freelancer.com/projects/{pid}"
+
                 logger.info(f"Processando alvo: {title}")
                 raw_text = gerar_proposta_diego(title, p.get('preview_description', ''))
 
-                # Sanitização de Saída
-                safe_title = escape_markdown(title)
-                safe_text = escape_markdown(raw_text)
+                # Sanitização de Saída (HTML)
+                safe_title = escape_html(title)
+                safe_text = escape_html(raw_text)
 
                 if bot:
-                    bot.send_message(CHAT_ID, f"🎯 *NOVO ALVO ENCONTRADO*\n\n📝 *Projeto:* {safe_title}\n💰 {p.get('budget', {}).get('minimum', '?')} USD\n\n{safe_text}", parse_mode="Markdown")
+                    # Create Buttons
+                    markup = InlineKeyboardMarkup()
+                    markup.add(
+                        InlineKeyboardButton("Abrir Projeto", url=project_link),
+                        InlineKeyboardButton("Gerar Nova", callback_data=f"regen_{pid}")
+                    )
+
+                    bot.send_message(
+                        CHAT_ID,
+                        f"🎯 <b>NOVO ALVO ENCONTRADO</b>\n\n📝 <b>Projeto:</b> {safe_title}\n💰 {p.get('budget', {}).get('minimum', '?')} USD\n\n{safe_text}",
+                        parse_mode="HTML",
+                        reply_markup=markup
+                    )
 
                 with memory_lock:
                     memory[pid] = True
@@ -136,6 +160,10 @@ if __name__ == "__main__":
     logger.info(f"🔧 CONFIG LOADED: TG_TOKEN={mask(TG_TOKEN)}")
     logger.info(f"🔧 CONFIG LOADED: FLN_TOKEN={mask(FLN_TOKEN)}")
     logger.info(f"🔧 CONFIG LOADED: GROQ_KEY={mask(GROQ_API_KEY)}")
+
+    # Start polling in a separate thread to handle button callbacks if implemented later
+    if bot:
+        threading.Thread(target=bot.infinity_polling, kwargs={'timeout': 10, 'long_polling_timeout': 5}, daemon=True).start()
 
     while True:
         scan_radar()
