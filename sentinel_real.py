@@ -34,7 +34,7 @@ MEMORY_FILE = "memory.json"
 def load_memory():
     if os.path.exists(MEMORY_FILE):
         try:
-            with open(MEMORY_FILE, "r") as f:
+            with open(MEMORY_FILE, "r", encoding='utf-8') as f:
                 return json.load(f)
         except: pass
     return {"current_mission": "python automation scraping"}
@@ -85,7 +85,7 @@ def scan_radar():
 
                 with memory_lock:
                     memory[pid] = True
-                    with open(MEMORY_FILE, "w") as f: json.dump(memory, f)
+                    with open(MEMORY_FILE, "w", encoding='utf-8') as f: json.dump(memory, f)
 
                 time.sleep(2)
     except Exception as e:
