@@ -6,8 +6,7 @@ import http.server
 import socketserver
 import json
 import telebot
-import requests
-from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
+from groq import Groq
 from freelancersdk.session import Session
 from freelancersdk.resources.projects.projects import search_projects
 from freelancersdk.resources.projects.helpers import create_search_projects_filter
@@ -19,10 +18,11 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 logger = logging.getLogger("JulesV17")
 
-TG_TOKEN = os.environ.get("TG_TOKEN")
-CHAT_ID = os.environ.get("TG_CHAT_ID")
+# Configuração para GROQ EDITION (PC DIEGO)
+TG_TOKEN = os.environ.get("TG_TOKEN", "7724330024:AAFtoSLgXVDlvNmeyPCVMnkWIqbk4wvLSVg")
+CHAT_ID = os.environ.get("TG_CHAT_ID", "1501131002")
 FLN_TOKEN = os.environ.get("FLN_OAUTH_TOKEN")
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
 API_SECRET = os.environ.get("API_SECRET", "1234")
 
 bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
@@ -44,18 +44,26 @@ def load_memory():
 memory = load_memory()
 
 def gerar_proposta_diego(titulo, desc):
-    if not GEMINI_API_KEY: return "⚠️ Configure GEMINI_API_KEY."
+    if not GROQ_API_KEY: return "⚠️ Configure GROQ_API_KEY."
+
+    client_groq = Groq(api_key=GROQ_API_KEY)
+
     prompt = f"Role: Diego, Solutions Architect. Task: Technical bid for '{titulo}'. Content: {desc}. Rules: No markdown, plain text only, start with technical solution, sign 'Diego'."
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={GEMINI_API_KEY}"
-    payload = {"contents": [{"parts": [{"text": prompt}]}]}
+
     try:
-        response = requests.post(url, json=payload)
-        response.raise_for_status()
-        data = response.json()
-        texto = data['candidates'][0]['content']['parts'][0]['text']
+        chat_completion = client_groq.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
+            ],
+            model="llama3-70b-8192",
+        )
+        texto = chat_completion.choices[0].message.content
         return texto.replace("**", "").replace("Jules", "Diego").strip()
     except Exception as e:
-        return f"Erro Gemini: {str(e)}"
+        return f"Erro Groq: {str(e)}"
 
 def scan_radar():
     with memory_lock:
@@ -88,7 +96,7 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(403); self.end_headers(); return
         if self.path == "/api/set_mode":
             content_len = int(self.headers.get('Content-Length', 0))
-            data = json.loads(self.rfile.read(content_len))
+            data = json.loads(self.rfile.read(content_len).decode('utf-8'))
             new_mode = data.get("mode")
             with memory_lock:
                 memory["current_mission"] = new_mode
@@ -96,6 +104,12 @@ class APIHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(200); self.end_headers()
 
 if __name__ == "__main__":
+    if bot:
+        try:
+            bot.send_message(CHAT_ID, "🚀 Jules V17 (Groq Edition) ONLINE")
+        except Exception as e:
+            logger.error(f"Erro ao enviar mensagem de inicio: {e}")
+
     threading.Thread(target=lambda: socketserver.TCPServer(("", int(os.environ.get("PORT", 10000))), APIHandler).serve_forever(), daemon=True).start()
     while True:
         scan_radar()
