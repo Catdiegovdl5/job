@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV49_Efficiency")
+logger = logging.getLogger("JulesV50_CleanProtocol")
 
 load_dotenv()
 
@@ -108,7 +108,7 @@ def handle_mission_command(message):
     markup.add(btn_fast)
     markup.add(btn_stier)
     config = memory.get("config", {})
-    bot.reply_to(message, f"🎮 <b>JULES V4.9 (EFFICIENCY)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
+    bot.reply_to(message, f"🎮 <b>JULES V5.0 (CLEAN PROTOCOL)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
@@ -196,7 +196,7 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
          context_focus = "Visual Design & Image Generation"
          tool_suggestion = "Midjourney, Photoshop (Firefly), Canva, Stable Diffusion"
 
-    # --- LANGUAGE ENFORCER PROMPT (V4.8 BLINDAGEM) ---
+    # --- LANGUAGE ENFORCER PROMPT (V5.0 CLEAN PROTOCOL) ---
     prompt = f"""
     Role: Diego, AI Expert.
     Project: "{titulo}"
@@ -210,6 +210,8 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     1. Write summary in strict Portuguese (Brazil).
     2. List ONLY relevant tools (Focus on SUGGESTED ARSENAL if applicable).
     3. Write proposal in strict Professional English.
+
+    STRICT RULE: NEVER use bolding (**), italics (_), or headers (###). Use only plain text. For lists, use a simple hyphen (-). Do NOT include the words 'RESUMO:', 'ARSENAL:', or 'PROPOSTA:' inside the content of the sections themselves.
 
     CRITICAL INSTRUCTION: SECAO 1 (RESUMO) is a briefing for the user about the CLIENT'S NEEDS. Do NOT use phrases like 'Estou aqui para ajudar' or 'Eu vou fazer' in SECAO 1. Instead, use 'O cliente precisa...', 'O projeto exige...' ou 'O objetivo é...'. Leave all your personal offers and 'I can help' phrases exclusively for SECAO 3.
 
@@ -253,8 +255,9 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
         )
         content = completion.choices[0].message.content.strip()
 
-        # --- POLISHED OUTPUT (CLEANING) ---
-        content = content.replace("##", "").replace("* ", "• ")
+        # --- POLISHED OUTPUT (V5.0 DEEP CLEANING) ---
+        # Remove markdown chars (*, #, _)
+        content = re.sub(r'[\*\#_]', '', content)
 
         # Remove Language Tags
         for tag in ["(PT-BR)", "(ENGLISH)", "(Portuguese Brazil 🇧🇷)", "(Project Language)"]:
@@ -290,22 +293,24 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
                      resumo = part.split(":", 1)[1].strip()
                 else:
                      resumo = part.replace("1: RESUMO", "").strip()
-                # Remove prefixes using regex
-                resumo = re.sub(r'^(RESUMO|Resumo)\s*[:\-]*\s*', '', resumo).strip()
+                # V5.0 DEEP CLEANING LABELS
+                resumo = re.sub(r'^(RESUMO|Resumo|Briefing|O cliente)\s*[:\-]*\s*', '', resumo, flags=re.IGNORECASE).strip(); resumo = re.sub(r'^(RESUMO|Resumo|Briefing|O cliente)\s*[:\-]*\s*', '', resumo, flags=re.IGNORECASE).strip()
 
             elif "2: FERRAMENTAS" in part or part.startswith("2:"):
                 if ":" in part:
                     ferramentas = part.split(":", 1)[1].strip()
                 else:
                     ferramentas = part.replace("2: FERRAMENTAS", "").strip()
-                ferramentas = re.sub(r'^(FERRAMENTAS|Ferramentas)\s*[:\-]*\s*', '', ferramentas).strip()
+                # V5.0 DEEP CLEANING LABELS
+                ferramentas = re.sub(r'^(FERRAMENTAS|Arsenal|Tools|Stack)\s*[:\-]*\s*', '', ferramentas, flags=re.IGNORECASE).strip(); ferramentas = re.sub(r'^(FERRAMENTAS|Arsenal|Tools|Stack)\s*[:\-]*\s*', '', ferramentas, flags=re.IGNORECASE).strip()
 
             elif "3: PROPOSTA" in part or part.startswith("3:"):
                 if ":" in part:
                     proposta = part.split(":", 1)[1].strip()
                 else:
                     proposta = part.replace("3: PROPOSTA", "").strip()
-                proposta = re.sub(r'^(PROPOSTA|Proposta)\s*[:\-]*\s*', '', proposta).strip()
+                # V5.0 DEEP CLEANING LABELS
+                proposta = re.sub(r'^(PROPOSTA|Proposal|Offer)\s*[:\-]*\s*', '', proposta, flags=re.IGNORECASE).strip(); proposta = re.sub(r'^(PROPOSTA|Proposal|Offer)\s*[:\-]*\s*', '', proposta, flags=re.IGNORECASE).strip()
 
         return nivel, resumo, ferramentas, proposta
 
@@ -407,7 +412,7 @@ def scan_radar():
 
 if __name__ == "__main__":
     get_my_id()
-    logger.info("🤖 Jules V4.9 (EFFICIENCY) ONLINE")
+    logger.info("🤖 Jules V5.0 (CLEAN PROTOCOL) ONLINE")
     t = threading.Thread(target=start_telegram_listener)
     t.daemon = True
     t.start()
