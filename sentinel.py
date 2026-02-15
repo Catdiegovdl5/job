@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV47_ContextAware")
+logger = logging.getLogger("JulesV48_Tactical")
 
 load_dotenv()
 
@@ -43,12 +43,25 @@ MY_ACCEPTED_SKILLS = [
 
 MY_SKILLS_SET = {s.lower().strip() for s in MY_ACCEPTED_SKILLS}
 
-# --- FORÇA BRUTA (AI OVERRIDE) ---
-FORCE_KEYWORDS = ["chatbot", "gpt", "ai agent", "artificial intelligence", "midjourney", "automation", "make.com", "n8n", "content writing"]
+# --- FORÇA BRUTA (AI OVERRIDE - V4.8 EXPANSION) ---
+FORCE_KEYWORDS = [
+    "chatbot", "ai agent", "design", "logo", "writing", "translation",
+    "image", "editing", "voice", "animation", "content", "gpt",
+    "artificial intelligence", "midjourney", "automation", "make.com", "n8n"
+]
 
+# --- RADAR RECONFIGURATION (V4.8) ---
 MISSIONS = {
-    "caixa_rapido": ["AI Writing", "AI Image", "Translation", "Content Writing", "Voice Synthesis"],
-    "nivel_s": ["Chatbot", "AI Agents", "Automation", "AI Research", "AI Development"]
+    "caixa_rapido": [
+        "Visual Design", "AI Graphic Design", "AI Art Creation", "AI Image Editing",
+        "Image Processing", "AI Content Writing", "AI Writing", "AI Translation",
+        "Text Recognition", "Photo Editing"
+    ],
+    "nivel_s": [
+        "Chatbot", "AI Chatbot Development", "Conversational AI", "Chatbot Integration",
+        "AI Agents", "AI Animation", "Voice Synthesis", "Image Analysis",
+        "AI Research", "AI Text-to-speech"
+    ]
 }
 
 # --- GLOBAL BANKER ---
@@ -95,7 +108,7 @@ def handle_mission_command(message):
     markup.add(btn_fast)
     markup.add(btn_stier)
     config = memory.get("config", {})
-    bot.reply_to(message, f"🎮 <b>JULES V4.7 (CONTEXT AWARE)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
+    bot.reply_to(message, f"🎮 <b>JULES V4.8 (TACTICAL)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
@@ -162,16 +175,46 @@ def start_telegram_listener():
 def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     if not client_groq: return "N/A", "Erro", "N/A", "N/A"
 
-    # --- LANGUAGE ENFORCER PROMPT (V4.7 Context Awareness) ---
+    # --- TACTICAL INTELLIGENCE (V4.8) ---
+    titulo_lower = titulo.lower()
+    desc_lower = desc.lower()
+
+    # Priority Order: Chatbot/Auto -> Content -> Visual
+    # This prevents "SEO Writing" from being caught by "art" in "articles" if we were scanning visual first without strict boundaries
+    # But since we use simple 'in', we should order by specificity or check full words.
+
+    context_focus = "General"
+    tool_suggestion = "Best available tools"
+
+    # Use word boundaries for stricter matching or prioritize unique keywords
+
+    is_chatbot_auto = any(k in titulo_lower or k in desc_lower for k in ["chatbot", "automation", "agent", "python", "script", "scraping", "n8n", "make", "development"])
+    is_content = any(k in titulo_lower or k in desc_lower for k in ["writing", "translation", "content", "copy", "text", "seo", "article", "blog"])
+    is_visual = any(k in titulo_lower or k in desc_lower for k in ["design", "image", "logo", "art ", "visual", "photo", "graphic"])
+
+    if is_chatbot_auto:
+         context_focus = "Chatbot & Automation"
+         tool_suggestion = "OpenAI API, n8n, Make.com, Python, LangChain"
+    elif is_content:
+         context_focus = "Content Writing & Translation"
+         tool_suggestion = "GPT-4o, Claude 3.5 Sonnet, SEO Surfer, Jasper"
+    elif is_visual:
+         context_focus = "Visual Design & Image Generation"
+         tool_suggestion = "Midjourney, Photoshop (Firefly), Canva, Stable Diffusion"
+
+    # --- LANGUAGE ENFORCER PROMPT (V4.8 BLINDAGEM) ---
     prompt = f"""
     Role: Diego, AI Expert.
     Project: "{titulo}"
     Budget: "{budget_str}" (Approx ${usd_val:.2f} USD)
     Context: "{desc}"
 
+    DETECTED CATEGORY: {context_focus}
+    SUGGESTED ARSENAL: {tool_suggestion}
+
     INSTRUCTIONS:
     1. Write summary in strict Portuguese (Brazil).
-    2. List ONLY relevant tools (Free/Paid).
+    2. List ONLY relevant tools (Focus on SUGGESTED ARSENAL if applicable).
     3. Write proposal in strict Professional English.
 
     CRITICAL INSTRUCTION: SECAO 1 (RESUMO) is a briefing for the user about the CLIENT'S NEEDS. Do NOT use phrases like 'Estou aqui para ajudar' or 'Eu vou fazer' in SECAO 1. Instead, use 'O cliente precisa...', 'O projeto exige...' ou 'O objetivo é...'. Leave all your personal offers and 'I can help' phrases exclusively for SECAO 3.
@@ -360,7 +403,7 @@ def scan_radar():
 
 if __name__ == "__main__":
     get_my_id()
-    logger.info("🤖 Jules V4.7 (CONTEXT AWARE) ONLINE")
+    logger.info("🤖 Jules V4.8 (TACTICAL) ONLINE")
     t = threading.Thread(target=start_telegram_listener)
     t.daemon = True
     t.start()
