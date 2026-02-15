@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV50_CleanProtocol")
+logger = logging.getLogger("JulesV51_TotalCoverage")
 
 load_dotenv()
 
@@ -43,24 +43,25 @@ MY_ACCEPTED_SKILLS = [
 
 MY_SKILLS_SET = {s.lower().strip() for s in MY_ACCEPTED_SKILLS}
 
-# --- FORÇA BRUTA (AI OVERRIDE - V4.8 EXPANSION) ---
+# --- FORÇA BRUTA (AI OVERRIDE - V5.1 TOTAL SKILL COVERAGE) ---
 FORCE_KEYWORDS = [
-    "chatbot", "ai agent", "design", "logo", "writing", "translation",
-    "image", "editing", "voice", "animation", "content", "gpt",
-    "artificial intelligence", "midjourney", "automation", "make.com", "n8n"
+    "chatbot", "ai", "agent", "design", "logo", "writing", "video",
+    "editing", "seo", "marketing", "shopify", "automation", "excel", "data"
 ]
 
-# --- RADAR RECONFIGURATION (V4.8) ---
+# --- RADAR RECONFIGURATION (V5.1 - 15 Categories) ---
 MISSIONS = {
     "caixa_rapido": [
-        "Visual Design", "AI Graphic Design", "AI Art Creation", "AI Image Editing",
-        "Image Processing", "AI Content Writing", "AI Writing", "AI Translation",
-        "Text Recognition", "Photo Editing"
+        "Data Entry", "Excel", "Graphic Design", "Logo Design", "Photoshop",
+        "SEO", "Article Writing", "Virtual Assistant", "Photo Editing",
+        "Content Writing", "Social Media Marketing", "Copywriting",
+        "Research", "Translation", "Product Descriptions"
     ],
     "nivel_s": [
-        "Chatbot", "AI Chatbot Development", "Conversational AI", "Chatbot Integration",
-        "AI Agents", "AI Animation", "Voice Synthesis", "Image Analysis",
-        "AI Research", "AI Text-to-speech"
+        "Artificial Intelligence", "Chatbot", "Video Editing", "Shopify",
+        "Automation", "AI Agents", "n8n", "Make.com", "Digital Marketing",
+        "Facebook Ads", "Animation", "Data Analysis", "Prompt Engineering",
+        "Conversational AI", "E-commerce"
     ]
 }
 
@@ -108,7 +109,7 @@ def handle_mission_command(message):
     markup.add(btn_fast)
     markup.add(btn_stier)
     config = memory.get("config", {})
-    bot.reply_to(message, f"🎮 <b>JULES V5.0 (CLEAN PROTOCOL)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
+    bot.reply_to(message, f"🎮 <b>JULES V5.1 (TOTAL COVERAGE)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
@@ -294,7 +295,7 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
                 else:
                      resumo = part.replace("1: RESUMO", "").strip()
                 # V5.0 DEEP CLEANING LABELS
-                resumo = re.sub(r'^(RESUMO|Resumo|Briefing|O cliente)\s*[:\-]*\s*', '', resumo, flags=re.IGNORECASE).strip(); resumo = re.sub(r'^(RESUMO|Resumo|Briefing|O cliente)\s*[:\-]*\s*', '', resumo, flags=re.IGNORECASE).strip()
+                resumo = re.sub(r'^(RESUMO|Resumo|Briefing|O cliente)\s*[:\-]*\s*', '', resumo, flags=re.IGNORECASE).strip()
 
             elif "2: FERRAMENTAS" in part or part.startswith("2:"):
                 if ":" in part:
@@ -302,7 +303,7 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
                 else:
                     ferramentas = part.replace("2: FERRAMENTAS", "").strip()
                 # V5.0 DEEP CLEANING LABELS
-                ferramentas = re.sub(r'^(FERRAMENTAS|Arsenal|Tools|Stack)\s*[:\-]*\s*', '', ferramentas, flags=re.IGNORECASE).strip(); ferramentas = re.sub(r'^(FERRAMENTAS|Arsenal|Tools|Stack)\s*[:\-]*\s*', '', ferramentas, flags=re.IGNORECASE).strip()
+                ferramentas = re.sub(r'^(FERRAMENTAS|Arsenal|Tools|Stack)\s*[:\-]*\s*', '', ferramentas, flags=re.IGNORECASE).strip()
 
             elif "3: PROPOSTA" in part or part.startswith("3:"):
                 if ":" in part:
@@ -310,7 +311,7 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
                 else:
                     proposta = part.replace("3: PROPOSTA", "").strip()
                 # V5.0 DEEP CLEANING LABELS
-                proposta = re.sub(r'^(PROPOSTA|Proposal|Offer)\s*[:\-]*\s*', '', proposta, flags=re.IGNORECASE).strip(); proposta = re.sub(r'^(PROPOSTA|Proposal|Offer)\s*[:\-]*\s*', '', proposta, flags=re.IGNORECASE).strip()
+                proposta = re.sub(r'^(PROPOSTA|Proposal|Offer)\s*[:\-]*\s*', '', proposta, flags=re.IGNORECASE).strip()
 
         return nivel, resumo, ferramentas, proposta
 
@@ -339,8 +340,8 @@ def scan_radar():
         projects_list = result.get('projects')
         if projects_list:
             count = 0
-            # SCAN THROTTLING (V4.9) - Analyze only 3 projects per cycle
-            for p in projects_list[:3]:
+            # SCAN THROTTLING (V5.1) - Increased to 15 per cycle
+            for p in projects_list[:15]:
                 if p.get('status', 'active') != 'active': continue
 
                 pid = str(p.get('id'))
@@ -412,11 +413,12 @@ def scan_radar():
 
 if __name__ == "__main__":
     get_my_id()
-    logger.info("🤖 Jules V5.0 (CLEAN PROTOCOL) ONLINE")
+    logger.info("🤖 Jules V5.1 (TOTAL COVERAGE) ONLINE")
     t = threading.Thread(target=start_telegram_listener)
     t.daemon = True
     t.start()
     while True:
         scan_radar()
-        logger.info("💤 Trocando frequência em 60s...")
-        time.sleep(60)
+        # RADAR SENSITIVITY (V5.1) - 45s Interval
+        logger.info("💤 Trocando frequência em 45s...")
+        time.sleep(45)
