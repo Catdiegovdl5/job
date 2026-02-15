@@ -7,7 +7,7 @@ import random
 import re
 import telebot
 from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
-from groq import Groq
+from groq import Groq, RateLimitError
 from freelancersdk.session import Session
 from freelancersdk.resources.projects.projects import search_projects, place_project_bid
 from freelancersdk.resources.users.users import get_self_user_id
@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV48_Tactical")
+logger = logging.getLogger("JulesV49_Efficiency")
 
 load_dotenv()
 
@@ -108,7 +108,7 @@ def handle_mission_command(message):
     markup.add(btn_fast)
     markup.add(btn_stier)
     config = memory.get("config", {})
-    bot.reply_to(message, f"🎮 <b>JULES V4.8 (TACTICAL)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
+    bot.reply_to(message, f"🎮 <b>JULES V4.9 (EFFICIENCY)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
@@ -179,14 +179,8 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     titulo_lower = titulo.lower()
     desc_lower = desc.lower()
 
-    # Priority Order: Chatbot/Auto -> Content -> Visual
-    # This prevents "SEO Writing" from being caught by "art" in "articles" if we were scanning visual first without strict boundaries
-    # But since we use simple 'in', we should order by specificity or check full words.
-
     context_focus = "General"
     tool_suggestion = "Best available tools"
-
-    # Use word boundaries for stricter matching or prioritize unique keywords
 
     is_chatbot_auto = any(k in titulo_lower or k in desc_lower for k in ["chatbot", "automation", "agent", "python", "script", "scraping", "n8n", "make", "development"])
     is_content = any(k in titulo_lower or k in desc_lower for k in ["writing", "translation", "content", "copy", "text", "seo", "article", "blog"])
@@ -254,7 +248,7 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     try:
         completion = client_groq.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
-            model="llama-3.3-70b-versatile",
+            model="llama-3.1-8b-instant",  # MODEL SWAP (V4.9)
             temperature=0.6,
         )
         content = completion.choices[0].message.content.strip()
@@ -314,6 +308,12 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
                 proposta = re.sub(r'^(PROPOSTA|Proposta)\s*[:\-]*\s*', '', proposta).strip()
 
         return nivel, resumo, ferramentas, proposta
+
+    except RateLimitError:  # RATE LIMIT HANDLING (V4.9)
+        logger.warning("⚠️ Cota de IA atingida. Aguardando para tentar novamente...")
+        time.sleep(60)
+        return "Aguardando Cota", "Aguardando Cota", "Aguardando Cota", "Aguardando Cota"
+
     except Exception as e:
         logger.error(f"Erro na IA: {e}")
         return "Erro", "Erro IA", "N/A", "Erro IA"
@@ -334,7 +334,8 @@ def scan_radar():
         projects_list = result.get('projects')
         if projects_list:
             count = 0
-            for p in projects_list[:10]:
+            # SCAN THROTTLING (V4.9) - Analyze only 3 projects per cycle
+            for p in projects_list[:3]:
                 if p.get('status', 'active') != 'active': continue
 
                 pid = str(p.get('id'))
@@ -368,6 +369,9 @@ def scan_radar():
                 logger.info(f"🎯 Alvo Capturado: {title}")
 
                 nivel, resumo, ferramentas, proposta = gerar_analise_diego(title, p.get('preview_description', ''), f"{budget_min} {code}", min_usd)
+
+                if nivel == "Aguardando Cota": # Skip if rate limited
+                    continue
 
                 # Bid Amount Logic
                 bid_amount = budget_min
@@ -403,7 +407,7 @@ def scan_radar():
 
 if __name__ == "__main__":
     get_my_id()
-    logger.info("🤖 Jules V4.8 (TACTICAL) ONLINE")
+    logger.info("🤖 Jules V4.9 (EFFICIENCY) ONLINE")
     t = threading.Thread(target=start_telegram_listener)
     t.daemon = True
     t.start()
