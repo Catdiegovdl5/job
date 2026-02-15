@@ -392,7 +392,7 @@ def scan_radar():
                 msg += f"<b>💡 PROPOSTA:</b>\n{proposta}"
 
                 markup = InlineKeyboardMarkup()
-                markup.add(InlineKeyboardButton(f"✅ LANCE ({bid_amount} {code})", callback_data=f"bid_{pid}"))
+                markup.add(InlineKeyboardButton(f"✅ Aceitar (Disparar Proposta)", callback_data=f"bid_{pid}"))
                 markup.add(InlineKeyboardButton("❌ Rejeitar", callback_data=f"rejeitar_{pid}"))
 
                 if bot: bot.send_message(CHAT_ID, msg, parse_mode="HTML", reply_markup=markup)
