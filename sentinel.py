@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV45_Polished")
+logger = logging.getLogger("JulesV47_ContextAware")
 
 load_dotenv()
 
@@ -95,7 +95,7 @@ def handle_mission_command(message):
     markup.add(btn_fast)
     markup.add(btn_stier)
     config = memory.get("config", {})
-    bot.reply_to(message, f"🎮 <b>JULES V4.5 (POLISHED)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
+    bot.reply_to(message, f"🎮 <b>JULES V4.7 (CONTEXT AWARE)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
@@ -162,7 +162,7 @@ def start_telegram_listener():
 def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     if not client_groq: return "N/A", "Erro", "N/A", "N/A"
 
-    # --- LANGUAGE ENFORCER PROMPT ---
+    # --- LANGUAGE ENFORCER PROMPT (V4.7 Context Awareness) ---
     prompt = f"""
     Role: Diego, AI Expert.
     Project: "{titulo}"
@@ -173,6 +173,18 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     1. Write summary in strict Portuguese (Brazil).
     2. List ONLY relevant tools (Free/Paid).
     3. Write proposal in strict Professional English.
+
+    CRITICAL INSTRUCTION: SECAO 1 (RESUMO) is a briefing for the user about the CLIENT'S NEEDS. Do NOT use phrases like 'Estou aqui para ajudar' or 'Eu vou fazer' in SECAO 1. Instead, use 'O cliente precisa...', 'O projeto exige...' ou 'O objetivo é...'. Leave all your personal offers and 'I can help' phrases exclusively for SECAO 3.
+
+    SECAO 1: RESUMO (PT-BR)
+    Objetivo: Explicar para o Comandante (VOCÊ) do que se trata o projeto do cliente.
+    Regra de Ouro: Foque 100% no que o CLIENTE escreveu na descrição. Não mencione o que você (Diego) vai fazer.
+    Exemplo Correto: "O cliente possui uma loja Shopify e precisa integrar a API do Gemini via n8n para automatizar postagens no blog e redes sociais."
+
+    SECAO 3: PROPOSTA (ENGLISH)
+    Objetivo: Convencer o CLIENTE a te contratar.
+    Regra de Ouro: Foque 100% na solução técnica e no seu diferencial. Use Inglês.
+    Exemplo Correto: "I can build your Shopify-Gemini ecosystem using n8n. I have experience in RAG systems and social media automation..."
 
     RULES FOR PROPOSAL (SECTION 3):
     - Start DIRECTLY (e.g., "I can help with...").
@@ -186,7 +198,7 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     - Else: "⚖️ MID-TIER"
 
     SECAO 1: RESUMO (PT-BR)
-    - 3 lines summary.
+    - 3 lines summary about CLIENT NEEDS.
 
     SECAO 2: FERRAMENTAS
     - Tools list.
@@ -348,7 +360,7 @@ def scan_radar():
 
 if __name__ == "__main__":
     get_my_id()
-    logger.info("🤖 Jules V4.5 (POLISHED) ONLINE")
+    logger.info("🤖 Jules V4.7 (CONTEXT AWARE) ONLINE")
     t = threading.Thread(target=start_telegram_listener)
     t.daemon = True
     t.start()
