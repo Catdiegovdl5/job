@@ -29,9 +29,23 @@ bot = telebot.TeleBot(TG_TOKEN)
 WORKANA_URL = "https://www.workana.com/jobs?language=en%2Cpt&skills=artificial-intelligence%2Cinternet-marketing%2Cvideo-editing"
 AUTH_FILE = "workana_auth.json"
 SEEN_PROJECTS_FILE = "workana_seen.json"
+MEMORY_FILE_WK = "workana_memory.json"
 
-# MEMÓRIA VOLÁTIL (Para botões)
-memory = {}
+# PERSISTÊNCIA DE MEMÓRIA (Para botões)
+def load_memory_wk():
+    if os.path.exists(MEMORY_FILE_WK):
+        try:
+            with open(MEMORY_FILE_WK, "r", encoding="utf-8") as f: return json.load(f)
+        except: return {}
+    return {}
+
+def save_memory_wk():
+    try:
+        with open(MEMORY_FILE_WK, "w", encoding="utf-8") as f: json.dump(memory, f, indent=2)
+    except Exception as e:
+        print(f"⚠️ Erro ao salvar memória Workana: {e}")
+
+memory = load_memory_wk()
 
 def load_seen():
     if os.path.exists(SEEN_PROJECTS_FILE):
@@ -99,11 +113,6 @@ async def disparar_proposta_workana_with_context(link, text):
             context = await browser.new_context()
 
         await disparar_proposta_workana(context, link, text)
-
-        # Keep browser open for a bit or close? User instruction says "Verifique na Workana para o envio final."
-        # If we close immediately, user might not see it if they are watching.
-        # But 'headless=False' means it will pop up.
-        # Let's wait a bit before closing to ensure operations complete and allow visual confirm.
         await asyncio.sleep(5)
         await browser.close()
 
@@ -112,8 +121,6 @@ def handle_workana_bid(call):
     # Formato: wk_OPCAO_ID (ex: wk_A_12345)
     try:
         parts = call.data.split("_")
-        # Handle potential ID with dashes/underscores? No, ID is usually alphanumeric.
-        # "wk", "A", "12345"
         if len(parts) < 3: return
         opcao = parts[1]
         p_id = "_".join(parts[2:]) # Rejoin if ID had underscores
@@ -126,9 +133,6 @@ def handle_workana_bid(call):
         prop_text = project_data['opc_a'] if opcao == "A" else project_data['opc_b']
         bot.answer_callback_query(call.id, f"🚀 Disparando Opção {opcao}...")
 
-        # Run async function in a new event loop for this thread or run_until_complete?
-        # Telebot runs callbacks in threads. We need to run async code.
-        # Creating a new loop is safest for simple scripts.
         try:
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
@@ -214,20 +218,23 @@ async def scan_workana():
             link = "https://www.workana.com" + href
 
             # Diego analisa o alvo (RETORNA 5 VALORES AGORA)
-            nivel, resumo, ferramentas, opc_a, opc_b = gerar_analise_diego(title, desc, budget_str, 50.0)
+            nivel, resumo, arsenal, opc_a, opc_b = gerar_analise_diego(title, desc, budget_str, 50.0)
 
-            # Salva na memória para o clique do botão
+            # Guarda os dados na memória para o clique do botão no Telegram
             memory[p_id] = {'link': link, 'opc_a': opc_a, 'opc_b': opc_b}
+            save_memory_wk()
 
             # Envio para o Telegram com DUPLA OPÇÃO
-            msg = f"<b>🏷️ WORKANA | {nivel}</b>\n🕒 {date_text}\n\n"
+            msg = f"<b>🏷️ PLATAFORMA: WORKANA</b>\n"
+            msg += f"<b>🏆 {nivel}</b> | 🕒 {date_text}\n\n"
             msg += f"<b>📂 Projeto:</b> <a href='{link}'>{title}</a>\n"
             msg += f"<b>💰 Orçamento:</b> {budget_str}\n\n"
             msg += f"<b>📋 RESUMO:</b>\n<i>{resumo}</i>\n\n"
-            msg += f"<b>🛠 ARSENAL:</b>\n<code>{ferramentas}</code>"
+            msg += f"<b>🛠 ARSENAL:</b>\n<code>{arsenal}</code>"
 
+            # CRIAÇÃO DOS BOTÕES DE MÚLTIPLA ESCOLHA
             markup = InlineKeyboardMarkup()
-            markup.add(InlineKeyboardButton("🎯 Opção A (Direta)", callback_data=f"wk_A_{p_id}"))
+            markup.add(InlineKeyboardButton("🎯 Opção A (Técnica)", callback_data=f"wk_A_{p_id}"))
             markup.add(InlineKeyboardButton("🤝 Opção B (Persuasiva)", callback_data=f"wk_B_{p_id}"))
 
             bot.send_message(CHAT_ID, msg, parse_mode="HTML", reply_markup=markup)
