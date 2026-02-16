@@ -420,5 +420,5 @@ if __name__ == "__main__":
     while True:
         scan_radar()
         # RADAR SENSITIVITY (V5.1) - 45s Interval
-        logger.info("💤 Trocando frequência em 45s...")
-        time.sleep(45)
+        logger.info("💤 Trocando frequência em 600s (Modo Observação)...")
+        time.sleep(600)
