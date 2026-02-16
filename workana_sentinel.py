@@ -65,7 +65,7 @@ async def scan_workana():
 
         projects = await page.query_selector_all(".project-item")
 
-        for p_item in projects[:5]:
+        for p_item in projects[:20]:
             p_id = await p_item.get_attribute("id")
             if not p_id or p_id in seen_ids: continue
 
@@ -114,6 +114,6 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"⚠️ Erro no Radar Workana: {e}")
 
-        wait_time = random.randint(300, 600)
+        wait_time = random.randint(60, 120)
         print(f"💤 Trocando frequência em {wait_time}s...")
         time.sleep(wait_time)
