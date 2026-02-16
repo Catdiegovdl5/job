@@ -8,11 +8,9 @@ from playwright.async_api import async_playwright
 from dotenv import load_dotenv
 
 # Reutilizamos sua IA (Diego) do script principal
-# Assuming sentinel.py is the main file name
 try:
     from sentinel import gerar_analise_diego
 except ImportError:
-    # Fallback if file is named differently in env
     try:
         from sentinel_real import gerar_analise_diego
     except ImportError:
@@ -24,8 +22,8 @@ TG_TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
 bot = telebot.TeleBot(TG_TOKEN)
 
-# Configurações de Busca
-WORKANA_URL = "https://www.workana.com/projects?category=it-programming&subcategory=artificial-intelligence-1"
+# Configurações de Busca - UPDATED URL
+WORKANA_URL = "https://www.workana.com/projects?category=it-programming&category=design-multimedia&category=marketing-sales&language=pt&language=en&language=es"
 AUTH_FILE = "workana_auth.json"
 SEEN_PROJECTS_FILE = "workana_seen.json"
 
@@ -45,9 +43,6 @@ async def scan_workana():
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         # Tenta carregar os cookies do arquivo gerado pelo setup
-        # Note: If using persistent context in setup, we might need to use persistent context here too
-        # or load the storage state if it was saved to json.
-        # The setup script saves to 'workana_auth.json', so loading from it is correct for headless execution.
         try:
             context = await browser.new_context(storage_state=AUTH_FILE)
         except Exception as e:
