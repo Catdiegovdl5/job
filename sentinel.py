@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV51_TotalCoverage")
+logger = logging.getLogger("JulesV52_Polyglot")
 
 load_dotenv()
 
@@ -109,7 +109,7 @@ def handle_mission_command(message):
     markup.add(btn_fast)
     markup.add(btn_stier)
     config = memory.get("config", {})
-    bot.reply_to(message, f"🎮 <b>JULES V5.1 (TOTAL COVERAGE)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
+    bot.reply_to(message, f"🎮 <b>JULES V5.2 (POLYGLOT)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
@@ -205,7 +205,7 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
          context_focus = "Visual Design & Image Generation"
          tool_suggestion = "Midjourney, Photoshop (Firefly), Canva, Stable Diffusion"
 
-    # --- LANGUAGE ENFORCER PROMPT (V5.0 CLEAN PROTOCOL) ---
+    # --- LANGUAGE ENFORCER PROMPT (V5.2 POLYGLOT) ---
     prompt = f"""
     Role: Diego, AI Expert.
     Project: "{titulo}"
@@ -216,9 +216,11 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     SUGGESTED ARSENAL: {tool_suggestion}
 
     INSTRUCTIONS:
-    1. Write summary in strict Portuguese (Brazil).
-    2. List ONLY relevant tools (Focus on SUGGESTED ARSENAL if applicable).
-    3. Write proposal in strict Professional English.
+    1. Write summary (SECAO 1) in strict Portuguese (Brazil).
+    2. Write proposal (SECAO 3) in the SAME LANGUAGE as the Project Description (Portuguese, English, or Spanish).
+    3. If the project is in English, Section 3 MUST be English. If in Spanish, Section 3 MUST be Spanish.
+
+    CRITICAL: Never mention you are an AI. Be human, direct, and professional.
 
     STRICT RULE: NEVER use bolding (**), italics (_), or headers (###). Use only plain text. For lists, use a simple hyphen (-). Do NOT include the words 'RESUMO:', 'ARSENAL:', or 'PROPOSTA:' inside the content of the sections themselves.
 
@@ -229,13 +231,13 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     Regra de Ouro: Foque 100% no que o CLIENTE escreveu na descrição. Não mencione o que você (Diego) vai fazer.
     Exemplo Correto: "O cliente possui uma loja Shopify e precisa integrar a API do Gemini via n8n para automatizar postagens no blog e redes sociais."
 
-    SECAO 3: PROPOSTA (ENGLISH)
+    SECAO 3: PROPOSTA (PROJECT LANGUAGE)
     Objetivo: Convencer o CLIENTE a te contratar.
-    Regra de Ouro: Foque 100% na solução técnica e no seu diferencial. Use Inglês.
-    Exemplo Correto: "I can build your Shopify-Gemini ecosystem using n8n. I have experience in RAG systems and social media automation..."
+    Regra de Ouro: Foque 100% na solução técnica e no seu diferencial.
+    Exemplo Correto (EN): "I can build your Shopify-Gemini ecosystem using n8n. I have experience in RAG systems and social media automation..."
 
     RULES FOR PROPOSAL (SECTION 3):
-    - Start DIRECTLY (e.g., "I can help with...").
+    - Start DIRECTLY (e.g., "I can help with...", "Posso ajudar com...").
     - Be casual, human, professional.
     - Max 150 words.
     - No fluff.
@@ -251,7 +253,7 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     SECAO 2: FERRAMENTAS
     - Tools list.
 
-    SECAO 3: PROPOSTA (ENGLISH)
+    SECAO 3: PROPOSTA (PROJECT LANGUAGE)
     - Proposal text.
     - Sign: Diego.
     """
@@ -421,29 +423,12 @@ def scan_radar():
 
 if __name__ == "__main__":
     get_my_id()
-    logger.info("🤖 Jules V5.1 (TOTAL COVERAGE) ONLINE")
+    logger.info("🤖 Jules V5.2 (POLYGLOT) ONLINE")
     t = threading.Thread(target=start_telegram_listener)
     t.daemon = True
     t.start()
     while True:
         scan_radar()
         # RADAR SENSITIVITY (V5.1) - 45s Interval, but we keep 600s if instructed by previous "Observation Mode".
-        # Prompt doesn't explicitly say to revert 600s, but says "Adjust Sentinel to Market Observation Mode" was PREVIOUS.
-        # This prompt says "Atualizar o Cérebro do Diego (sentinel_real.py)". It doesn't mention the sleep time for sentinel.py.
-        # But wait, step 1 was for Workana Monitor. Step 2 for Sentinel.
-        # I will keep 600s as per the last state (Observation Mode) unless told otherwise, but wait...
-        # The prompt says "Ajuste de Sensibilidade do Radar: ... diminuir o intervalo ... para 45 segundos ...".
-        # Wait, that was V5.1 instruction block 3 in the prompt?
-        # Ah, "Ajuste de Sensibilidade do Radar: Instrua o assistente a diminuir o intervalo de troca de frequência para 45 segundos".
-        # This is for sentinel.py? Or Workana? The prompt context is "Expand Workana Radar... Update Diego Brain...".
-        # Block 1 is for Workana Monitor. Block 2 is for Sentinel (Diego Brain).
-        # Block 3 in previous V5.1 prompt was for Sentinel.
-        # This prompt only has 2 steps: "Passo 1: Atualizar o Radar (workana_monitor.py)" and "Passo 2: Atualizar o Cérebro do Diego".
-        # It does NOT ask to change the sleep time of sentinel.py back to 45s.
-        # So I will leave the sleep time at 600s (from the previous turn's "Market Observation Mode").
-        # Wait, I just pasted the whole file content above. I need to make sure I don't accidentally revert to 45s or 60s if I'm rewriting the file.
-        # I'll check the current state of sentinel.py regarding sleep time.
-        # It was set to 600s. I should preserve that if I'm not instructed to change it.
-        # The prompt is specifically about adding Marketing/Video logic.
         logger.info("💤 Trocando frequência em 600s (Modo Observação)...")
         time.sleep(600)

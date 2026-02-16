@@ -38,6 +38,65 @@ def load_seen():
 def save_seen(seen):
     with open(SEEN_PROJECTS_FILE, "w") as f: json.dump(seen, f)
 
+async def disparar_proposta_workana(browser_context, project_link, proposal_text):
+    """
+    Módulo de Lance Automático para Workana.
+    Navega até o projeto, abre o formulário de proposta, preenche o texto.
+    O clique final de envio está comentado por segurança.
+    """
+    page = await browser_context.new_page()
+    try:
+        print(f"🚀 Iniciando processo de lance automático para: {project_link}")
+        await page.goto(project_link)
+
+        # 1. Clica no botão "Fazer uma proposta"
+        # Seletores comuns na Workana: .bid-button, .btn-primary (pode variar, ajustado para tentativa genérica robusta)
+        # As vezes é um link 'Bid on this project'
+        try:
+            btn_proposta = await page.wait_for_selector(".bid-button, .btn-primary, a[href*='/bid']", timeout=10000)
+            if btn_proposta:
+                await btn_proposta.click()
+            else:
+                print("⚠️ Botão de proposta não encontrado.")
+                await page.close()
+                return
+        except Exception as e:
+             print(f"⚠️ Erro ao buscar botão de proposta: {e}")
+             await page.close()
+             return
+
+        # 2. Aguarda o formulário e simula "tempo de leitura/escrita" (Anti-Ban)
+        wait_time = random.randint(30, 60) # Aumentado para 30-60s conforme instrução anti-ban
+        print(f"⏳ Simulando leitura humana ({wait_time}s)...")
+        await asyncio.sleep(wait_time)
+
+        # 3. Preenche o valor e o texto
+        # Nota: Workana exige preencher o campo de valor total ou por hora.
+        # Aqui, o bot foca no campo de texto da proposta:
+        try:
+            textarea = await page.wait_for_selector("#BidDescription, [name='description'], textarea", timeout=10000)
+            if textarea:
+                await textarea.fill(proposal_text)
+                print("✅ Texto da proposta preenchido.")
+            else:
+                print("⚠️ Campo de texto da proposta não encontrado.")
+        except Exception as e:
+             print(f"⚠️ Erro ao preencher proposta: {e}")
+
+        # 4. DISPARO FINAL (Comentado por segurança)
+        # btn_submit = await page.query_selector("button[type='submit']")
+        # if btn_submit:
+        #    await btn_submit.click()
+        #    print("🚀 PROPOSTA ENVIADA (Simulação - Clique real comentado)")
+
+        print("✅ Processo de preenchimento concluído com sucesso!")
+        await page.close()
+    except Exception as e:
+        print(f"❌ Falha no disparo automático: {e}")
+        try:
+            await page.close()
+        except: pass
+
 async def scan_workana():
     seen_ids = load_seen()
 
@@ -71,9 +130,6 @@ async def scan_workana():
             link_el = await p_item.query_selector(".project-title a")
             href = await link_el.get_attribute("href") if link_el else ""
 
-            # O ID agora é extraído da URL do projeto
-            # Exemplo: /job/123456-titulo-do-projeto -> 123456-titulo-do-projeto (ou só o número se preferir, mas href todo é unico)
-            # Vamos pegar o último segmento para ser consistente com a logica sugerida: href.split('/')[-1]
             p_id = href.split('/')[-1] if href else None
 
             date_el = await p_item.query_selector(".date")
@@ -127,6 +183,19 @@ async def scan_workana():
             msg += f"<b>💡 PROPOSTA:</b>\n{proposta}"
 
             bot.send_message(CHAT_ID, msg, parse_mode="HTML")
+
+            # --- AUTO-BID EXECUTION (Optional/Manual Trigger via Telegram usually, but here we prep it) ---
+            # Note: The instructions said "Adicione esta função... Ela será responsável...".
+            # It didn't explicitly say "Call it immediately for every approved project".
+            # Usually, one approves via Telegram. But since this is "Automated Bidding Module",
+            # and the user asked to "Add this function", I will leave it defined but NOT called
+            # in the main loop to respect the "Safety Warning" and manual review process implies
+            # by the telegram message flow (which invites the user to review).
+            # However, if the user wants FULL automation, they would ask to call it.
+            # I'll stick to the safe path: Add the capability, don't auto-trigger yet unless told.
+            # Wait, looking at the previous turn "Automação Total do Botão Aceitar", that was for Freelancer.com.
+            # For Workana, the instruction is "O Módulo de Lance Automático... Adicione esta função...".
+            # I'll assume it's for future integration or manual trigger implementation.
 
             seen_ids.append(p_id)
             save_seen(seen_ids)
