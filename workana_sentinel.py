@@ -183,14 +183,17 @@ async def scan_workana():
             href = await link_el.get_attribute("href") if link_el else ""
             p_id = href.split('/')[-1] if href else None
 
+            # DATE LOGIC REPAIR
             date_el = await p_item.query_selector(".date")
-            date_text = (await date_el.inner_text()).lower() if date_el else "data n/a"
+            date_text = (await date_el.inner_text()).lower() if date_el else "agora mesmo"
 
             print(f"--- Verificando: {title[:25]}... | ID: {p_id} | Data: {date_text}")
 
-            if not p_id: continue
+            if not p_id:
+                print("   ⏭️ Ignorado: ID não encontrado.")
+                continue
 
-            # FILTRO DE 3 DIAS
+            # FILTRO DE 3 DIAS (UPDATED)
             is_too_old = False
             if any(x in date_text for x in ["semana", "mês", "mes", "ano"]):
                 is_too_old = True
@@ -225,8 +228,7 @@ async def scan_workana():
             save_memory_wk()
 
             # Envio para o Telegram com DUPLA OPÇÃO
-            msg = f"<b>🏷️ PLATAFORMA: WORKANA</b>\n"
-            msg += f"<b>🏆 {nivel}</b> | 🕒 {date_text}\n\n"
+            msg = f"<b>🏷️ WORKANA | {nivel}</b>\n🕒 {date_text}\n\n"
             msg += f"<b>📂 Projeto:</b> <a href='{link}'>{title}</a>\n"
             msg += f"<b>💰 Orçamento:</b> {budget_str}\n\n"
             msg += f"<b>📋 RESUMO:</b>\n<i>{resumo}</i>\n\n"
@@ -251,7 +253,7 @@ if __name__ == "__main__":
     t.daemon = True
     t.start()
 
-    print("🤖 Jules V6.5.3 (Interactive Monitor) ONLINE")
+    print("🤖 Jules V6.5.3 (Interactive Monitor - Fixed) ONLINE")
     while True:
         try:
             asyncio.run(scan_workana())
