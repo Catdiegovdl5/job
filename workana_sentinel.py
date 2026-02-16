@@ -3,6 +3,7 @@ import json
 import os
 import time
 import random
+import re
 import telebot
 from playwright.async_api import async_playwright
 from dotenv import load_dotenv
@@ -42,33 +43,53 @@ async def scan_workana():
 
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
-        # Tenta carregar os cookies do arquivo gerado pelo setup
         try:
             context = await browser.new_context(storage_state=AUTH_FILE)
         except Exception as e:
-            print(f"⚠️ Erro ao carregar sessão (arquivo ausente ou inválido): {e}")
-            print("Iniciando sem autenticação (pode ser limitado)...")
+            print(f"⚠️ Erro na sessão: {e}")
             context = await browser.new_context()
 
         page = await context.new_page()
-
         print("📡 WORKANA: Varrendo a fortaleza em busca de alvos...")
         await page.goto(WORKANA_URL)
 
-        # Espera os projetos carregarem
         try:
-            await page.wait_for_selector(".project-item", timeout=10000)
+            await page.wait_for_selector(".project-item", timeout=15000)
         except:
-            print("⚠️ Nenhum projeto encontrado no momento ou erro de carregamento.")
+            print("⚠️ Erro de carregamento na Workana.")
             await browser.close()
             return
 
         projects = await page.query_selector_all(".project-item")
         print(f"🔎 Foram encontrados {len(projects)} projetos na página.")
 
+        # Analisamos até 20 projetos para garantir que passamos dos "antigos"
         for p_item in projects[:20]:
             p_id = await p_item.get_attribute("id")
-            if not p_id or p_id in seen_ids: continue
+            if not p_id: continue
+
+            # --- FILTRO CRONOLÓGICO (3 DIAS) ---
+            # Na Workana, a data fica geralmente em um elemento com texto 'Publicado: há...'
+            date_el = await p_item.query_selector(".date")
+            date_text = (await date_el.inner_text()).lower() if date_el else ""
+
+            # Lógica: Ignorar se mencionar 'semana', 'mês' ou mais de '3 dias'
+            is_too_old = False
+            if "semana" in date_text or "mês" in date_text or "mes" in date_text:
+                is_too_old = True
+            elif "dia" in date_text:
+                # Extrai o número de dias (ex: "há 4 dias")
+                days = re.findall(r'\d+', date_text)
+                if days and int(days[0]) > 3:
+                    is_too_old = True
+
+            if is_too_old:
+                # print(f"⏭️ Ignorado (Muito antigo): {date_text}") # Opcional para debug
+                continue
+
+            # Se já vimos o projeto, pulamos para o próximo
+            if p_id in seen_ids:
+                continue
 
             title_el = await p_item.query_selector(".project-title")
             title = (await title_el.inner_text()).strip() if title_el else "Sem Título"
@@ -83,17 +104,15 @@ async def scan_workana():
             href = await link_el.get_attribute("href") if link_el else ""
             link = "https://www.workana.com" + href
 
-            print(f"🎯 ALVO WORKANA DETECTADO: {title}")
+            print(f"🎯 ALVO DETECTADO: {title} ({date_text})")
 
             # Diego analisa o alvo
-            # Dummy logic for budget float conversion since workana strings vary
-            budget_float = 50.0
+            # Dummy budget for logic
+            nivel, resumo, ferramentas, proposta = gerar_analise_diego(title, desc, budget_str, 50.0)
 
-            nivel, resumo, ferramentas, proposta = gerar_analise_diego(title, desc, budget_str, budget_float)
-
-            # Envio Tático para o Telegram (Seguindo o padrão de limpeza V5.0)
+            # Envio para o Telegram
             msg = f"<b>🏷️ PLATAFORMA: WORKANA</b>\n"
-            msg += f"<b>🏆 {nivel}</b>\n\n"
+            msg += f"<b>🏆 {nivel}</b> | 🕒 {date_text}\n\n"
             msg += f"<b>📂 Projeto:</b> <a href='{link}'>{title}</a>\n"
             msg += f"<b>💰 Orçamento:</b> {budget_str}\n\n"
             msg += f"<b>📋 RESUMO:</b>\n<i>{resumo}</i>\n\n"
