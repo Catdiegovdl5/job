@@ -16,7 +16,7 @@ from dotenv import load_dotenv
 
 # Configuração de Logs
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV52_Polyglot")
+logger = logging.getLogger("JulesV653_DualOption")
 
 load_dotenv()
 
@@ -43,13 +43,13 @@ MY_ACCEPTED_SKILLS = [
 
 MY_SKILLS_SET = {s.lower().strip() for s in MY_ACCEPTED_SKILLS}
 
-# --- FORÇA BRUTA (AI OVERRIDE - V5.1 TOTAL SKILL COVERAGE) ---
+# --- FORÇA BRUTA ---
 FORCE_KEYWORDS = [
     "chatbot", "ai", "agent", "design", "logo", "writing", "video",
     "editing", "seo", "marketing", "shopify", "automation", "excel", "data"
 ]
 
-# --- RADAR RECONFIGURATION (V5.1 - 15 Categories) ---
+# --- RADAR RECONFIGURATION ---
 MISSIONS = {
     "caixa_rapido": [
         "Data Entry", "Excel", "Graphic Design", "Logo Design", "Photoshop",
@@ -96,7 +96,6 @@ def convert_currency(amount, currency_code):
     if not amount: return 0, 0
     code = currency_code.upper()
     rate_to_usd = RATES.get(code, 1.0)
-
     val_usd = float(amount) * rate_to_usd
     val_brl = val_usd * USD_TO_BRL
     return val_usd, val_brl
@@ -109,10 +108,13 @@ def handle_mission_command(message):
     markup.add(btn_fast)
     markup.add(btn_stier)
     config = memory.get("config", {})
-    bot.reply_to(message, f"🎮 <b>JULES V5.2 (POLYGLOT)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
+    bot.reply_to(message, f"🎮 <b>JULES V6.5.3 (DUAL OPTION)</b>\nModo: {config.get('mode', 'PADRÃO')}\n\nTexto limpo e formatado.", parse_mode="HTML", reply_markup=markup)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
+    # This handler is specific to Sentinel (Freelancer.com).
+    # Workana Sentinel has its own handler logic in workana_sentinel.py,
+    # BUT since they share this 'bot' instance if running separately, it's fine.
     global memory
 
     if call.data.startswith("rejeitar_"):
@@ -126,6 +128,7 @@ def callback_query(call):
         except: pass
 
     elif call.data.startswith("bid_"):
+        # This block is for Freelancer.com API bidding
         pid = call.data.replace("bid_", "")
         project_data = memory.get(pid)
 
@@ -136,6 +139,9 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "🚀 Disparando...")
         try:
             if not MY_USER_ID: get_my_id()
+            # For Freelancer.com, we use 'opc_a' as default or 'proposal' if old format
+            prop_text = project_data.get('opc_a', project_data.get('proposal', 'Hi, I can help.'))
+
             place_project_bid(
                 session,
                 project_id=int(pid),
@@ -143,7 +149,7 @@ def callback_query(call):
                 amount=project_data['amount'],
                 period=project_data['period'],
                 milestone_percentage=100,
-                description=project_data['proposal']
+                description=prop_text
             )
             bot.send_message(call.message.chat.id, f"✅ <b>TIRO NO ALVO!</b>\nProjeto: {pid}\nStatus: Enviado com Sucesso!")
             bot.edit_message_reply_markup(call.message.chat.id, call.message.message_id, reply_markup=None)
@@ -174,9 +180,9 @@ def start_telegram_listener():
         bot.infinity_polling()
 
 def gerar_analise_diego(titulo, desc, budget_str, usd_val):
-    if not client_groq: return "N/A", "Erro", "N/A", "N/A"
+    if not client_groq: return "N/A", "Erro", "N/A", "N/A", "N/A"
 
-    # --- TACTICAL INTELLIGENCE (V4.8 & V5.1 UPDATED) ---
+    # --- TACTICAL INTELLIGENCE ---
     titulo_lower = titulo.lower()
     desc_lower = desc.lower()
 
@@ -205,7 +211,7 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
          context_focus = "Visual Design & Image Generation"
          tool_suggestion = "Midjourney, Photoshop (Firefly), Canva, Stable Diffusion"
 
-    # --- LANGUAGE ENFORCER PROMPT (V5.2 POLYGLOT) ---
+    # --- LANGUAGE ENFORCER PROMPT (V6.5.3 DUAL OPTION) ---
     prompt = f"""
     Role: Diego, AI Expert.
     Project: "{titulo}"
@@ -216,31 +222,11 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     SUGGESTED ARSENAL: {tool_suggestion}
 
     INSTRUCTIONS:
-    1. Write summary (SECAO 1) in strict Portuguese (Brazil).
-    2. Write proposal (SECAO 3) in the SAME LANGUAGE as the Project Description (Portuguese, English, or Spanish).
-    3. If the project is in English, Section 3 MUST be English. If in Spanish, Section 3 MUST be Spanish.
+    1. Write SECAO 1 (Summary) in strict Portuguese (Brazil).
+    2. Write SECAO 3 (Option A - Direct Proposal) in the SAME LANGUAGE as the Project Description. Short, punchy, "I can do this" style.
+    3. Write SECAO 4 (Option B - Persuasive Proposal) in the SAME LANGUAGE as the Project Description. Detailed, "Here is my approach" style.
 
-    CRITICAL: Never mention you are an AI. Be human, direct, and professional.
-
-    STRICT RULE: NEVER use bolding (**), italics (_), or headers (###). Use only plain text. For lists, use a simple hyphen (-). Do NOT include the words 'RESUMO:', 'ARSENAL:', or 'PROPOSTA:' inside the content of the sections themselves.
-
-    CRITICAL INSTRUCTION: SECAO 1 (RESUMO) is a briefing for the user about the CLIENT'S NEEDS. Do NOT use phrases like 'Estou aqui para ajudar' or 'Eu vou fazer' in SECAO 1. Instead, use 'O cliente precisa...', 'O projeto exige...' ou 'O objetivo é...'. Leave all your personal offers and 'I can help' phrases exclusively for SECAO 3.
-
-    SECAO 1: RESUMO (PT-BR)
-    Objetivo: Explicar para o Comandante (VOCÊ) do que se trata o projeto do cliente.
-    Regra de Ouro: Foque 100% no que o CLIENTE escreveu na descrição. Não mencione o que você (Diego) vai fazer.
-    Exemplo Correto: "O cliente possui uma loja Shopify e precisa integrar a API do Gemini via n8n para automatizar postagens no blog e redes sociais."
-
-    SECAO 3: PROPOSTA (PROJECT LANGUAGE)
-    Objetivo: Convencer o CLIENTE a te contratar.
-    Regra de Ouro: Foque 100% na solução técnica e no seu diferencial.
-    Exemplo Correto (EN): "I can build your Shopify-Gemini ecosystem using n8n. I have experience in RAG systems and social media automation..."
-
-    RULES FOR PROPOSAL (SECTION 3):
-    - Start DIRECTLY (e.g., "I can help with...", "Posso ajudar com...").
-    - Be casual, human, professional.
-    - Max 150 words.
-    - No fluff.
+    CRITICAL: Never mention you are an AI. Be human, direct, and professional. Do NOT include markdown headers inside content.
 
     OUTPUT FORMAT:
     SECAO 0: NIVEL
@@ -253,24 +239,23 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
     SECAO 2: FERRAMENTAS
     - Tools list.
 
-    SECAO 3: PROPOSTA (PROJECT LANGUAGE)
-    - Proposal text.
-    - Sign: Diego.
+    SECAO 3: OPC_A
+    - Option A text (Direct).
+
+    SECAO 4: OPC_B
+    - Option B text (Persuasive).
     """
 
     try:
         completion = client_groq.chat.completions.create(
             messages=[{"role": "user", "content": prompt}],
-            model="llama-3.1-8b-instant",  # MODEL SWAP (V4.9)
+            model="llama-3.1-8b-instant",
             temperature=0.6,
         )
         content = completion.choices[0].message.content.strip()
 
         # --- POLISHED OUTPUT (V5.0 DEEP CLEANING) ---
-        # Remove markdown chars (*, #, _)
         content = re.sub(r'[\*\#_]', '', content)
-
-        # Remove Language Tags
         for tag in ["(PT-BR)", "(ENGLISH)", "(Portuguese Brazil 🇧🇷)", "(Project Language)"]:
             content = content.replace(tag, "")
 
@@ -280,17 +265,16 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
         nivel = "⚖️ MID-TIER"
         resumo = "..."
         ferramentas = "..."
-        proposta = "..."
+        opc_a = "..."
+        opc_b = "..."
 
         for part in parts:
             part = part.strip()
             if not part: continue
 
             if "0: NIVEL" in part or part.startswith("0:"):
-                # Handle variations like "0: NIVEL - Select: 💎 S-TIER" or "0: NIVEL: 💎 S-TIER"
                 if ":" in part.split("0:", 1)[1]:
                      sub_parts = part.split(":")
-                     # Find the part that looks like the level
                      for sp in sub_parts:
                          sp = sp.strip()
                          if "S-TIER" in sp or "MID-TIER" in sp:
@@ -304,7 +288,6 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
                      resumo = part.split(":", 1)[1].strip()
                 else:
                      resumo = part.replace("1: RESUMO", "").strip()
-                # V5.0 DEEP CLEANING LABELS
                 resumo = re.sub(r'^(RESUMO|Resumo|Briefing|O cliente)\s*[:\-]*\s*', '', resumo, flags=re.IGNORECASE).strip()
 
             elif "2: FERRAMENTAS" in part or part.startswith("2:"):
@@ -312,27 +295,32 @@ def gerar_analise_diego(titulo, desc, budget_str, usd_val):
                     ferramentas = part.split(":", 1)[1].strip()
                 else:
                     ferramentas = part.replace("2: FERRAMENTAS", "").strip()
-                # V5.0 DEEP CLEANING LABELS
                 ferramentas = re.sub(r'^(FERRAMENTAS|Arsenal|Tools|Stack)\s*[:\-]*\s*', '', ferramentas, flags=re.IGNORECASE).strip()
 
-            elif "3: PROPOSTA" in part or part.startswith("3:"):
+            elif "3: OPC_A" in part or part.startswith("3:"):
                 if ":" in part:
-                    proposta = part.split(":", 1)[1].strip()
+                    opc_a = part.split(":", 1)[1].strip()
                 else:
-                    proposta = part.replace("3: PROPOSTA", "").strip()
-                # V5.0 DEEP CLEANING LABELS
-                proposta = re.sub(r'^(PROPOSTA|Proposal|Offer)\s*[:\-]*\s*', '', proposta, flags=re.IGNORECASE).strip()
+                    opc_a = part.replace("3: OPC_A", "").strip()
+                opc_a = re.sub(r'^(OPC_A|Option A|Direct)\s*[:\-]*\s*', '', opc_a, flags=re.IGNORECASE).strip()
 
-        return nivel, resumo, ferramentas, proposta
+            elif "4: OPC_B" in part or part.startswith("4:"):
+                if ":" in part:
+                    opc_b = part.split(":", 1)[1].strip()
+                else:
+                    opc_b = part.replace("4: OPC_B", "").strip()
+                opc_b = re.sub(r'^(OPC_B|Option B|Persuasive)\s*[:\-]*\s*', '', opc_b, flags=re.IGNORECASE).strip()
 
-    except RateLimitError:  # RATE LIMIT HANDLING (V4.9)
+        return nivel, resumo, ferramentas, opc_a, opc_b
+
+    except RateLimitError:
         logger.warning("⚠️ Cota de IA atingida. Aguardando para tentar novamente...")
         time.sleep(60)
-        return "Aguardando Cota", "Aguardando Cota", "Aguardando Cota", "Aguardando Cota"
+        return "Aguardando Cota", "Aguardando Cota", "Aguardando Cota", "Aguardando Cota", "Aguardando Cota"
 
     except Exception as e:
         logger.error(f"Erro na IA: {e}")
-        return "Erro", "Erro IA", "N/A", "Erro IA"
+        return "Erro", "Erro IA", "N/A", "Erro IA", "Erro IA"
 
 def scan_radar():
     config = memory.get("config", {})
@@ -350,14 +338,12 @@ def scan_radar():
         projects_list = result.get('projects')
         if projects_list:
             count = 0
-            # SCAN THROTTLING (V5.1) - Increased to 15 per cycle
             for p in projects_list[:15]:
                 if p.get('status', 'active') != 'active': continue
 
                 pid = str(p.get('id'))
                 if pid in memory: continue
 
-                # --- LÓGICA V4.5 (AI OVERRIDE & SKILL MATCH) ---
                 raw_jobs = p.get('jobs') or []
                 project_skills = [j.get('name', '').lower() for j in raw_jobs]
                 title_lower = p.get('title', '').lower()
@@ -365,7 +351,6 @@ def scan_radar():
                 has_skill_match = any(ps in MY_SKILLS_SET for ps in project_skills)
                 is_ai_project = any(fk in title_lower for fk in FORCE_KEYWORDS)
 
-                # Se não tem skill compatível E não é projeto de IA forçado, ignora
                 if not has_skill_match and not is_ai_project:
                     continue
 
@@ -375,7 +360,6 @@ def scan_radar():
                 budget_max = p.get('budget', {}).get('maximum', budget_min)
                 code = p.get('currency', {}).get('code', 'USD')
 
-                # Conversão Global Banker
                 min_usd, min_brl = convert_currency(budget_min, code)
                 max_usd, max_brl = convert_currency(budget_max, code)
 
@@ -384,35 +368,40 @@ def scan_radar():
 
                 logger.info(f"🎯 Alvo Capturado: {title}")
 
-                nivel, resumo, ferramentas, proposta = gerar_analise_diego(title, p.get('preview_description', ''), f"{budget_min} {code}", min_usd)
+                nivel, resumo, ferramentas, opc_a, opc_b = gerar_analise_diego(title, p.get('preview_description', ''), f"{budget_min} {code}", min_usd)
 
-                if nivel == "Aguardando Cota": # Skip if rate limited
+                if nivel == "Aguardando Cota":
                     continue
 
-                # Bid Amount Logic
                 bid_amount = budget_min
                 if "S-TIER" in nivel: bid_amount = int((budget_min + budget_max) / 2)
 
                 memory[pid] = {
                     "status": "seen",
-                    "proposal": proposta,
+                    "opc_a": opc_a,
+                    "opc_b": opc_b,
+                    "proposal": opc_a, # Fallback for old bid logic
                     "amount": bid_amount,
                     "period": 7,
                     "currency": code
                 }
                 save_memory()
 
-                # --- TACTICAL DISPLAY (TELEGRAM) ---
                 msg = f"<b>🎯 NOVO ALVO [{mode_name}]</b>\n"
                 msg += f"<b>🏆 {nivel}</b>\n\n"
                 msg += f"<b>📂 Projeto:</b> <a href='https://www.freelancer.com/projects/{pid}'>{title}</a>\n"
                 msg += f"<b>💰 Valor:</b> {budget_str_usd}  |  {budget_str_brl}\n\n"
                 msg += f"<b>📋 RESUMO:</b>\n<i>{resumo}</i>\n\n"
                 msg += f"<b>🛠 ARSENAL:</b>\n<code>{ferramentas}</code>\n\n"
-                msg += f"<b>💡 PROPOSTA:</b>\n{proposta}"
+                msg += f"<b>💡 OPÇÃO A (DIRETA):</b>\n{opc_a[:100]}...\n\n"
 
                 markup = InlineKeyboardMarkup()
-                markup.add(InlineKeyboardButton(f"✅ Aceitar (Disparar Proposta)", callback_data=f"bid_{pid}"))
+                # Adapting button to support Dual Option for Freelancer.com too, using opc_a by default for now via 'bid_'
+                # Or we could implement wk_A_ logic here too if we want dual option on Freelancer.com.
+                # For now, keeping the "Aceitar" (which uses opc_a/proposal) to not break existing flow unless requested.
+                # The user request specifically mentioned updating `workana_monitor.py` for buttons.
+                # But `sentinel.py` is the main brain, so it needs to return 5 values.
+                markup.add(InlineKeyboardButton(f"✅ Aceitar (Opção A)", callback_data=f"bid_{pid}"))
                 markup.add(InlineKeyboardButton("❌ Rejeitar", callback_data=f"rejeitar_{pid}"))
 
                 if bot: bot.send_message(CHAT_ID, msg, parse_mode="HTML", reply_markup=markup)
@@ -423,12 +412,11 @@ def scan_radar():
 
 if __name__ == "__main__":
     get_my_id()
-    logger.info("🤖 Jules V5.2 (POLYGLOT) ONLINE")
+    logger.info("🤖 Jules V6.5.3 (DUAL OPTION) ONLINE")
     t = threading.Thread(target=start_telegram_listener)
     t.daemon = True
     t.start()
     while True:
         scan_radar()
-        # RADAR SENSITIVITY (V5.1) - 45s Interval, but we keep 600s if instructed by previous "Observation Mode".
         logger.info("💤 Trocando frequência em 600s (Modo Observação)...")
         time.sleep(600)
