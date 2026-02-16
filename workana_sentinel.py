@@ -22,8 +22,8 @@ TG_TOKEN = os.environ.get("TG_TOKEN")
 CHAT_ID = os.environ.get("TG_CHAT_ID")
 bot = telebot.TeleBot(TG_TOKEN)
 
-# Configurações de Busca - UPDATED URL
-WORKANA_URL = "https://www.workana.com/projects?category=it-programming&category=design-multimedia&category=marketing-sales&language=pt&language=en&language=es"
+# Configurações de Busca - UPDATED PRECISE URL
+WORKANA_URL = "https://www.workana.com/jobs?language=en%2Cpt&skills=artificial-intelligence%2Cinternet-marketing%2Cvideo-editing"
 AUTH_FILE = "workana_auth.json"
 SEEN_PROJECTS_FILE = "workana_seen.json"
 
@@ -64,6 +64,7 @@ async def scan_workana():
             return
 
         projects = await page.query_selector_all(".project-item")
+        print(f"🔎 Foram encontrados {len(projects)} projetos na página.")
 
         for p_item in projects[:20]:
             p_id = await p_item.get_attribute("id")
