@@ -1,5 +1,4 @@
 requests
-pyTelegramBotAPI
-freelancersdk
-python-dotenv
+playwright
 groq
+python-dotenv

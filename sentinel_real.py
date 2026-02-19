@@ -1,98 +1,113 @@
-import time
-import logging
 import os
-import threading
-import json
-import telebot
+import re
 from groq import Groq
-from freelancersdk.session import Session
-from freelancersdk.resources.projects.projects import search_projects
-from freelancersdk.resources.projects.helpers import create_search_projects_filter
 from dotenv import load_dotenv
 
-# Carrega chaves do arquivo .env (apenas para rodar local)
 load_dotenv()
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logger = logging.getLogger("JulesV17_Groq")
-
-TG_TOKEN = os.environ.get("TG_TOKEN")
-CHAT_ID = os.environ.get("TG_CHAT_ID")
-FLN_TOKEN = os.environ.get("FLN_OAUTH_TOKEN")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
+client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
 
-bot = telebot.TeleBot(TG_TOKEN) if TG_TOKEN else None
-try:
-    client_groq = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
-except Exception as e:
-    logger.error(f"Erro ao inicializar Groq: {e}")
-    client_groq = None
+def limpar_texto(texto):
+    # Remove marcadores e sujeira
+    texto = re.sub(r'(?:__|\*\*|\[|#)?\s*SECAO_\d\s*(?:__|\*\*|\]|:|#)?', '', texto, flags=re.IGNORECASE)
+    texto = re.sub(r'\[?(S-TIER|MID-TIER)\]?', '', texto)
+    remove_list = [
+        "Resumo:", "Ferramentas:", "Proposta Direta:", 
+        "Proposta Persuasiva:", "Opção A:", "Opção B:", 
+        "O problema é que", "A solução é", "###"
+    ]
+    for item in remove_list:
+        texto = texto.replace(item, "")
+    return texto.strip()
 
-memory_lock = threading.Lock()
-MEMORY_FILE = "memory.json"
+def analisar_e_escrever(titulo, descricao, budget, skills):
+    if not GROQ_API_KEY: return "ERRO KEY", "Sem API Key", "N/A", "Check .env", "Check .env", "0", "0"
+    if not client: return "ERRO CLIENT", "Falha Client", "N/A", "Erro Client", "Erro Client", "0", "0"
 
-def load_memory():
-    if os.path.exists(MEMORY_FILE):
-        try:
-            with open(MEMORY_FILE, "r") as f:
-                return json.load(f)
-        except: pass
-    return {"current_mission": "python automation scraping"}
+    # --- CÉREBRO CAMALEÃO (V30) ---
+    system_prompt = """
+    Você é o 'Diego'. Sua missão é fechar contratos High-Ticket.
+    Você não é mono-skill. Você se ADAPTA ao projeto.
+    
+    PASSO 1: IDENTIFIQUE O NICHO DO PROJETO:
+    
+    [CASO A: VÍDEO / YOUTUBE / EDIÇÃO]
+    - Sua Persona: Especialista em Retenção e Viralização.
+    - Sua Prova: "Cresci um canal até 12k inscritos (100k views) e VENDI a operação."
+    - Oferta: "Faço um Style Frame (Teste de 5s) para validar a estética."
+    - Ferramentas: After Effects, Premiere, CapCut.
+    
+    [CASO B: DADOS / EXCEL / AUTOMAÇÃO / PYTHON]
+    - Sua Persona: Especialista em Automação e Inteligência de Dados.
+    - Sua Prova: "Crio scripts em Python que automatizam o trabalho manual de dias em minutos."
+    - Oferta: "Posso automatizar essa planilha/processo para rodar sozinho."
+    - Ferramentas: Python (Pandas), Excel Avançado, Dashboards, Web Scraping.
+    
+    [CASO C: TRÁFEGO / MARKETING / COPY]
+    - Sua Persona: Gestor de Performance.
+    - Sua Prova: "Foco em ROI e Conversão, não em métricas de vaidade."
+    - Ferramentas: Facebook Ads, Google Ads, Copywriting Persuasivo.
 
-memory = load_memory()
+    REGRAS DE OURO:
+    - NUNCA misture as personas. Se o projeto é planilha, NÃO fale de "Sound Design".
+    - Se o projeto é Vídeo, NÃO fale de "Planilhas".
+    - Use "Eu" (Lobo Solitário).
+    - ZERO papo corporativo ("Prezado", "Abrangente", "Significativo"). Seja técnico e direto.
+    - NUNCA comece com "Olá! Sou o Diego" ou "Meu nome é Diego". Vá direto ao ponto.
 
-def gerar_proposta_diego(titulo, desc):
-    if not client_groq: return "⚠️ Erro: Groq não configurado."
+    ESTRUTURA OBRIGATÓRIA:
+    __SECAO_0__
+    [S-TIER]
+    __SECAO_1__
+    [Resumo Ácido: Aponte o erro que eles estão cometendo hoje no nicho deles]
+    __SECAO_2__
+    [3 Ferramentas REAIS para AQUELE nicho específico]
+    __SECAO_3__
+    [Proposta Direta: "Li o escopo. Minha stack é X. Entrego em Y dias. Valor: $. Vamos?"]
+    __SECAO_4__
+    [Proposta Persuasiva: Use a "Prova" correta para o nicho (Canal Vendido OU Automação Python).]
+    """
 
-    prompt = f"Role: Diego, Solutions Architect. Create a technical bid for: {titulo}. Description: {desc}. Rule: NO markdown, plain text only, be direct, sign 'Diego'."
+    user_prompt = f"""
+    PROJETO DO CLIENTE:
+    Título: {titulo}
+    Descrição: {descricao}
+    Budget: {budget}
+    """
 
     try:
-        chat_completion = client_groq.chat.completions.create(
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt,
-                }
-            ],
-            model="llama3-70b-8192",
+        completion = client.chat.completions.create(
+            messages=[{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
+            model="llama-3.3-70b-versatile",
             temperature=0.5,
+            max_tokens=1500
         )
-        return chat_completion.choices[0].message.content.strip()
+
+        content = completion.choices[0].message.content.strip()
+        
+        # DEBUG
+        print("\n" + "="*10 + " CÉREBRO ADAPTATIVO V30 " + "="*10)
+        print(content[:100] + "...")
+
+        dados = {
+            "0": "MID-TIER", "1": "...", "2": "...", "3": "Erro A", "4": content
+        }
+
+        parts = re.split(r'(?:__|\*\*|#)?\s*SECAO_(\d)\s*(?:__|\*\*|#)?', content, flags=re.IGNORECASE)
+        
+        if len(parts) > 1:
+            for i in range(1, len(parts), 2):
+                chave = parts[i].strip()
+                valor = parts[i+1].strip()
+                if chave in dados:
+                    dados[chave] = limpar_texto(valor)
+
+        return dados["0"], dados["1"], dados["2"], dados["3"], dados["4"], budget, "7"
+
     except Exception as e:
-        return f"Erro Groq: {str(e)}"
+        print(f"❌ Erro: {e}")
+        return "ERRO", "Falha", "N/A", "Erro", f"Erro: {e}", "0", "0"
 
-def scan_radar():
-    query = memory.get("current_mission", "python automation scraping")
-
-    try:
-        session = Session(oauth_token=FLN_TOKEN, url="https://www.freelancer.com")
-        search_filter = create_search_projects_filter(sort_field='time_updated', project_types=['fixed'])
-        result = search_projects(session, query=query, search_filter=search_filter)
-
-        if result and 'projects' in result:
-            for p in result['projects'][:2]:
-                pid = str(p.get('id'))
-
-                with memory_lock:
-                    if pid in memory: continue
-
-                title = p.get('title')
-                logger.info(f"Processando alvo: {title}")
-                texto = gerar_proposta_diego(title, p.get('preview_description', ''))
-
-                if bot:
-                    bot.send_message(CHAT_ID, f"🎯 *NOVO ALVO ENCONTRADO*\n\n📝 *Projeto:* {title}\n💰 {p.get('budget', {}).get('minimum', '?')} USD\n\n{texto}", parse_mode="Markdown")
-
-                with memory_lock:
-                    memory[pid] = True
-                    with open(MEMORY_FILE, "w") as f: json.dump(memory, f)
-
-                time.sleep(2)
-    except Exception as e:
-        logger.error(f"Erro no Radar: {e}")
-
-if __name__ == "__main__":
-    logger.info("🤖 Jules V17 (Groq Edition) ONLINE no PC DIEGO")
-    while True:
-        scan_radar()
-        time.sleep(60)
+def gerar_analise_diego(title, desc, budget, usd):
+    return analisar_e_escrever(title, desc, budget, "Geral")

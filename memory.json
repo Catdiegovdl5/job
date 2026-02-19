@@ -1,0 +1,349 @@
+{
+  "config": {
+    "current_mission_key": "nivel_s",
+    "mode": "AI TECH"
+  },
+  "40234546": {
+    "status": "seen",
+    "proposal": "I can help with visual design and image generation for your fashion brand launch. With experience in using Midjourney, Photoshop (Firefly), Canva, and Stable Diffusion, I can create high-quality visuals that meet your brand's aesthetic. I'll work closely with you to understand your vision and goals, and deliver a cohesive visual identity that sets your brand apart. I'm confident in my ability to deliver results within your budget of 1500.00 INR.\n\nDiego",
+    "amount": 1500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40234304": {
+    "status": "seen",
+    "proposal": "I can help with building a high-quality Shopify store that meets your needs and budget. With my experience in Shopify development, I can create a custom theme that matches your brand identity and configure products and payment gateways seamlessly. I'll also ensure that your store is mobile-responsive and user-friendly. I have expertise in using Shopify's Theme Kit and GraphCMS for headless commerce. Let's get started and create a great online shopping experience for your customers.\n\nDiego",
+    "amount": 12500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40234309": {
+    "status": "seen",
+    "proposal": "I can help with building a clean and modern Shopify store that meets your requirements. With my expertise in UI/UX design and development, I can create a seamless shopping experience for your customers. I'll use Tailwind CSS for styling and n8n for automating tasks. I'll also ensure the store is responsive and easy to navigate. I can help you launch a professional-looking store that attracts customers and drives sales. \n\nDiego",
+    "amount": 12500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40234108": {
+    "status": "seen",
+    "proposal": "I can create a sleek and conversion-oriented e-commerce page for SmartBiz using Midjourney and Photoshop (Firefly). With my expertise in visual design, I can craft an engaging user experience that drives sales and builds customer loyalty. I am confident that my design will meet your expectations and exceed your budget of 1500 INR. I look forward to working with you.\n\nDiego",
+    "amount": 1500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40234085": {
+    "status": "seen",
+    "proposal": "I can help you create a stunning and elegant website design that instantly conveys refinement and sophistication. With my expertise in visual design and image generation, I'll use Midjourney and Photoshop (Firefly) to craft a unique and captivating identity for your luxury sweets brand. Canva will be used for layout and typography refinement, ensuring a seamless user experience. Stable Diffusion will aid in generating high-quality images that perfectly complement your brand's aesthetic. I've worked on several projects that require a similar level of refinement and can deliver a high-end website design that meets your expectations.\n\nDiego",
+    "amount": 25000,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40234049": {
+    "status": "seen",
+    "proposal": "I can help with fixing over 50 broken product links in Google Search Console after your Shopify migration. I have experience with SEO tools like Screaming Frog and Ahrefs to identify and fix broken links. I can also automate tasks using n8n to minimize the impact on your business. With my expertise, I can ensure that your Shopify store is running smoothly and efficiently.\n\nDiego",
+    "amount": 1500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40233736": {
+    "status": "seen",
+    "proposal": "I can build a custom Shopify store that integrates with the OpenAI API to provide real-time book availability information. With my expertise in automation and API integration, I can help you create a seamless shopping experience for your customers. I'll use n8n to connect the OpenAI API and Make.com to automate tasks, ensuring your store is up-to-date and running smoothly.\n\nDiego",
+    "amount": 10.0,
+    "period": 7,
+    "currency": "AUD"
+  },
+  "40233705": {
+    "status": "seen",
+    "proposal": "I can help with designing and setting up a complete e-commerce website for your cookie business using Shopify. With my expertise in automation and RAG systems, I can integrate the OpenAI API with n8n to automate post-processing on your blog and social media. I have experience with Python and LangChain, which will enable me to build a seamless user experience for your customers. I'm confident that I can deliver a professional Shopify website that meets your business needs.\n\nDiego.",
+    "amount": 40.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40233639": {
+    "status": "seen",
+    "proposal": "I can help with building a full-featured e-commerce website on Shopify for your cookie business. With a budget of $10, I will integrate the Gemini API via n8n to automate blog and social media posts. My expertise in automation and e-commerce development will ensure a seamless and efficient customer experience. I'm confident that I can deliver a high-quality solution within your budget. - Diego",
+    "amount": 10.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40234009": {
+    "status": "seen",
+    "proposal": "I can help with integrating the Gemini API via n8n for automated blog and social media posts. My experience in RAG systems and social media automation will ensure seamless integration and efficient workflow management. I will utilize the best available tools to meet your project requirements and budget of 12500.0 INR (approx. $145.00 USD). I am confident in my ability to deliver a high-quality solution that meets your needs.\n\nDiego",
+    "amount": 12500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40233867": {
+    "status": "seen",
+    "proposal": "I can create a captivating 3-second hook for your AI-themed video edit. With my expertise in Visual Design & Image Generation, I'll use Midjourney to generate stunning visuals and Photoshop (Firefly) to refine the details. I'll also leverage Canva for a seamless editing experience and Stable Diffusion for generating high-quality images. My goal is to craft a hook that grabs the audience's attention and sets the tone for your video.\n\nDiego",
+    "amount": 600.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40232963": {
+    "status": "accepted",
+    "proposal": "I can help with building an efficient AI scoring system for artist opportunities using machine learning algorithms and Flask as the web framework. I will utilize pandas and NumPy for data manipulation, scikit-learn for model development, and SQLite for database management. With my experience in Google Colab, I can ensure seamless integration and deployment of the system. I can deliver a scalable and efficient solution within the given budget of $30.00.\n\nDiego",
+    "amount": 30.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40231721": {
+    "status": "rejected",
+    "proposal": "I can build a scalable and efficient Strata Reports review automation system using OpenAI API and n8n. My experience in RAG systems and social media automation will ensure a seamless integration with Gemini API. I can also utilize Python and LangChain for data processing and analysis. With a budget of $487.50 USD, I can deliver a high-quality solution that meets your needs. I'm confident in my ability to bring this project to life.\n\nDiego",
+    "amount": 1125,
+    "period": 7,
+    "currency": "AUD"
+  },
+  "40231634": {
+    "status": "rejected",
+    "proposal": "I can help with creating an AI-driven WhatsApp sales agent for your residential solar company. I'll use the OpenAI API to generate engaging conversations and n8n to automate the sales process. With Python and LangChain, I can ensure seamless integration and customization. This solution will not only save you time but also increase sales conversions. I'm confident that this project will exceed your expectations.\n\nDiego",
+    "amount": 25000,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40230278": {
+    "status": "rejected",
+    "proposal": "I can help with building a custom AI assistant for the TechIcee School Management System. With Dialogflow and Google Cloud Functions, I can create an intuitive and robust conversational interface that meets the specific needs of your users. My experience in RAG systems and social media automation will ensure seamless integration of the AI assistant with your existing infrastructure. I'm confident that I can deliver a high-quality solution within the budget of 12500.0 INR.\n\nDiego",
+    "amount": 12500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40230031": {
+    "status": "rejected",
+    "proposal": "I can help with designing, developing, and deploying a generative AI system that can create high-quality content such as text, images, and videos. With my expertise in OpenAI API, n8n, and Python, I can build a system that generates content automatically and personalized for different platforms. I have experience in integrating AI systems with various tools and platforms, ensuring seamless integration and high-quality results. I'm excited to bring my skills to this project and deliver a robust and scalable solution.\n\nDiego",
+    "amount": 12500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40228247": {
+    "status": "rejected",
+    "proposal": "I can help with building an AI Opportunity Finder Agent that automatically scouts freelancing websites, general job boards, and other sources for you. Using OpenAI API, n8n, and LangChain, I can create a robust automation pipeline that streamlines your job search process. I have experience with Python and workflow automation, ensuring a seamless integration of tools. I'm confident that this solution will save you time and increase your chances of finding the right job opportunity. \n\nDiego",
+    "amount": 1500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40229006": {
+    "status": "rejected",
+    "proposal": "I can help with turning ChatGPT into a friendly and efficient support chat automation system. With my expertise in AI and automation, I can design and implement a user-friendly interface that integrates seamlessly with OpenAI API, n8n, Make.com, Python, and LangChain. This will enable you to provide personalized and efficient support to your customers. I'm confident that my skills and experience make me the perfect fit for this project. I'm looking forward to working with you.\n\nDiego",
+    "amount": 30.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40228981": {
+    "status": "rejected",
+    "proposal": "I can help with turning ChatGPT into a friendly and efficient support chat automation system. I have experience with OpenAI API and n8n, and I can leverage these tools to build a scalable and secure system. I will use Python and LangChain to create a seamless integration with ChatGPT and ensure that the system is highly customizable and adaptable to your needs. I am confident that I can deliver a high-quality solution that meets your requirements and exceeds your expectations.\n\nDiego",
+    "amount": 30.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40227061": {
+    "status": "rejected",
+    "proposal": "I can help with designing and implementing a secure agentic AI integration layer for your enterprise risk management platform. With experience in AI/Backend engineering, I can leverage OpenAI API, n8n, and LangChain to create a robust and scalable system. I can automate tasks and ensure the integrity and security of your platform using Python. I'm confident in delivering a high-quality solution within your budget of 1500.0 INR.\n\nDiego.",
+    "amount": 1500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40234097": {
+    "status": "rejected",
+    "proposal": "I can help with managing your paid ad campaigns across Google Ads, Instagram, and other platforms to increase visibility and drive traffic to your franchising business. With a focus on optimizing ad spend and improving campaign performance, I'll work closely with you to achieve your goals. My expertise in ad management and analytics will ensure that your campaigns are running efficiently and effectively. I've worked with various tools and platforms, including Google Ads, Instagram Ads, and Facebook Ads Manager.\n\nDiego",
+    "amount": 200.0,
+    "period": 7,
+    "currency": "AUD"
+  },
+  "40234314": {
+    "status": "rejected",
+    "proposal": "I can help with turning your user-generated clips into engaging social media ads. With my expertise in video editing, I can enhance the visual appeal of your content using industry-standard tools like Adobe Premiere Pro, Final Cut Pro X, and DaVinci Resolve. I will apply creative LUTs and texturas to give your videos a unique look and add professional-grade transitions and sound effects. This will help increase engagement and drive sales for your physical products. I am confident in delivering high-quality results within your budget of 30 EUR.\n\nDiego",
+    "amount": 30.0,
+    "period": 7,
+    "currency": "EUR"
+  },
+  "40233949": {
+    "status": "rejected",
+    "proposal": "I can help with driving a steady flow of qualified leads to your consulting services. With my expertise in digital marketing, I can leverage the power of Ahrefs, SEMrush, and Ubersuggest to analyze your online presence, identify areas for improvement, and develop a tailored lead generation strategy. I'll also set up Google Search Console and Google Analytics to track your website's performance. With my guidance, you can expect a significant increase in qualified leads and a better understanding of your online market. Diego.",
+    "amount": 1500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40233828": {
+    "status": "rejected",
+    "proposal": "I can help with driving ecommerce sales via targeted ad campaigns. With expertise in Google Ads and Facebook Ads, I can create and manage campaigns that meet your budget of 12500.0 INR. Using tools like AdEspresso, I can optimize ad performance and increase conversions. My goal is to deliver a strong return on investment for your ecommerce store.\n\nDiego.",
+    "amount": 12500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40234202": {
+    "status": "rejected",
+    "proposal": "I can help with creating two conversational AI agents powered by Claude and ChatGPT, connected to automate marketing actions. With experience in integrating APIs and building RAG systems, I can ensure seamless communication between the agents and other marketing tools. I will utilize tools like n8n, Make.com, and Python to create a custom solution that meets your marketing automation needs. I am confident in delivering a high-quality solution within the budget of 12500.0 INR.\n\n- Diego",
+    "amount": 12500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40233320": {
+    "status": "rejected",
+    "proposal": "I can help with designing and building a robust chatbot automation system using the OpenAI API and other tools like n8n and Make.com. With my experience in AI engineering, I can ensure that the system is scalable, efficient, and provides accurate responses to user queries. I am familiar with the LangChain library and can use Python to integrate the various components of the system. I am confident that I can deliver a high-quality solution that meets your requirements. \n\n Diego",
+    "amount": 30.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40233306": {
+    "status": "rejected",
+    "proposal": "I can help with creating high-quality cinematic ad videos using OpenAI API and n8n. With my experience in AI video creation and automation, I can ensure that your marketing messages are personalized and attention-grabbing. I will work within your budget of $250 to deliver a unique and engaging video content that meets your brand's needs.\n\nSincerely,\nDiego",
+    "amount": 250.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40232285": {
+    "status": "rejected",
+    "proposal": "I can help with creating a multi-language video course using Premiere Pro and adding subtitles with the suggested arsenal of tools. With experience in video editing and automation, I can work within your budget of $750. I'll utilize OpenAI API for language processing, n8n for workflow automation, and Premiere Pro for video editing. I'll ensure the final product is of high quality and meets your requirements. I'm confident in delivering this project efficiently.\n\nDiego",
+    "amount": 1125,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40232004": {
+    "status": "rejected",
+    "proposal": "I can help with building a robust AI-driven invoicing and CRM automation system, tailored to your specific needs. With my expertise in AI and automation, I can integrate the OpenAI API with n8n and Make.com to create a seamless workflow. I'll use Python and LangChain to develop the system, ensuring it's production-ready and scalable. I can help you reduce manual labor and increase efficiency, making your business more agile. I'm confident in delivering a high-quality solution within your budget of $435.00 USD.\n\nDiego",
+    "amount": 37500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40230874": {
+    "status": "rejected",
+    "proposal": "I can help with creating two conversational AI agents, one powered by Claude and the other by ChatGPT, connected and trained. I've got the skills to combine OpenAI API, n8n, and Make.com to automate marketing actions. With my experience in Python and LangChain, I can ensure seamless integration and efficient workflows. I'm confident in delivering a robust solution that meets your needs.\n\nDiego",
+    "amount": 1125,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40230503": {
+    "status": "rejected",
+    "proposal": "I can help with creating a 2-minute video introduction and features for SmartDocs365.com. I have experience in video production and editing, and I can use a combination of OBS Studio, Adobe After Effects, and Audacity to create a high-quality video. With Lumen5 and Canva, I can also design engaging graphics and animations to showcase the website's features. I have a good understanding of visual storytelling and can ensure that the video is both informative and engaging. I can deliver a professional-looking video that meets your expectations.\n\nDiego",
+    "amount": 600.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40229632": {
+    "status": "rejected",
+    "proposal": "I can help with building a custom Oracle AI Agent using the suggested arsenal of tools. With my experience in RAG systems and social media automation, I can deliver a scalable and efficient solution that meets your business needs. I'm confident that my expertise will help you achieve your objectives within the given budget of 1500.0 INR. I'd be happy to discuss the project further and provide a detailed proposal.\n\n Diego",
+    "amount": 1500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40234537": {
+    "status": "rejected",
+    "proposal": "I can help with building a clear and defensible quantitative study using your existing secondary dataset. I'll leverage the best available tools to deliver a comprehensive analysis that meets your objectives. With my expertise in R and Python, I'll ensure that the study is well-structured, and the results are easy to interpret.\n\n- Diego",
+    "amount": 10.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40234268": {
+    "status": "rejected",
+    "proposal": "I can help with exporting AppMagic subscription data using n8n's automation capabilities. I'll leverage OpenAI API for data processing and LangChain for integrating the data into a focused dataset. With Python, I'll create a seamless interface for data export. My experience in RAG systems and social media automation ensures a robust solution. \n\nDiego",
+    "amount": 250.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40234157": {
+    "status": "rejected",
+    "proposal": "I can help with your graduate-level data analysis project, focusing on mixed data types. With my expertise in RStudio and Python, I can guide you through a customized data analysis process using Pandas, NumPy, and Matplotlib. We can also leverage Scikit-learn for machine learning tasks and Jupyter Notebook for interactive exploration. My experience in data analysis and visualization will ensure you get the most out of your project.\n\nDiego",
+    "amount": 30.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40233093": {
+    "status": "rejected",
+    "proposal": "I can help you sell your complete SEO services to businesses looking to boost their online presence. With my experience in sales and SEO, I can understand the needs of your clients and present tailored solutions to meet their objectives. I'm confident in my ability to drive results and exceed your sales targets. I'm excited to discuss this opportunity further and explore how we can work together to achieve success. \n\nBest regards,\nDiego",
+    "amount": 30.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40234547": {
+    "status": "rejected",
+    "proposal": "I can help with crafting a well-structured, publication-ready literature review that surveys current research in Artificial Artifacts. With experience in AI-powered writing and a deep understanding of academic writing requirements, I can assist in producing a high-quality review article that meets your needs. I'll utilize the latest tools and techniques to ensure your review is accurate, comprehensive, and engaging. Let's work together to produce a outstanding literature review.\n\nDiego",
+    "amount": 250.0,
+    "period": 7,
+    "currency": "AUD"
+  },
+  "40232233": {
+    "status": "rejected",
+    "proposal": "I can help with designing and developing a visually stunning AI-generated video for your community-driven contest. I'll utilize Midjourney to create unique and captivating visuals, and then refine them using Photoshop (Firefly) and Canva. Stable Diffusion will be used to generate high-quality images that fit your contest's theme.\n\nDiego",
+    "amount": 12500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40229905": {
+    "status": "rejected",
+    "proposal": "I can help with creating a comprehensive research paper on Artificial Intelligence. With my expertise in AI and machine learning, I can provide you with a well-structured and in-depth analysis of the topic. I will use Python and relevant libraries such as Pandas, NumPy, and Matplotlib to create a detailed report. I am confident in delivering a high-quality paper that meets your expectations.\n\nDiego",
+    "amount": 600.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40229098": {
+    "status": "rejected",
+    "proposal": "I can help with the development of an advanced AI voice agent tailored for your business. With my expertise in AI and automation, I can integrate OpenAI API with n8n to create a seamless customer engagement experience. I've worked with Make.com and Python to build scalable systems, and LangChain to develop conversational interfaces. I'm confident that I can deliver a high-quality solution within your budget of $3000. I look forward to discussing the project further.\n\nDiego",
+    "amount": 4000,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40226653": {
+    "status": "rejected",
+    "proposal": "I can help with the development of a custom AI subtitling software that meets your specific requirements. I have experience with machine learning and video processing using FFmpeg and Aegisub. I can leverage OpenSubtitles for subtitle data and integrate it with your Blu-ray/Remux project. My expertise in TensorFlow and Keras will ensure accurate and efficient subtitling. I am confident that I can deliver a high-quality solution within the budget of $250. I look forward to working with you.\n\nDiego",
+    "amount": 250.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40225064": {
+    "status": "accepted",
+    "proposal": "I can help with creating a modern vector logo for Herrera's Cleaning Services that effectively communicates the company's commercial and residential services. I have experience in logo design and will utilize Midjourney and Photoshop (Firefly) to create a unique and eye-catching design that meets your expectations. I will ensure the logo is scalable and adaptable for various applications, including business cards, website, and social media. I am confident in delivering a high-quality logo that meets your budget of $250.00 USD. \n\nDiego",
+    "amount": 250.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40234769": {
+    "status": "seen",
+    "proposal": "I can help with building a short, professional-looking product demonstration video directly in Figma, tailored to your needs. I have experience working with Figma and video creation tools like Loom and ScreenFlow. I can create a high-quality video that showcases the functionality of your Figma project and highlights the user experience. My goal is to provide a clear and concise video that effectively communicates the value of your project.\n\nDiego",
+    "amount": 10.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40234604": {
+    "status": "seen",
+    "proposal": "I can help with creating a captivating 2D animation for your existing logo, reinforcing your brand identity. With experience in visual design and image generation, I can utilize Midjourney and Photoshop (Firefly) to bring your logo to life. I'll work closely with you to ensure the animation meets your expectations and effectively communicates your brand message. I'm confident in delivering a high-quality animation that exceeds your expectations. \n\nDiego",
+    "amount": 30.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40234506": {
+    "status": "seen",
+    "proposal": "I can help with bringing your raw clips to life by creating a captivating 3D motion-graphic video edit. With my expertise in visual design and image generation, I can use tools like Midjourney, Photoshop (Firefly), Canva, and Stable Diffusion to craft a unique and engaging visual narrative. My goal is to exceed your expectations and deliver a high-quality final product that meets your needs. I'm confident in my ability to bring your vision to reality within the budget of 12500.0 INR.\nDiego",
+    "amount": 12500.0,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40233887": {
+    "status": "seen",
+    "proposal": "I can help with building a feature-rich football training app using React Native, Node.js, and MongoDB. With experience in TypeScript and Redux, I can ensure a scalable and maintainable codebase. I'll also set up ESLint and Prettier for code formatting and React Router for routing. I can deliver a high-quality app within the budget of 250 dollars. \n\nDiego",
+    "amount": 250.0,
+    "period": 7,
+    "currency": "USD"
+  },
+  "40233769": {
+    "status": "seen",
+    "proposal": "I can help with structured, beginner-friendly coaching that will take you from \"hello world\" to employable in no time. With a budget of $487.50 USD, I can provide you with the best tools and resources to learn Python, TensorFlow, and Keras. I have experience with Jupyter Notebooks and can help you build complex projects. I'll guide you through the process of learning Data Science with libraries like Pandas, NumPy, and Matplotlib. You'll be able to apply your skills to real-world problems using OpenCV and Scikit-image. Let's get started!\n\nDiego",
+    "amount": 750.0,
+    "period": 7,
+    "currency": "AUD"
+  },
+  "40231617": {
+    "status": "seen",
+    "proposal": "I can help with building and deploying chatbots on both your Facebook page and WhatsApp using the suggested arsenal. With my expertise in automation and programming, I can integrate OpenAI API, n8n, and Make.com to create a seamless user experience. I have experience in Python and LangChain, which will enable me to develop efficient and scalable chatbots. I am confident that I can deliver a high-quality solution within the given budget of $17.40 USD.\n\nDiego.",
+    "amount": 7000,
+    "period": 7,
+    "currency": "INR"
+  },
+  "40234502": {
+    "status": "seen",
+    "proposal": "I can help with creating a captivating book trailer for your science-fiction novel with detective and horror elements. With a budget of 10 dollars, I can utilize the best available tools to deliver a high-quality production. I have experience with visual effects, audio editing, and graphic design, which will be essential in creating a compelling trailer that will grab the attention of your target audience. I will use OpenShot for video editing, Adobe After Effects for visual effects, Audacity for audio editing, and Canva for graphic design. I will then upload the final product to YouTube for seamless playback. Let's bring your novel to life with a stunning book trailer.\n\nSincerely,\nDiego",
+    "amount": 10.0,
+    "period": 7,
+    "currency": "USD"
+  }
+}
