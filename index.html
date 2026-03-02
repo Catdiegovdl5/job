@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Portfólio de Gestor de Tráfego especialista em Meta Ads.">
+    <title>Portfólio | Gestor de Tráfego</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* --- ESTILOS GERAIS (Mantivemos o mesmo design premium) --- */
+        :root {
+            --primary: #3b82f6;
+            --accent: #38bdf8;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header {
+            text-align: center;
+            margin-top: 50px;
+            margin-bottom: 70px;
+            padding: 0 20px;
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            line-height: 1.1;
+            font-weight: 800;
+        }
+
+        .header h1 span {
+            background: linear-gradient(to right, #38bdf8, #818cf8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            color: #94a3b8;
+            max-width: 700px;
+            margin: 0 auto 40px auto;
+        }
+
+        .btn-conversao {
+            background: linear-gradient(45deg, #25D366, #128C7E);
+            color: white;
+            padding: 18px 40px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
+            transition: all 0.3s;
+        }
+
+        .btn-conversao:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.5);
+        }
+
+        .btn-conversao svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .grid-resultados {
+            display: flex;
+            gap: 30px;
+            padding: 40px 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 1200px;
+        }
+
+        .cartao {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            width: 320px;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+            animation: flutuar 6s ease-in-out infinite;
+            position: relative;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cartao:hover {
+            border-color: var(--accent);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.2);
+        }
+
+        .cartao:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .cartao:nth-child(2) {
+            animation-delay: 1.5s;
+        }
+
+        .cartao:nth-child(3) {
+            animation-delay: 3s;
+        }
+
+        .cartao h3 {
+            margin-top: 20px;
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: 700;
+        }
+
+        .cartao p {
+            color: #94a3b8;
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .check-icon {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .cartao-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background-color: #000;
+        }
+
+        @keyframes flutuar {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .grid-resultados {
+                gap: 20px;
+            }
+
+            .btn-conversao {
+                font-size: 1.1rem;
+                padding: 15px 30px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div style="font-weight: 800; font-size: 1.5rem; letter-spacing: -1px;">ANALYTIC<span
+                style="color: var(--accent);">SCALE</span></div>
+    </nav>
+
+    <div class="header">
+        <h1>Pare de Gastar. Comece a <span>Escalar</span>.</h1>
+        <p>Estratégias validadas de Meta Ads para negócios que buscam previsibilidade e lucros exponenciais.</p>
+
+        <a href="https://wa.me/5543991652706?text=Ol%C3%A1!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20agendar%20uma%20consultoria%20gratuita."
+            target="_blank" rel="noopener noreferrer" class="btn-conversao">
+            <svg viewBox="0 0 24 24">
+                <path
+                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+            </svg>
+            Agendar Consultoria Gratuita
+        </a>
+    </div>
+
+    <div class="grid-resultados">
+        <div class="cartao">
+            <img src="assets/img/bofu.png" alt="Print Resultado BOFU" class="cartao-img">
+            <h3>Remarketing 30D (BOFU)</h3>
+            <p><span class="check-icon">✓</span> $1.57 Custo por Lead</p>
+            <p><span class="check-icon">✓</span> Alto volume de conversão</p>
+            <p>Retargeting preciso para usuários com alta intenção de compra.</p>
+        </div>
+
+        <div class="cartao">
+            <img src="assets/img/tofu.png" alt="Print Resultado TOFU" class="cartao-img">
+            <h3>Premium Markets (TOFU)</h3>
+            <p><span class="check-icon">✓</span> 83.000+ Impressões</p>
+            <p><span class="check-icon">✓</span> $0.07 Custo p/ View (Landing Page)</p>
+            <p>Geração de tráfego ultra qualificado em mercados competitivos.</p>
+        </div>
+
+        <div class="cartao">
+            <div class="cartao-img"
+                style="display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(135deg, #1e293b, #0f172a); gap: 10px; border: 1px solid #38bdf8;">
+                <div style="font-size: 2.5rem; font-weight: 900; color: #38bdf8;">7.5x</div>
+                <div style="font-size: 0.9rem; letter-spacing: 2px; color: #94a3b8; font-weight: 600;">ROAS MÉDIO</div>
+            </div>
+            <h3>Gestão High-Ticket</h3>
+            <p><span class="check-icon">✓</span> Otimização Diária</p>
+            <p><span class="check-icon">✓</span> ROI Positivo Validado</p>
+            <p>Gestão de orçamentos com foco em escala agressiva.</p>
+        </div>
+    </div>
+
+</body>
+
+</html>
