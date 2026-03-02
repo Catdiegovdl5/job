@@ -6,22 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
         content="Portfólio de Gestor de Tráfego especialista em Meta Ads. Estratégias validadas para negócios que buscam previsibilidade.">
-    <title>Portfólio | Gestor de Tráfego</title>
+    <title>Analytic Scale | Gestor de Tráfego</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- ESTILOS GERAIS (Clean e Corporativo) --- */
+        /* --- ESTILOS GERAIS (Sério e Limpo) --- */
         :root {
-            --bg-site: #0f172a;
-            /* Azul escuro sólido e elegante */
+            --bg-site: #0b1120;
+            /* Fundo super escuro, estilo terminal/dashboard */
             --bg-cartao: #1e293b;
-            /* Fundo do cartão levemente mais claro */
             --texto-principal: #f8fafc;
             --texto-secundario: #94a3b8;
-            --destaque: #38bdf8;
+            --destaque: #3b82f6;
+            /* Azul corporativo */
             --borda: #334155;
-            --whatsapp: #25D366;
+            --sucesso: #10b981;
         }
 
         body {
@@ -31,22 +31,17 @@
             background-color: var(--bg-site);
             color: var(--texto-principal);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
         /* --- NAVBAR --- */
         .navbar {
-            width: 100%;
-            max-width: 1200px;
+            max-width: 1000px;
+            margin: 0 auto;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 25px 20px;
-            box-sizing: border-box;
+            padding: 30px 20px;
             border-bottom: 1px solid var(--borda);
-            /* Linha divisória profissional */
         }
 
         .logo {
@@ -61,17 +56,18 @@
 
         /* --- CABEÇALHO --- */
         .header {
+            max-width: 800px;
+            margin: 80px auto;
             text-align: center;
-            margin-top: 60px;
-            margin-bottom: 60px;
             padding: 0 20px;
         }
 
         .header h1 {
-            font-size: 3.2rem;
-            margin-bottom: 20px;
-            line-height: 1.2;
+            font-size: 3.5rem;
+            margin-bottom: 24px;
+            line-height: 1.1;
             font-weight: 800;
+            letter-spacing: -1px;
         }
 
         .header h1 span {
@@ -79,21 +75,19 @@
         }
 
         .header p {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             color: var(--texto-secundario);
-            max-width: 650px;
             margin: 0 auto 40px auto;
             line-height: 1.6;
         }
 
-        /* --- BOTÃO WHATSAPP --- */
         .btn-conversao {
-            background-color: var(--whatsapp);
+            background-color: #25D366;
             color: #000;
-            padding: 16px 36px;
+            padding: 18px 40px;
             border: none;
-            border-radius: 8px;
-            /* Bordas menos arredondadas = mais sério */
+            border-radius: 4px;
+            /* Borda mais reta (Corporativo) */
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
@@ -101,12 +95,11 @@
             display: inline-flex;
             align-items: center;
             gap: 12px;
-            transition: background-color 0.2s ease, transform 0.2s ease;
+            transition: background-color 0.2s;
         }
 
         .btn-conversao:hover {
             background-color: #1ebc59;
-            transform: translateY(-2px);
         }
 
         .btn-conversao svg {
@@ -115,78 +108,105 @@
             fill: currentColor;
         }
 
-        /* --- GRID DE RESULTADOS --- */
-        .grid-resultados {
+        /* --- SESSÃO DE ESTUDOS DE CASO --- */
+        .estudos-de-caso {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px 80px 20px;
             display: flex;
-            gap: 24px;
-            padding: 0 20px 60px 20px;
-            flex-wrap: wrap;
-            justify-content: center;
-            max-width: 1200px;
+            flex-direction: column;
+            gap: 40px;
+            /* Espaço entre os projetos */
         }
 
-        /* --- CARTÕES (Sem flutuação, sem vidro) --- */
-        .cartao {
-            background-color: var(--bg-cartao);
+        /* Estrutura do Estudo de Caso (Imagem de um lado, texto do outro) */
+        .caso {
+            display: flex;
+            background-color: var(--bg-site);
             border: 1px solid var(--borda);
-            border-radius: 12px;
-            padding: 24px;
-            width: 340px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            /* Sombra sutil e realista */
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            border-radius: 8px;
+            overflow: hidden;
+            /* Garante que nada saia do cartão */
         }
 
-        .cartao:hover {
-            transform: translateY(-4px);
-            /* Apenas levanta um pouquinho ao passar o mouse */
-            border-color: #475569;
-        }
-
-        .cartao h3 {
-            margin: 20px 0 10px 0;
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .cartao p {
-            color: var(--texto-secundario);
-            font-size: 0.95rem;
-            line-height: 1.5;
-            margin: 8px 0;
+        .caso-imagem {
+            flex: 1;
+            /* Ocupa metade do espaço */
+            background-color: #000;
+            padding: 20px;
             display: flex;
-            align-items: flex-start;
-            gap: 8px;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid var(--borda);
         }
 
-        .check-icon {
-            color: var(--destaque);
-            font-weight: bold;
-            margin-top: 2px;
-        }
-
-        /* --- IMAGENS (Otimizadas) --- */
-        .cartao-img {
+        .caso-imagem img {
             width: 100%;
             height: auto;
-            /* Mantém a proporção real do seu print */
-            aspect-ratio: 16/9;
-            /* Ajuda no carregamento */
-            object-fit: cover;
-            object-position: top;
-            /* Foca na parte de cima da tabela */
-            border-radius: 8px;
-            border: 1px solid var(--borda);
-            background-color: #000;
+            border-radius: 4px;
+            /* object-fit: contain garante que a imagem não seja cortada, mostrando a tabela inteira */
+            object-fit: contain;
         }
 
+        .caso-conteudo {
+            flex: 1;
+            /* Ocupa a outra metade */
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .caso-conteudo h3 {
+            font-size: 1.8rem;
+            margin: 0 0 15px 0;
+        }
+
+        .metrica {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--texto-principal);
+        }
+
+        .metrica strong {
+            color: var(--destaque);
+            font-size: 1.2rem;
+        }
+
+        .check {
+            color: var(--sucesso);
+            font-weight: bold;
+        }
+
+        .descricao {
+            margin-top: 20px;
+            color: var(--texto-secundario);
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        /* --- RESPONSIVIDADE (Celulares) --- */
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 2.2rem;
+                font-size: 2.5rem;
             }
 
-            .cartao {
-                width: 100%;
+            .caso {
+                flex-direction: column;
+            }
+
+            /* Coloca a imagem em cima e o texto em baixo no telemóvel */
+            .caso-imagem {
+                border-right: none;
+                border-bottom: 1px solid var(--borda);
+                padding: 10px;
+            }
+
+            .caso-conteudo {
+                padding: 30px 20px;
             }
         }
     </style>
@@ -213,40 +233,36 @@
         </a>
     </div>
 
-    <div class="grid-resultados">
-        <div class="cartao">
-            <img src="assets/img/bofu.png" alt="Print Resultado BOFU" class="cartao-img" loading="lazy"
-                decoding="async">
-            <h3>Remarketing 30D (BOFU)</h3>
-            <p><span class="check-icon">✓</span> <strong>Custo por Lead:</strong> $1.57</p>
-            <p><span class="check-icon">✓</span> <strong>Objetivo:</strong> Maximização de Vendas</p>
-            <p style="margin-top: 15px; font-size: 0.85rem;">Retargeting preciso para usuários com alta intenção de
-                compra, reduzindo o CPA médio.</p>
-        </div>
+    <div class="estudos-de-caso">
 
-        <div class="cartao">
-            <img src="assets/img/tofu.png" alt="Print Resultado TOFU" class="cartao-img" loading="lazy"
-                decoding="async">
-            <h3>Premium Markets (TOFU)</h3>
-            <p><span class="check-icon">✓</span> <strong>Custo p/ View:</strong> $0.07</p>
-            <p><span class="check-icon">✓</span> <strong>Impressões:</strong> +83.000</p>
-            <p style="margin-top: 15px; font-size: 0.85rem;">Geração de tráfego ultra qualificado (Landing Page Views)
-                em mercados altamente competitivos.</p>
-        </div>
-
-        <div class="cartao">
-            <div class="cartao-img"
-                style="display:flex; flex-direction:column; align-items:center; justify-content:center; background-color: #0f172a; border-color: #38bdf8; height: 190px;">
-                <div style="font-size: 3rem; font-weight: 800; color: #38bdf8;">7.5x</div>
-                <div style="font-size: 0.8rem; letter-spacing: 2px; color: #94a3b8; font-weight: 600; margin-top: 5px;">
-                    ROAS MÉDIO</div>
+        <div class="caso">
+            <div class="caso-imagem">
+                <img src="assets/img/bofu.png" alt="Print Resultado BOFU" loading="lazy">
             </div>
-            <h3>Escala e Gestão</h3>
-            <p><span class="check-icon">✓</span> <strong>Estratégia:</strong> Otimização Diária</p>
-            <p><span class="check-icon">✓</span> <strong>Resultado:</strong> ROI Positivo Validado</p>
-            <p style="margin-top: 15px; font-size: 0.85rem;">Gestão meticulosa de orçamentos com foco em escala
-                agressiva mantendo a lucratividade.</p>
+            <div class="caso-conteudo">
+                <h3>Campanha de Remarketing (BOFU)</h3>
+                <div class="metrica"><span class="check">✓</span> Custo por Lead: <strong>$1.57</strong></div>
+                <div class="metrica"><span class="check">✓</span> Qualificação: <strong>Alta Intenção</strong></div>
+                <p class="descricao">Estratégia desenhada especificamente para capturar os usuários mais quentes do
+                    funil, convertendo tráfego morno em vendas previsíveis e baixando o Custo de Aquisição (CAC) geral
+                    do cliente.</p>
+            </div>
         </div>
+
+        <div class="caso">
+            <div class="caso-imagem">
+                <img src="assets/img/tofu.png" alt="Print Resultado TOFU" loading="lazy">
+            </div>
+            <div class="caso-conteudo">
+                <h3>Escala em Premium Markets (TOFU)</h3>
+                <div class="metrica"><span class="check">✓</span> Custo por View: <strong>$0.07</strong></div>
+                <div class="metrica"><span class="check">✓</span> Impressões: <strong>+83.000</strong></div>
+                <p class="descricao">Geração de tráfego de topo de funil em mercados internacionais altamente
+                    competitivos. Alcançámos volumes massivos de visualizações na Landing Page mantendo custos
+                    extremamente baixos.</p>
+            </div>
+        </div>
+
     </div>
 
 </body>
