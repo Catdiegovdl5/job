@@ -4,206 +4,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Portfólio de Gestor de Tráfego especialista em Meta Ads.">
+    <meta name="description"
+        content="Portfólio de Gestor de Tráfego especialista em Meta Ads. Estratégias validadas para negócios que buscam previsibilidade.">
     <title>Portfólio | Gestor de Tráfego</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- ESTILOS GERAIS (Mantivemos o mesmo design premium) --- */
+        /* --- ESTILOS GERAIS (Clean e Corporativo) --- */
         :root {
-            --primary: #3b82f6;
-            --accent: #38bdf8;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --bg-site: #0f172a;
+            /* Azul escuro sólido e elegante */
+            --bg-cartao: #1e293b;
+            /* Fundo do cartão levemente mais claro */
+            --texto-principal: #f8fafc;
+            --texto-secundario: #94a3b8;
+            --destaque: #38bdf8;
+            --borda: #334155;
+            --whatsapp: #25D366;
         }
 
         body {
             margin: 0;
             padding: 0;
             font-family: 'Inter', sans-serif;
-            background: radial-gradient(circle at top, #1e1b4b 0%, #0f172a 100%);
-            color: #ffffff;
+            background-color: var(--bg-site);
+            color: var(--texto-principal);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden;
         }
 
+        /* --- NAVBAR --- */
         .navbar {
             width: 100%;
             max-width: 1200px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px;
+            padding: 25px 20px;
             box-sizing: border-box;
+            border-bottom: 1px solid var(--borda);
+            /* Linha divisória profissional */
         }
 
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--destaque);
+        }
+
+        /* --- CABEÇALHO --- */
         .header {
             text-align: center;
-            margin-top: 50px;
-            margin-bottom: 70px;
+            margin-top: 60px;
+            margin-bottom: 60px;
             padding: 0 20px;
-            animation: fadeIn 1s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .header h1 {
-            font-size: 3.5rem;
+            font-size: 3.2rem;
             margin-bottom: 20px;
-            line-height: 1.1;
+            line-height: 1.2;
             font-weight: 800;
         }
 
         .header h1 span {
-            background: linear-gradient(to right, #38bdf8, #818cf8);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: var(--destaque);
         }
 
         .header p {
-            font-size: 1.3rem;
-            color: #94a3b8;
-            max-width: 700px;
+            font-size: 1.2rem;
+            color: var(--texto-secundario);
+            max-width: 650px;
             margin: 0 auto 40px auto;
+            line-height: 1.6;
         }
 
+        /* --- BOTÃO WHATSAPP --- */
         .btn-conversao {
-            background: linear-gradient(45deg, #25D366, #128C7E);
-            color: white;
-            padding: 18px 40px;
+            background-color: var(--whatsapp);
+            color: #000;
+            padding: 16px 36px;
             border: none;
-            border-radius: 50px;
-            font-size: 1.2rem;
+            border-radius: 8px;
+            /* Bordas menos arredondadas = mais sério */
+            font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.3);
-            transition: all 0.3s;
+            transition: background-color 0.2s ease, transform 0.2s ease;
         }
 
         .btn-conversao:hover {
-            transform: translateY(-5px) scale(1.05);
-            box-shadow: 0 15px 40px rgba(37, 211, 102, 0.5);
+            background-color: #1ebc59;
+            transform: translateY(-2px);
         }
 
         .btn-conversao svg {
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             fill: currentColor;
         }
 
+        /* --- GRID DE RESULTADOS --- */
         .grid-resultados {
             display: flex;
-            gap: 30px;
-            padding: 40px 20px;
+            gap: 24px;
+            padding: 0 20px 60px 20px;
             flex-wrap: wrap;
             justify-content: center;
             max-width: 1200px;
         }
 
+        /* --- CARTÕES (Sem flutuação, sem vidro) --- */
         .cartao {
-            background: var(--glass);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 30px;
-            width: 320px;
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
-            animation: flutuar 6s ease-in-out infinite;
-            position: relative;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            background-color: var(--bg-cartao);
+            border: 1px solid var(--borda);
+            border-radius: 12px;
+            padding: 24px;
+            width: 340px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            /* Sombra sutil e realista */
+            transition: transform 0.2s ease, border-color 0.2s ease;
         }
 
         .cartao:hover {
-            border-color: var(--accent);
-            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.2);
-        }
-
-        .cartao:nth-child(1) {
-            animation-delay: 0s;
-        }
-
-        .cartao:nth-child(2) {
-            animation-delay: 1.5s;
-        }
-
-        .cartao:nth-child(3) {
-            animation-delay: 3s;
+            transform: translateY(-4px);
+            /* Apenas levanta um pouquinho ao passar o mouse */
+            border-color: #475569;
         }
 
         .cartao h3 {
-            margin-top: 20px;
-            color: #fff;
-            font-size: 1.4rem;
+            margin: 20px 0 10px 0;
+            font-size: 1.3rem;
             font-weight: 700;
         }
 
         .cartao p {
-            color: #94a3b8;
-            font-size: 1rem;
-            line-height: 1.6;
-            margin: 10px 0;
+            color: var(--texto-secundario);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin: 8px 0;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 8px;
         }
 
         .check-icon {
-            color: #10b981;
+            color: var(--destaque);
             font-weight: bold;
+            margin-top: 2px;
         }
 
+        /* --- IMAGENS (Otimizadas) --- */
         .cartao-img {
             width: 100%;
-            height: 180px;
+            height: auto;
+            /* Mantém a proporção real do seu print */
+            aspect-ratio: 16/9;
+            /* Ajuda no carregamento */
             object-fit: cover;
-            border-radius: 16px;
-            border: 1px solid var(--border);
+            object-position: top;
+            /* Foca na parte de cima da tabela */
+            border-radius: 8px;
+            border: 1px solid var(--borda);
             background-color: #000;
-        }
-
-        @keyframes flutuar {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
         }
 
         @media (max-width: 768px) {
             .header h1 {
-                font-size: 2.5rem;
+                font-size: 2.2rem;
             }
 
-            .grid-resultados {
-                gap: 20px;
-            }
-
-            .btn-conversao {
-                font-size: 1.1rem;
-                padding: 15px 30px;
+            .cartao {
+                width: 100%;
             }
         }
     </style>
@@ -212,13 +195,13 @@
 <body>
 
     <nav class="navbar">
-        <div style="font-weight: 800; font-size: 1.5rem; letter-spacing: -1px;">ANALYTIC<span
-                style="color: var(--accent);">SCALE</span></div>
+        <div class="logo">ANALYTIC<span>SCALE</span></div>
     </nav>
 
     <div class="header">
         <h1>Pare de Gastar. Comece a <span>Escalar</span>.</h1>
-        <p>Estratégias validadas de Meta Ads para negócios que buscam previsibilidade e lucros exponenciais.</p>
+        <p>Estratégias validadas de Meta Ads para negócios que buscam previsibilidade em vendas e lucros exponenciais
+            baseados em dados.</p>
 
         <a href="https://wa.me/5543991652706?text=Ol%C3%A1!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20agendar%20uma%20consultoria%20gratuita."
             target="_blank" rel="noopener noreferrer" class="btn-conversao">
@@ -226,37 +209,43 @@
                 <path
                     d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
             </svg>
-            Agendar Consultoria Gratuita
+            Falar com Especialista
         </a>
     </div>
 
     <div class="grid-resultados">
         <div class="cartao">
-            <img src="assets/img/bofu.png" alt="Print Resultado BOFU" class="cartao-img">
+            <img src="assets/img/bofu.png" alt="Print Resultado BOFU" class="cartao-img" loading="lazy"
+                decoding="async">
             <h3>Remarketing 30D (BOFU)</h3>
-            <p><span class="check-icon">✓</span> $1.57 Custo por Lead</p>
-            <p><span class="check-icon">✓</span> Alto volume de conversão</p>
-            <p>Retargeting preciso para usuários com alta intenção de compra.</p>
+            <p><span class="check-icon">✓</span> <strong>Custo por Lead:</strong> $1.57</p>
+            <p><span class="check-icon">✓</span> <strong>Objetivo:</strong> Maximização de Vendas</p>
+            <p style="margin-top: 15px; font-size: 0.85rem;">Retargeting preciso para usuários com alta intenção de
+                compra, reduzindo o CPA médio.</p>
         </div>
 
         <div class="cartao">
-            <img src="assets/img/tofu.png" alt="Print Resultado TOFU" class="cartao-img">
+            <img src="assets/img/tofu.png" alt="Print Resultado TOFU" class="cartao-img" loading="lazy"
+                decoding="async">
             <h3>Premium Markets (TOFU)</h3>
-            <p><span class="check-icon">✓</span> 83.000+ Impressões</p>
-            <p><span class="check-icon">✓</span> $0.07 Custo p/ View (Landing Page)</p>
-            <p>Geração de tráfego ultra qualificado em mercados competitivos.</p>
+            <p><span class="check-icon">✓</span> <strong>Custo p/ View:</strong> $0.07</p>
+            <p><span class="check-icon">✓</span> <strong>Impressões:</strong> +83.000</p>
+            <p style="margin-top: 15px; font-size: 0.85rem;">Geração de tráfego ultra qualificado (Landing Page Views)
+                em mercados altamente competitivos.</p>
         </div>
 
         <div class="cartao">
             <div class="cartao-img"
-                style="display:flex; flex-direction:column; align-items:center; justify-content:center; background: linear-gradient(135deg, #1e293b, #0f172a); gap: 10px; border: 1px solid #38bdf8;">
-                <div style="font-size: 2.5rem; font-weight: 900; color: #38bdf8;">7.5x</div>
-                <div style="font-size: 0.9rem; letter-spacing: 2px; color: #94a3b8; font-weight: 600;">ROAS MÉDIO</div>
+                style="display:flex; flex-direction:column; align-items:center; justify-content:center; background-color: #0f172a; border-color: #38bdf8; height: 190px;">
+                <div style="font-size: 3rem; font-weight: 800; color: #38bdf8;">7.5x</div>
+                <div style="font-size: 0.8rem; letter-spacing: 2px; color: #94a3b8; font-weight: 600; margin-top: 5px;">
+                    ROAS MÉDIO</div>
             </div>
-            <h3>Gestão High-Ticket</h3>
-            <p><span class="check-icon">✓</span> Otimização Diária</p>
-            <p><span class="check-icon">✓</span> ROI Positivo Validado</p>
-            <p>Gestão de orçamentos com foco em escala agressiva.</p>
+            <h3>Escala e Gestão</h3>
+            <p><span class="check-icon">✓</span> <strong>Estratégia:</strong> Otimização Diária</p>
+            <p><span class="check-icon">✓</span> <strong>Resultado:</strong> ROI Positivo Validado</p>
+            <p style="margin-top: 15px; font-size: 0.85rem;">Gestão meticulosa de orçamentos com foco em escala
+                agressiva mantendo a lucratividade.</p>
         </div>
     </div>
 
