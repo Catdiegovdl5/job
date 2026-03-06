@@ -5,306 +5,707 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
-        content="Estratégias validadas de Meta Ads para negócios que buscam previsibilidade, escala agressiva e lucros exponenciais baseados em análise profunda de dados.">
-
-    <!-- Open Graph / LinkedIn -->
+        content="Estratégias validadas de Meta Ads para negócios que buscam previsibilidade, escala agressiva e lucros exponenciais.">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://analytic-scale.netlify.app/">
-    <meta property="og:title" content="Analytic Scale | Gestor de Tráfego de Elite">
+    <meta property="og:title" content="Analytic Scale | Growth Engineer & Meta Ads">
     <meta property="og:description"
-        content="Estratégias validadas de Meta Ads para negócios que buscam previsibilidade, escala agressiva e lucros exponenciais baseados em análise profunda de dados.">
+        content="Estratégias validadas de Meta Ads para negócios que buscam previsibilidade, escala agressiva e lucros exponenciais.">
     <meta property="og:image" content="https://analytic-scale.netlify.app/assets/img/og_preview.png">
+    <title>Analytic Scale | Growth Engineer & Meta Ads</title>
 
-    <title>Analytic Scale | Gestor de Tráfego</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
 
     <style>
-        /* --- ESTILOS GERAIS (Sério e Limpo) --- */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         :root {
-            --bg-site: #0b1120;
-            /* Fundo super escuro, estilo terminal/dashboard */
-            --bg-cartao: #1e293b;
-            --texto-principal: #f8fafc;
-            --texto-secundario: #94a3b8;
-            --destaque: #3b82f6;
-            /* Azul corporativo */
-            --borda: #334155;
-            --sucesso: #10b981;
+            --bg: #060b14;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.35);
+            --green: #10b981;
+            --green-glow: rgba(16, 185, 129, 0.2);
+            --text: #f0f4ff;
+            --muted: #64748b;
+            --glass-bg: rgba(255, 255, 255, 0.04);
+            --glass-border: rgba(255, 255, 255, 0.08);
+        }
+
+        /* ========================
+           BASE & ANIMATED BG
+        ======================== */
+        html {
+            scroll-behavior: smooth;
         }
 
         body {
-            margin: 0;
-            padding: 0;
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-site);
-            color: var(--texto-principal);
+            background-color: var(--bg);
+            color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
         }
 
-        /* --- NAVBAR --- */
-        .navbar {
-            max-width: 1000px;
-            margin: 0 auto;
+        /* Animated mesh gradient background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 80% 90%, rgba(16, 185, 129, 0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 60% at 60% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
+            animation: mesh-shift 12s ease-in-out infinite alternate;
+        }
+
+        @keyframes mesh-shift {
+            0% {
+                filter: hue-rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                filter: hue-rotate(20deg);
+                opacity: 0.8;
+            }
+        }
+
+        /* Noise texture overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+
+        .page-wrapper {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ========================
+           NAVBAR
+        ======================== */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 30px 20px;
-            border-bottom: 1px solid var(--borda);
+            padding: 20px 40px;
+            background: rgba(6, 11, 20, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--glass-border);
         }
 
-        .logo {
+        .nav-logo {
+            font-family: 'Syne', sans-serif;
             font-weight: 800;
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             letter-spacing: -0.5px;
+            color: var(--text);
         }
 
-        .logo span {
-            color: var(--destaque);
+        .nav-logo span {
+            color: var(--accent);
         }
 
         .nav-links {
             display: flex;
-            gap: 20px;
+            gap: 8px;
             align-items: center;
+        }
+
+        .nav-badge {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 600;
         }
 
         .nav-links a {
-            color: var(--texto-secundario);
+            color: var(--muted);
             text-decoration: none;
-            transition: color 0.2s;
             display: flex;
             align-items: center;
+            padding: 8px;
+            border-radius: 8px;
+            transition: color 0.2s, background 0.2s;
         }
 
         .nav-links a:hover {
-            color: var(--texto-principal);
+            color: var(--text);
+            background: var(--glass-bg);
         }
 
         .nav-links svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             fill: currentColor;
         }
 
-        /* --- CABEÇALHO --- */
-        .header {
-            max-width: 800px;
-            margin: 80px auto;
+        /* ========================
+           HERO
+        ======================== */
+        .hero {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 120px 40px 80px;
             text-align: center;
-            padding: 0 20px;
         }
 
-        .header h1 {
-            font-size: 3.5rem;
-            margin-bottom: 24px;
-            line-height: 1.1;
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-bottom: 32px;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-eyebrow .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 8px var(--green);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.3);
+                opacity: 0.7;
+            }
+        }
+
+        .hero h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(3rem, 7vw, 6rem);
             font-weight: 800;
-            letter-spacing: -1px;
+            line-height: 1.0;
+            letter-spacing: -2px;
+            margin-bottom: 28px;
         }
 
-        .header h1 span {
-            color: var(--destaque);
+        .hero h1 .gradient-text {
+            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
-        .header p {
-            font-size: 1.25rem;
-            color: var(--texto-secundario);
-            margin: 0 auto 40px auto;
-            line-height: 1.6;
+        .hero p {
+            font-size: 1.2rem;
+            color: var(--muted);
+            max-width: 600px;
+            margin: 0 auto 48px;
+            line-height: 1.7;
+            font-weight: 400;
         }
 
-        .btn-conversao {
-            background-color: #25D366;
-            color: #000;
-            padding: 18px 40px;
-            border: none;
-            border-radius: 4px;
-            /* Borda mais reta (Corporativo) */
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            text-decoration: none;
+        .hero-cta {
             display: inline-flex;
             align-items: center;
             gap: 12px;
-            transition: background-color 0.2s;
+            background: linear-gradient(135deg, #25D366, #1bab52);
+            color: #000;
+            padding: 18px 36px;
+            border-radius: 14px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: -0.2px;
+            box-shadow: 0 0 30px rgba(37, 211, 102, 0.3), 0 8px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
         }
 
-        .btn-conversao:hover {
-            background-color: #1ebc59;
+        .hero-cta:hover {
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 0 50px rgba(37, 211, 102, 0.5), 0 16px 40px rgba(0, 0, 0, 0.4);
         }
 
-        .btn-conversao svg {
+        .hero-cta svg {
             width: 22px;
             height: 22px;
             fill: currentColor;
         }
 
-        /* --- SESSÃO DE ESTUDOS DE CASO --- */
-        .estudos-de-caso {
-            max-width: 1000px;
+        /* ========================
+           STATS BAR
+        ======================== */
+        .stats-bar {
+            max-width: 1100px;
             margin: 0 auto;
-            padding: 0 20px 80px 20px;
+            padding: 0 40px 80px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            overflow: hidden;
+            background: var(--glass-border);
+        }
+
+        .stat {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: var(--green);
+            letter-spacing: -1px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* ========================
+           CASE STUDIES
+        ======================== */
+        .section {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 40px 80px;
+        }
+
+        .section-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.8rem, 3vw, 2.8rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 48px;
+            color: var(--text);
+        }
+
+        .cases-grid {
             display: flex;
             flex-direction: column;
-            gap: 40px;
-            /* Espaço entre os projetos */
+            gap: 24px;
         }
 
-        /* Estrutura do Estudo de Caso (Imagem de um lado, texto do outro) */
-        .caso {
-            display: flex;
-            background-color: var(--bg-site);
-            border: 1px solid var(--borda);
-            border-radius: 8px;
+        .case-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
             overflow: hidden;
-            /* Garante que nada saia do cartão */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .caso-imagem {
-            flex: 1;
-            /* Ocupa metade do espaço */
-            background-color: #000;
-            padding: 20px;
+        .case-card:hover {
+            border-color: rgba(59, 130, 246, 0.25);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.1);
+        }
+
+        .case-card.reverse {
+            direction: rtl;
+        }
+
+        .case-card.reverse>* {
+            direction: ltr;
+        }
+
+        .case-img-wrap {
+            background: #000;
             display: flex;
             align-items: center;
             justify-content: center;
-            border-right: 1px solid var(--borda);
+            padding: 20px;
+            border-right: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
         }
 
-        .caso-imagem img {
+        .case-card.reverse .case-img-wrap {
+            border-right: none;
+            border-left: 1px solid var(--glass-border);
+        }
+
+        .case-img-wrap::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
+        }
+
+        .case-img-wrap img {
             width: 100%;
             height: auto;
-            border-radius: 4px;
-            /* object-fit: contain garante que a imagem não seja cortada, mostrando a tabela inteira */
-            object-fit: contain;
+            border-radius: 8px;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.4s ease;
         }
 
-        .caso-conteudo {
-            flex: 1;
-            /* Ocupa a outra metade */
-            padding: 40px;
+        .case-card:hover .case-img-wrap img {
+            transform: scale(1.03);
+        }
+
+        .case-body {
+            padding: 48px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            gap: 16px;
         }
 
-        .caso-conteudo h3 {
+        .case-tag {
+            display: inline-block;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            width: fit-content;
+        }
+
+        .case-title {
+            font-family: 'Syne', sans-serif;
             font-size: 1.8rem;
-            margin: 0 0 15px 0;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            line-height: 1.2;
         }
 
-        .metrica {
+        .case-metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .metric {
             display: flex;
             align-items: center;
             gap: 10px;
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            color: var(--texto-principal);
+            font-size: 0.95rem;
+            color: var(--muted);
         }
 
-        .metrica strong {
-            color: var(--destaque);
-            font-size: 1.2rem;
+        .metric strong {
+            color: var(--green);
+            font-size: 1.3rem;
+            font-weight: 700;
         }
 
-        .check {
-            color: var(--sucesso);
-            font-weight: bold;
-        }
-
-        .descricao {
-            margin-top: 20px;
-            color: var(--texto-secundario);
-            line-height: 1.6;
+        .metric-check {
+            color: var(--green);
+            font-weight: 700;
             font-size: 1rem;
         }
 
-        /* --- RESPONSIVIDADE (Celulares) --- */
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2.5rem;
+        .case-desc {
+            color: var(--muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            border-top: 1px solid var(--glass-border);
+            padding-top: 16px;
+        }
+
+        /* ========================
+           FOOTER CTA
+        ======================== */
+        .footer-cta {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 40px 100px;
+        }
+
+        .cta-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            padding: 80px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-box::before {
+            content: '';
+            position: absolute;
+            top: -60%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .cta-box h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .cta-box p {
+            color: var(--muted);
+            font-size: 1.1rem;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        /* ========================
+           SCROLL ANIMATIONS
+        ======================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .reveal.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ========================
+           RESPONSIVENESS
+        ======================== */
+        @media (max-width: 900px) {
+            nav {
+                padding: 16px 20px;
             }
 
-            .caso {
-                flex-direction: column;
+            .hero,
+            .section,
+            .footer-cta {
+                padding-left: 20px;
+                padding-right: 20px;
             }
 
-            /* Coloca a imagem em cima e o texto em baixo no telemóvel */
-            .caso-imagem {
+            .hero {
+                padding-top: 80px;
+            }
+
+            .stats-bar {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .case-card,
+            .case-card.reverse {
+                grid-template-columns: 1fr;
+                direction: ltr;
+            }
+
+            .case-img-wrap,
+            .case-card.reverse .case-img-wrap {
                 border-right: none;
-                border-bottom: 1px solid var(--borda);
-                padding: 10px;
+                border-left: none;
+                border-bottom: 1px solid var(--glass-border);
             }
 
-            .caso-conteudo {
-                padding: 30px 20px;
+            .case-body {
+                padding: 28px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 {
+                letter-spacing: -1px;
+            }
+
+            .stats-bar {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 
 <body>
+    <div class="page-wrapper">
 
-    <nav class="navbar">
-        <div class="logo">ANALYTIC<span>SCALE</span></div>
-        <div class="nav-links">
-            <a href="https://www.linkedin.com/in/diego-antônio-85366225b/" target="_blank" title="LinkedIn">
+        <!-- NAVBAR -->
+        <nav>
+            <div class="nav-logo">ANALYTIC<span>SCALE</span></div>
+            <div class="nav-links">
+                <span class="nav-badge">🇧🇷 Disponível para Projetos</span>
+                <a href="https://www.linkedin.com/in/diego-ant%C3%B4nio-85366225b/" target="_blank" rel="noopener"
+                    aria-label="LinkedIn">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                    </svg>
+                </a>
+            </div>
+        </nav>
+
+        <!-- HERO -->
+        <section class="hero">
+            <div class="hero-eyebrow reveal">
+                <div class="dot"></div>
+                Growth Engineer · Meta Ads · CAPI · IA
+            </div>
+            <h1 class="reveal">
+                Pare de Gastar.<br>Comece a <span class="gradient-text">Escalar.</span>
+            </h1>
+            <p class="reveal">
+                Estratégias validadas de Meta Ads para negócios que buscam previsibilidade em vendas e lucros
+                exponenciais baseados em análise profunda de dados.
+            </p>
+            <a href="https://wa.me/5543991652706?text=Olá!%20Vi%20seu%20portfólio%20e%20gostaria%20de%20agendar%20uma%20consultoria%20gratuita."
+                target="_blank" rel="noopener" class="hero-cta reveal">
                 <svg viewBox="0 0 24 24">
                     <path
-                        d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
                 </svg>
+                Falar com Especialista
             </a>
-        </div>
-    </nav>
+        </section>
 
-    <div class="header">
-        <h1>Pare de Gastar. Comece a <span>Escalar</span>.</h1>
-        <p>Estratégias validadas de Meta Ads para negócios que buscam previsibilidade em vendas e lucros exponenciais
-            baseados em dados.</p>
-
-        <a href="https://wa.me/5543991652706?text=Ol%C3%A1!%20Vi%20seu%20portf%C3%B3lio%20e%20gostaria%20de%20agendar%20uma%20consultoria%20gratuita."
-            target="_blank" rel="noopener noreferrer" class="btn-conversao">
-            <svg viewBox="0 0 24 24">
-                <path
-                    d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
-            </svg>
-            Falar com Especialista
-        </a>
-    </div>
-
-    <div class="estudos-de-caso">
-
-        <div class="caso">
-            <div class="caso-imagem">
-                <img src="assets/img/bofu.png" alt="Print Resultado BOFU" loading="lazy">
+        <!-- STATS BAR -->
+        <div class="stats-bar reveal">
+            <div class="stat">
+                <span class="stat-value">$1.57</span>
+                <span class="stat-label">Custo por Lead (BOFU)</span>
             </div>
-            <div class="caso-conteudo">
-                <h3>Campanha de Remarketing (BOFU)</h3>
-                <div class="metrica"><span class="check">✓</span> Custo por Lead: <strong>$1.57</strong></div>
-                <div class="metrica"><span class="check">✓</span> Qualificação: <strong>Alta Intenção</strong></div>
-                <p class="descricao">Estratégia desenhada especificamente para capturar os usuários mais quentes do
-                    funil, convertendo tráfego morno em vendas previsíveis e baixando o Custo de Aquisição (CAC) geral
-                    do cliente.</p>
+            <div class="stat">
+                <span class="stat-value">+83K</span>
+                <span class="stat-label">Impressões (TOFU)</span>
+            </div>
+            <div class="stat">
+                <span class="stat-value">$0.07</span>
+                <span class="stat-label">Custo por View</span>
             </div>
         </div>
 
-        <div class="caso">
-            <div class="caso-imagem">
-                <img src="assets/img/tofu.png" alt="Print Resultado TOFU" loading="lazy">
+        <!-- CASE STUDIES -->
+        <section class="section" style="margin-top: 80px;">
+            <p class="section-label reveal">Casos de Estudo</p>
+            <h2 class="section-title reveal">Resultados que Falam<br>por Si Mesmos.</h2>
+
+            <div class="cases-grid">
+
+                <div class="case-card reveal">
+                    <div class="case-img-wrap">
+                        <img src="assets/img/bofu.png" alt="Dashboard BOFU - Campanha de Remarketing" loading="lazy">
+                    </div>
+                    <div class="case-body">
+                        <span class="case-tag">BOFU · Remarketing</span>
+                        <h3 class="case-title">Campanha de<br>Remarketing</h3>
+                        <div class="case-metrics">
+                            <div class="metric"><span class="metric-check">✓</span> Custo por Lead:
+                                <strong>$1.57</strong></div>
+                            <div class="metric"><span class="metric-check">✓</span> Qualificação: <strong>Alta
+                                    Intenção</strong></div>
+                        </div>
+                        <p class="case-desc">Estratégia de fundo de funil para capturar os usuários mais quentes,
+                            convertendo tráfego morno em vendas previsíveis e reduzindo o CAC via API de Conversão
+                            (CAPI).</p>
+                    </div>
+                </div>
+
+                <div class="case-card reverse reveal">
+                    <div class="case-img-wrap">
+                        <img src="assets/img/tofu.png" alt="Dashboard TOFU - Escala Internacional" loading="lazy">
+                    </div>
+                    <div class="case-body">
+                        <span class="case-tag">TOFU · Mercados Internacionais</span>
+                        <h3 class="case-title">Escala em<br>Premium Markets</h3>
+                        <div class="case-metrics">
+                            <div class="metric"><span class="metric-check">✓</span> Custo por View:
+                                <strong>$0.07</strong></div>
+                            <div class="metric"><span class="metric-check">✓</span> Impressões: <strong>+83.000</strong>
+                            </div>
+                        </div>
+                        <p class="case-desc">Tráfego de topo de funil em mercados internacionais competitivos (USA,
+                            Europa, Japão). Volumes massivos de visualizações mantendo custos extremamente baixos.</p>
+                    </div>
+                </div>
+
             </div>
-            <div class="caso-conteudo">
-                <h3>Escala em Premium Markets (TOFU)</h3>
-                <div class="metrica"><span class="check">✓</span> Custo por View: <strong>$0.07</strong></div>
-                <div class="metrica"><span class="check">✓</span> Impressões: <strong>+83.000</strong></div>
-                <p class="descricao">Geração de tráfego de topo de funil em mercados internacionais altamente
-                    competitivos. Alcançámos volumes massivos de visualizações na Landing Page mantendo custos
-                    extremamente baixos.</p>
+        </section>
+
+        <!-- FOOTER CTA -->
+        <div class="footer-cta">
+            <div class="cta-box reveal">
+                <h2>Pronto para Parar<br>de Perder Dinheiro?</h2>
+                <p>Auditoria gratuita do seu tráfego. Sem compromisso.</p>
+                <a href="https://wa.me/5543991652706?text=Olá!%20Quero%20a%20auditoria%20gratuita%20do%20meu%20tráfego."
+                    target="_blank" rel="noopener" class="hero-cta">
+                    <svg viewBox="0 0 24 24">
+                        <path
+                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
+                    </svg>
+                    Solicitar Auditoria Gratuita
+                </a>
             </div>
         </div>
 
-    </div>
+    </div><!-- end page-wrapper -->
+
+    <script>
+        // Scroll Reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, i) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('visible');
+                    }, i * 80);
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+    </script>
 
 </body>
 
