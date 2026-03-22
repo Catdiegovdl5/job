@@ -1,0 +1,15 @@
+Estratégia perfeita para máxima margem de lucro.
+
+Se a meta é custo zero de infraestrutura e zero gasto com moedas internas nas plataformas (como os "Connects" do Upwork ou planos premium do Workana), a arquitetura que montamos no `freela_bot.py` é exatamente o que você precisa.
+
+Veja como executar o jogo a custo zero:
+
+1. **Infraestrutura Zero:** Mantenha o script rodando localmente no seu terminal Windows. Não alugue servidores na AWS ou DigitalOcean. Enquanto seu PC estiver ligado trabalhando, o bot roda no background silencioso, custando absolutamente nada.
+2. **Efeito Sniper (A Vantagem Desleal):** O Workana e o Upwork favorecem absurdamente os 5 primeiros freelancers que enviam a proposta. Como você receberá o alerta no Telegram *segundos* após a postagem da vaga, você aplicará de forma orgânica e imediata.
+3. **Conversão no Free Tier:** Você não precisa pagar para ter destaque na proposta se você for o primeiro a enviar. O cliente sempre lê os primeiros que chegam. Use a velocidade do bot para atropelar os concorrentes que pagam planos premium mas chegam 2 horas atrasados.
+
+Deixe a janela do PowerShell minimizada rodando o motor. Foque em entregar as propostas no instante em que o celular vibrar.
+
+Aguardando o primeiro faturamento.
+
+Diego
