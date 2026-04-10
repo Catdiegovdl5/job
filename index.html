@@ -1,712 +1,197 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-
+<html lang="pt-BR" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-        content="Estratégias validadas de Meta Ads para negócios que buscam previsibilidade, escala agressiva e lucros exponenciais.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://analytic-scale.netlify.app/">
-    <meta property="og:title" content="Analytic Scale | Growth Engineer & Meta Ads">
-    <meta property="og:description"
-        content="Estratégias validadas de Meta Ads para negócios que buscam previsibilidade, escala agressiva e lucros exponenciais.">
-    <meta property="og:image" content="https://analytic-scale.netlify.app/assets/img/og_preview.png">
-    <title>Analytic Scale | Growth Engineer & Meta Ads</title>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Inter:wght@300;400;500;600&display=swap"
-        rel="stylesheet">
-
+    <title>RYZE Case Study | Diego - Performance & Dev</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: { primary: '#E25B22' } // Laranja baseado na identidade visual dos anúncios (Struggle/Answer)
+                }
+            }
+        }
+    </script>
     <style>
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        :root {
-            --bg: #060b14;
-            --accent: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.35);
-            --green: #10b981;
-            --green-glow: rgba(16, 185, 129, 0.2);
-            --text: #f0f4ff;
-            --muted: #64748b;
-            --glass-bg: rgba(255, 255, 255, 0.04);
-            --glass-border: rgba(255, 255, 255, 0.08);
-        }
-
-        /* ========================
-           BASE & ANIMATED BG
-        ======================== */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Animated mesh gradient background */
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            background:
-                radial-gradient(ellipse 80% 60% at 20% 10%, rgba(59, 130, 246, 0.15) 0%, transparent 60%),
-                radial-gradient(ellipse 60% 50% at 80% 90%, rgba(16, 185, 129, 0.1) 0%, transparent 60%),
-                radial-gradient(ellipse 50% 60% at 60% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 60%);
-            animation: mesh-shift 12s ease-in-out infinite alternate;
-        }
-
-        @keyframes mesh-shift {
-            0% {
-                filter: hue-rotate(0deg);
-                opacity: 1;
-            }
-
-            100% {
-                filter: hue-rotate(20deg);
-                opacity: 0.8;
-            }
-        }
-
-        /* Noise texture overlay */
-        body::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            z-index: 1;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-            pointer-events: none;
-        }
-
-        .page-wrapper {
-            position: relative;
-            z-index: 2;
-        }
-
-        /* ========================
-           NAVBAR
-        ======================== */
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px 40px;
-            background: rgba(6, 11, 20, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .nav-logo {
-            font-family: 'Syne', sans-serif;
-            font-weight: 800;
-            font-size: 1.3rem;
-            letter-spacing: -0.5px;
-            color: var(--text);
-        }
-
-        .nav-logo span {
-            color: var(--accent);
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .nav-badge {
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--accent);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 20px;
-            padding: 6px 14px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .nav-links a {
-            color: var(--muted);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            padding: 8px;
-            border-radius: 8px;
-            transition: color 0.2s, background 0.2s;
-        }
-
-        .nav-links a:hover {
-            color: var(--text);
-            background: var(--glass-bg);
-        }
-
-        .nav-links svg {
-            width: 18px;
-            height: 18px;
-            fill: currentColor;
-        }
-
-        /* ========================
-           HERO
-        ======================== */
-        .hero {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 120px 40px 80px;
-            text-align: center;
-        }
-
-        .hero-eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 100px;
-            padding: 6px 16px;
-            font-size: 0.8rem;
-            color: var(--muted);
-            margin-bottom: 32px;
-            letter-spacing: 0.05em;
-        }
-
-        .hero-eyebrow .dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--green);
-            box-shadow: 0 0 8px var(--green);
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.3);
-                opacity: 0.7;
-            }
-        }
-
-        .hero h1 {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(3rem, 7vw, 6rem);
-            font-weight: 800;
-            line-height: 1.0;
-            letter-spacing: -2px;
-            margin-bottom: 28px;
-        }
-
-        .hero h1 .gradient-text {
-            background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #34d399 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .hero p {
-            font-size: 1.2rem;
-            color: var(--muted);
-            max-width: 600px;
-            margin: 0 auto 48px;
-            line-height: 1.7;
-            font-weight: 400;
-        }
-
-        .hero-cta {
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
-            background: linear-gradient(135deg, #25D366, #1bab52);
-            color: #000;
-            padding: 18px 36px;
-            border-radius: 14px;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 1rem;
-            letter-spacing: -0.2px;
-            box-shadow: 0 0 30px rgba(37, 211, 102, 0.3), 0 8px 30px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
-        }
-
-        .hero-cta:hover {
-            transform: translateY(-3px) scale(1.03);
-            box-shadow: 0 0 50px rgba(37, 211, 102, 0.5), 0 16px 40px rgba(0, 0, 0, 0.4);
-        }
-
-        .hero-cta svg {
-            width: 22px;
-            height: 22px;
-            fill: currentColor;
-        }
-
-        /* ========================
-           STATS BAR
-        ======================== */
-        .stats-bar {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 40px 80px;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            overflow: hidden;
-            background: var(--glass-border);
-        }
-
-        .stat {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            padding: 30px;
-            text-align: center;
-        }
-
-        .stat-value {
-            font-family: 'Syne', sans-serif;
-            font-size: 2.8rem;
-            font-weight: 800;
-            color: var(--green);
-            letter-spacing: -1px;
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 0.85rem;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        /* ========================
-           CASE STUDIES
-        ======================== */
-        .section {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 40px 80px;
-        }
-
-        .section-label {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 0.15em;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(1.8rem, 3vw, 2.8rem);
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 48px;
-            color: var(--text);
-        }
-
-        .cases-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .case-card {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 24px;
-            overflow: hidden;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .case-card:hover {
-            border-color: rgba(59, 130, 246, 0.25);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(59, 130, 246, 0.1);
-        }
-
-        .case-card.reverse {
-            direction: rtl;
-        }
-
-        .case-card.reverse>* {
-            direction: ltr;
-        }
-
-        .case-img-wrap {
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            border-right: 1px solid var(--glass-border);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .case-card.reverse .case-img-wrap {
-            border-right: none;
-            border-left: 1px solid var(--glass-border);
-        }
-
-        .case-img-wrap::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at center, rgba(59, 130, 246, 0.1) 0%, transparent 70%);
-        }
-
-        .case-img-wrap img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            position: relative;
-            z-index: 1;
-            transition: transform 0.4s ease;
-        }
-
-        .case-card:hover .case-img-wrap img {
-            transform: scale(1.03);
-        }
-
-        .case-body {
-            padding: 48px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            gap: 16px;
-        }
-
-        .case-tag {
-            display: inline-block;
-            background: rgba(59, 130, 246, 0.12);
-            color: var(--accent);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            width: fit-content;
-        }
-
-        .case-title {
-            font-family: 'Syne', sans-serif;
-            font-size: 1.8rem;
-            font-weight: 800;
-            letter-spacing: -0.5px;
-            line-height: 1.2;
-        }
-
-        .case-metrics {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .metric {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.95rem;
-            color: var(--muted);
-        }
-
-        .metric strong {
-            color: var(--green);
-            font-size: 1.3rem;
-            font-weight: 700;
-        }
-
-        .metric-check {
-            color: var(--green);
-            font-weight: 700;
-            font-size: 1rem;
-        }
-
-        .case-desc {
-            color: var(--muted);
-            font-size: 0.95rem;
-            line-height: 1.7;
-            border-top: 1px solid var(--glass-border);
-            padding-top: 16px;
-        }
-
-        /* ========================
-           FOOTER CTA
-        ======================== */
-        .footer-cta {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 40px 100px;
-        }
-
-        .cta-box {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px;
-            padding: 80px 40px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta-box::before {
-            content: '';
-            position: absolute;
-            top: -60%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 600px;
-            height: 300px;
-            background: radial-gradient(ellipse, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .cta-box h2 {
-            font-family: 'Syne', sans-serif;
-            font-size: clamp(2rem, 4vw, 3.5rem);
-            font-weight: 800;
-            letter-spacing: -1px;
-            margin-bottom: 16px;
-            position: relative;
-        }
-
-        .cta-box p {
-            color: var(--muted);
-            font-size: 1.1rem;
-            margin-bottom: 40px;
-            position: relative;
-        }
-
-        /* ========================
-           SCROLL ANIMATIONS
-        ======================== */
-        .reveal {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-
-        .reveal.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* ========================
-           RESPONSIVENESS
-        ======================== */
-        @media (max-width: 900px) {
-            nav {
-                padding: 16px 20px;
-            }
-
-            .hero,
-            .section,
-            .footer-cta {
-                padding-left: 20px;
-                padding-right: 20px;
-            }
-
-            .hero {
-                padding-top: 80px;
-            }
-
-            .stats-bar {
-                grid-template-columns: repeat(3, 1fr);
-            }
-
-            .case-card,
-            .case-card.reverse {
-                grid-template-columns: 1fr;
-                direction: ltr;
-            }
-
-            .case-img-wrap,
-            .case-card.reverse .case-img-wrap {
-                border-right: none;
-                border-left: none;
-                border-bottom: 1px solid var(--glass-border);
-            }
-
-            .case-body {
-                padding: 28px;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .hero h1 {
-                letter-spacing: -1px;
-            }
-
-            .stats-bar {
-                grid-template-columns: 1fr;
-            }
-        }
+        body { background-color: #0F1115; color: #E5E7EB; }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
     </style>
 </head>
+<body class="antialiased min-h-screen">
 
-<body>
-    <div class="page-wrapper">
-
-        <!-- NAVBAR -->
-        <nav>
-            <div class="nav-logo">ANALYTIC<span>SCALE</span></div>
-            <div class="nav-links">
-                <span class="nav-badge">🇧🇷 Disponível para Projetos</span>
-                <a href="https://www.linkedin.com/in/diego-ant%C3%B4nio-85366225b/" target="_blank" rel="noopener"
-                    aria-label="LinkedIn">
-                    <svg viewBox="0 0 24 24">
-                        <path
-                            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                    </svg>
-                </a>
+    <!-- Header Simples -->
+    <header class="border-b border-gray-800 bg-[#0F1115]/80 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="font-bold text-xl tracking-tight text-white">
+                DIEGO<span class="text-primary">.DEV</span>
             </div>
-        </nav>
+            <div class="text-sm text-gray-400 font-medium">Portfólio de Performance</div>
+        </div>
+    </header>
 
-        <!-- HERO -->
-        <section class="hero">
-            <div class="hero-eyebrow reveal">
-                <div class="dot"></div>
-                Growth Engineer · Meta Ads · CAPI · IA
+    <main class="max-w-6xl mx-auto px-6 py-12 lg:py-20">
+        
+        <!-- Cabeçalho do Case -->
+        <header class="mb-16 max-w-4xl">
+            <div class="inline-block px-3 py-1 mb-6 text-xs font-semibold tracking-wider text-primary uppercase bg-primary/10 rounded-full border border-primary/20">
+                Case de Sucesso
             </div>
-            <h1 class="reveal">
-                Pare de Gastar.<br>Comece a <span class="gradient-text">Escalar.</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-6 leading-tight">
+                Performance Creative Strategy & Data-Driven Ads | <span class="text-primary">RYZE</span>
             </h1>
-            <p class="reveal">
-                Estratégias validadas de Meta Ads para negócios que buscam previsibilidade em vendas e lucros
-                exponenciais baseados em análise profunda de dados.
+            <p class="text-lg md:text-xl text-gray-400 leading-relaxed">
+                This project was developed as a strategic creative test for a high-growth e-commerce brand, focusing on Meta and Google Ads performance. The primary objective was to engineer assets that optimize CTR and lower CPA through data-backed design principles.
             </p>
-            <a href="https://wa.me/5543991652706?text=Olá!%20Vi%20seu%20portfólio%20e%20gostaria%20de%20agendar%20uma%20consultoria%20gratuita."
-                target="_blank" rel="noopener" class="hero-cta reveal">
-                <svg viewBox="0 0 24 24">
-                    <path
-                        d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
-                </svg>
-                Falar com Especialista
+        </header>
+
+        <!-- Grid de Conteúdo: Estratégia e Workflow -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            
+            <div class="glass-panel p-8 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    Strategy & Execution
+                </h3>
+                <ul class="space-y-4 text-gray-300">
+                    <li class="flex items-start"><span class="text-primary mr-2">▪</span> <strong>Native Ads (UGC Style):</strong> Created to bypass 'ad blindness' by mimicking organic content, specifically designed for the critical 2-second 'stop-the-scroll' window.</li>
+                    <li class="flex items-start"><span class="text-primary mr-2">▪</span> <strong>Static Performance Ads:</strong> Developed high-intent layouts utilizing split-screen 'Struggle vs. Answer' visual hierarchy to trigger immediate consumer decision-making.</li>
+                    <li class="flex items-start"><span class="text-primary mr-2">▪</span> <strong>Psychological Triggers:</strong> Benefit-driven messaging focused on solving core pain points (Jitters, Brain Fog, Afternoon Crash) with proven functional solutions.</li>
+                </ul>
+            </div>
+
+            <div class="glass-panel p-8 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    Technical Workflow
+                </h3>
+                <ul class="space-y-4 text-gray-300">
+                    <li class="flex items-start"><span class="text-primary mr-2">▪</span> <strong>AI-Prototyping:</strong> Utilized advanced AI tools for rapid scenario generation and realistic product integration.</li>
+                    <li class="flex items-start"><span class="text-primary mr-2">▪</span> <strong>Infrastructure:</strong> Powered by an i5 13th Gen / 16GB RAM hardware setup for zero-lag editing and high-fidelity output (Optimized for thermal safety).</li>
+                    <li class="flex items-start"><span class="text-primary mr-2">▪</span> <strong>SOP Adherence:</strong> Strictly followed creative briefs and Standard Operating Procedures (SOP) to ensure technical alignment for high-spend advertising accounts.</li>
+                </ul>
+            </div>
+
+            <!-- Painel 3: Tracking & Attribution -->
+            <div class="glass-panel p-8 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    Tracking & Attribution
+                </h3>
+                <ul class="space-y-4 text-gray-300">
+                    <li class="flex items-start"><span class="text-primary mr-2">▪</span> <span><strong>Technical Stack:</strong> Implementation of GTM (Google Tag Manager) and Meta Conversions API (CAPI) to ensure 100% data accuracy and bypass iOS14+ tracking limitations.</span></li>
+                </ul>
+            </div>
+
+            <!-- Painel 4: Engineering vs. Design -->
+            <div class="glass-panel p-8 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path></svg>
+                    Engineering vs. Design
+                </h3>
+                <ul class="space-y-4 text-gray-300">
+                    <li class="flex items-start"><span class="text-primary mr-2">▪</span> <span><strong>Iterative Testing:</strong> Assets are not just created; they are engineered based on psychological hooks. We run 'Dark Posts' to validate hooks before scaling the primary budget.</span></li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Seção de Criativos (Imagens) -->
+        <h2 class="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-4">Creative Assets</h2>
+        
+        <div class="columns-1 md:columns-2 lg:columns-3 gap-6 mb-16 space-y-6">
+            
+            <!-- Imagem 1 -->
+            <div class="group relative rounded-xl overflow-hidden glass-panel shadow-lg break-inside-avoid">
+                <img src="IMAGENS/de.png" alt="Native Ad Concept" class="w-full h-auto object-contain transform transition duration-700 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+                <div class="absolute bottom-0 inset-x-0 p-6 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    <p class="text-white font-medium text-sm drop-shadow-md">Native concept focused on organic aesthetics</p>
+                </div>
+            </div>
+
+            <!-- Imagem 2 -->
+            <div class="group relative rounded-xl overflow-hidden glass-panel shadow-lg break-inside-avoid">
+                <img src="IMAGENS/Para_as_versões_202604081619.png" alt="Static Performance Ad" class="w-full h-auto object-contain transform transition duration-700 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+                <div class="absolute bottom-0 inset-x-0 p-6 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    <p class="text-white font-medium text-sm drop-shadow-md">Conversion-focused static with 4.9-star social proof</p>
+                </div>
+            </div>
+
+            <!-- Imagem 3 -->
+            <div class="group relative rounded-xl overflow-hidden glass-panel shadow-lg break-inside-avoid">
+                <img src="IMAGENS/Para_as_versões_202604081620.png" alt="Alternative Native Ad" class="w-full h-auto object-contain transform transition duration-700 group-hover:scale-105">
+                <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-90 group-hover:opacity-100 transition-opacity"></div>
+                <div class="absolute bottom-0 inset-x-0 p-6 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    <p class="text-white font-medium text-sm drop-shadow-md">Vertical format optimized for high-intent scroll stops</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Seção de Resultados / Data (A prova do crime) -->
+        <h2 class="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-4">Data-Driven Results</h2>
+        <div class="glass-panel p-2 rounded-2xl overflow-hidden mb-12">
+            <div class="bg-black/50 p-6 md:p-10 text-center">
+                <h3 class="text-xl md:text-2xl font-bold text-white mb-2">Escala Validada: Custos Extremos de Aquisição</h3>
+                <p class="text-gray-400 mb-6 max-w-2xl mx-auto">Comprovando eficiência máxima. Custos por visualização/resultado operando consistentemente entre $0.03 e $0.10, superando amplamente o benchmark base de $0.75.</p>
+                
+                <img src="IMAGENS/Captura de tela 2026-02-24 081207.png" alt="Meta Ads Manager Results" class="w-full rounded-xl border border-gray-700 shadow-2xl">
+            </div>
+        </div>
+
+        <!-- Tags / Metadados -->
+        <div class="flex flex-wrap gap-2 pt-8 border-t border-gray-800 mb-16">
+            <span class="px-4 py-2 bg-gray-800 text-gray-300 text-sm font-medium rounded-full hover:bg-gray-700 transition cursor-default">Graphic Design</span>
+            <span class="px-4 py-2 bg-gray-800 text-gray-300 text-sm font-medium rounded-full hover:bg-gray-700 transition cursor-default">Facebook Marketing</span>
+            <span class="px-4 py-2 bg-gray-800 text-gray-300 text-sm font-medium rounded-full hover:bg-gray-700 transition cursor-default">Advertising</span>
+            <span class="px-4 py-2 bg-gray-800 text-gray-300 text-sm font-medium rounded-full hover:bg-gray-700 transition cursor-default">Photoshop</span>
+            <span class="px-4 py-2 bg-gray-800 text-gray-300 text-sm font-medium rounded-full hover:bg-gray-700 transition cursor-default">Banner Design</span>
+        </div>
+
+        <h2 class="text-3xl font-bold text-white mb-8 border-b border-gray-800 pb-4">Technical Credentials</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            
+            <a href="certificados/mk.pdf" target="_blank" class="glass-panel p-6 rounded-xl border-l-4 border-primary hover:bg-white/5 transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg">
+                <h4 class="text-white font-bold mb-1 group-hover:text-primary transition-colors">RD Station Marketing</h4>
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">RD University</p>
+                <p class="text-sm text-gray-300">Inbound Marketing Strategy & Lead Generation Certified.</p>
             </a>
-        </section>
 
-        <!-- STATS BAR -->
-        <div class="stats-bar reveal">
-            <div class="stat">
-                <span class="stat-value">$1.57</span>
-                <span class="stat-label">Custo por Lead (BOFU)</span>
-            </div>
-            <div class="stat">
-                <span class="stat-value">+83K</span>
-                <span class="stat-label">Impressões (TOFU)</span>
-            </div>
-            <div class="stat">
-                <span class="stat-value">$0.07</span>
-                <span class="stat-label">Custo por View</span>
-            </div>
+            <a href="certificados/Visão geral da IA no Azure.pdf" target="_blank" class="glass-panel p-6 rounded-xl border-l-4 border-blue-500 hover:bg-white/5 transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg">
+                <h4 class="text-white font-bold mb-1 group-hover:text-blue-400 transition-colors">Azure AI & Cloud Strategy</h4>
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">Microsoft</p>
+                <p class="text-sm text-gray-300">Expertise in AI implementation and Azure infrastructure.</p>
+            </a>
+
+            <a href="certificados/Analisando dados com o Excel.pdf" target="_blank" class="glass-panel p-6 rounded-xl border-l-4 border-green-500 hover:bg-white/5 transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg">
+                <h4 class="text-white font-bold mb-1 group-hover:text-green-400 transition-colors">Data Analysis Specialist</h4>
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">Microsoft / Excel</p>
+                <p class="text-sm text-gray-300">Advanced financial modeling and data-driven decision making.</p>
+            </a>
+
+            <a href="certificados/Crie um site simples usando HTML, CSS e JavaScript.pdf" target="_blank" class="glass-panel p-6 rounded-xl border-l-4 border-yellow-500 hover:bg-white/5 transition-all duration-300 group hover:-translate-y-1 hover:shadow-lg">
+                <h4 class="text-white font-bold mb-1 group-hover:text-yellow-400 transition-colors">Web Development (HTML/JS)</h4>
+                <p class="text-xs text-gray-400 uppercase tracking-widest mb-3">Escola do Trabalhador 4.0</p>
+                <p class="text-sm text-gray-300">Front-end engineering for high-performance landing pages.</p>
+            </a>
         </div>
 
-        <!-- CASE STUDIES -->
-        <section class="section" style="margin-top: 80px;">
-            <p class="section-label reveal">Casos de Estudo</p>
-            <h2 class="section-title reveal">Resultados que Falam<br>por Si Mesmos.</h2>
+    </main>
 
-            <div class="cases-grid">
-
-                <div class="case-card reveal">
-                    <div class="case-img-wrap">
-                        <img src="assets/img/meta_ads_real_cropped.png" alt="Dashboard BOFU - Campanha de Remarketing" loading="lazy">
-                    </div>
-                    <div class="case-body">
-                        <span class="case-tag">BOFU · Remarketing</span>
-                        <h3 class="case-title">Campanha de<br>Remarketing</h3>
-                        <div class="case-metrics">
-                            <div class="metric"><span class="metric-check">✓</span> Custo por Lead:
-                                <strong>$1.57</strong></div>
-                            <div class="metric"><span class="metric-check">✓</span> Qualificação: <strong>Alta
-                                    Intenção</strong></div>
-                        </div>
-                        <p class="case-desc">Estratégia de fundo de funil para capturar os usuários mais quentes,
-                            convertendo tráfego morno em vendas previsíveis e reduzindo o CAC via API de Conversão
-                            (CAPI).</p>
-                    </div>
-                </div>
-
-                <div class="case-card reverse reveal">
-                    <div class="case-img-wrap">
-                        <img src="assets/img/tofu.png" alt="Dashboard TOFU - Escala Internacional" loading="lazy">
-                    </div>
-                    <div class="case-body">
-                        <span class="case-tag">TOFU · Mercados Internacionais</span>
-                        <h3 class="case-title">Escala em<br>Premium Markets</h3>
-                        <div class="case-metrics">
-                            <div class="metric"><span class="metric-check">✓</span> Custo por View:
-                                <strong>$0.07</strong></div>
-                            <div class="metric"><span class="metric-check">✓</span> Impressões: <strong>+83.000</strong>
-                            </div>
-                        </div>
-                        <p class="case-desc">Tráfego de topo de funil em mercados internacionais competitivos (USA,
-                            Europa, Japão). Volumes massivos de visualizações mantendo custos extremamente baixos.</p>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- FOOTER CTA -->
-        <div class="footer-cta">
-            <div class="cta-box reveal">
-                <h2>Pronto para Parar<br>de Perder Dinheiro?</h2>
-                <p>Auditoria gratuita do seu tráfego. Sem compromisso.</p>
-                <a href="https://wa.me/5543991652706?text=Olá!%20Quero%20a%20auditoria%20gratuita%20do%20meu%20tráfego."
-                    target="_blank" rel="noopener" class="hero-cta">
-                    <svg viewBox="0 0 24 24">
-                        <path
-                            d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
-                    </svg>
-                    Solicitar Auditoria Gratuita
-                </a>
-            </div>
-        </div>
-
-    </div><!-- end page-wrapper -->
-
-    <script>
-        // Scroll Reveal
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, i) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => {
-                        entry.target.classList.add('visible');
-                    }, i * 80);
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.1 });
-
-        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-    </script>
+    <footer class="py-12 text-center border-t border-gray-800 mt-16">
+        <h3 class="text-2xl font-bold text-white mb-4">Ready to Scale Your Project?</h3>
+        <p class="text-gray-400 mb-8">Currently accepting select performance-driven partnerships for 2026.</p>
+        <a href="#" class="inline-block px-8 py-3 bg-primary text-white font-bold rounded-full hover:bg-orange-600 shadow-[0_0_15px_rgba(226,91,34,0.3)] hover:shadow-[0_0_25px_rgba(226,91,34,0.6)] transform hover:-translate-y-1 transition-all duration-300">
+            Book a Technical Briefing
+        </a>
+        <p class="mt-8 text-xs text-gray-600">Diego | Performance Architect | INTJ-T | Powered by 13th Gen Infrastructure</p>
+    </footer>
 
 </body>
-
 </html>
