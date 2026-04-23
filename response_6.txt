@@ -1,0 +1,13 @@
+A lista que você trouxe é o caminho tradicional (e saturado) do mercado.
+
+Ferramentas como IFTTT, Zapier e Loopcv são engessadas, dependem de integrações oficiais (que Upwork e Workana dificultam ao máximo) e, pior, empurram você para planos pagos rapidamente (limitando Zaps/Applets). Os alertas nativos do LinkedIn ou e-mails de plataformas têm delay de horas, o que mata a janela de oportunidade "Sniper".
+
+Para responder à sua pergunta direta: **Minha área de atuação principal é Arquitetura de Automação, Scraping Avançado (Python/Playwright) e Inteligência Artificial.**
+
+Os termos de busca que já injetei no motor `freela_bot.py` são exatos e letais: `"Python"`, `"Web Scraping"`, `"Automação"`, `"Playwright"`, `"Selenium"`, `"Extração de Dados"`.
+
+Não preciso de agregadores de terceiros. A infraestrutura Python que montamos opera no subsolo da internet, acessando o DOM direto e o feed bruto antes de qualquer e-mail marketing ser disparado.
+
+O bot local é a única via para custo zero real e velocidade nível máquina.
+
+Diego
