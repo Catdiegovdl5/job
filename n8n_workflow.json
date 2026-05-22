@@ -1,0 +1,104 @@
+{
+  "name": "B2B Lead Triage Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-triage",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "97e6f8fa-848e-4a67-b50a-3c72b22f281e",
+      "name": "Webhook (Trigger)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.status_qualificacao }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "QUALIFICADO"
+            },
+            {
+              "value2": "NAO_QUALIFICADO"
+            }
+          ]
+        }
+      },
+      "id": "e98e986a-72ef-4573-b3c1-b0db4d2c8be3",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        480,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "1501131002",
+        "text": "=⚡ [TELEMETRIA DE FUNIL] ⚡\nSTATUS: {{ $json.status_qualificacao }}\n\n👤 Nome: {{ $json.contato.nome }}\n🌐 URL: {{ $json.contato.site }}\n📱 Zap: {{ $json.contato.whatsapp }}\n\n📊 Faturamento: {{ $json.dados_empresa.faturamento }}\n📈 Ads Spend: {{ $json.dados_empresa.investimento_anuncios }}\n🛠️ Gargalo: {{ $json.dados_empresa.gargalo_principal }}",
+        "additionalFields": {}
+      },
+      "id": "4b684bc2-8921-4fa3-94c6-2c5e52c8bd6b",
+      "name": "Telegram (Output)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        720,
+        300
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-cred-placeholder",
+          "name": "Telegram @mira262005_bot"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook (Trigger)": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Telegram (Output)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram (Output)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  }
+}
