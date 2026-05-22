@@ -1020,7 +1020,7 @@ if budget_value >= 500.0 and bids_count <= 15:
                         <label class="block text-[10px] font-mono uppercase tracking-wider text-gray-500 mb-1 translate-target" data-en="Business Email" data-pt="E-mail Corporativo">Business Email</label>
                         <input type="email" id="triageEmail" required class="w-full bg-black/40 border border-gray-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-primary transition translate-target" data-placeholder-en="you@company.com" data-placeholder-pt="voce@empresa.com">
                     </div>
-                    <button type="submit" class="w-full mt-4 py-4 bg-primary text-white font-extrabold text-sm rounded-xl hover:bg-orange-600 shadow-[0_0_15px_rgba(226,91,34,0.3)] hover:shadow-[0_0_25px_rgba(226,91,34,0.5)] transition-all duration-300 translate-target cursor-pointer" data-en="Analyze Integration Telemetry" data-pt="Analisar Telemetria de Integração">Analisar Telemetria de Integração</button>
+                    <button type="submit" id="triageSubmitBtn" class="w-full mt-4 py-4 bg-primary text-white font-extrabold text-sm rounded-xl hover:bg-orange-600 shadow-[0_0_15px_rgba(226,91,34,0.3)] hover:shadow-[0_0_25px_rgba(226,91,34,0.5)] transition-all duration-300 translate-target cursor-pointer" data-en="Analyze Integration Telemetry" data-pt="Analisar Telemetria de Integração">Analisar Telemetria de Integração</button>
                 </form>
             </div>
 
@@ -1233,6 +1233,15 @@ if budget_value >= 500.0 and bids_count <= 15:
         function submitTriage(event) {
             event.preventDefault();
             
+            // Loading state no botão
+            const submitBtn = document.getElementById('triageSubmitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = currentLang === 'en'
+                    ? '⚙️ Processing Telemetry...'
+                    : '⚙️ Processando Telemetria...';
+            }
+
             const name = document.getElementById("triageName").value;
             const whatsapp = document.getElementById("triageWhatsapp").value;
             const website = document.getElementById("triageWebsite").value;
@@ -1260,6 +1269,7 @@ if budget_value >= 500.0 and bids_count <= 15:
             const payload = {
                 timestamp: new Date().toISOString(),
                 status_qualificacao: statusQualificacao,
+                topico_origem: triageTopic,
                 dados_empresa: {
                     faturamento: faturamento,
                     investimento_anuncios: investimento,
@@ -1274,15 +1284,15 @@ if budget_value >= 500.0 and bids_count <= 15:
             };
 
             // CONFIGURAÇÃO DE SEGURANÇA E NOTIFICAÇÃO (100% GRATUITO E SEGURO)
-            // Para não expor seu token do Telegram no navegador e salvar os dados em uma Planilha Google:
-            // 1. Crie uma Planilha Google, vá em Extensões > Apps Script.
-            // 2. Cole o código fornecido no repositório (com o token e chat_id protegidos no servidor do Google).
-            // 3. Publique como Web App (Executar como "Eu", Acesso "Qualquer um").
-            // 4. Substitua a URL abaixo pelo link gerado (ex: https://script.google.com/macros/s/.../exec).
+            // 1. Abra o arquivo `google_apps_script.gs` nesta mesma pasta.
+            // 2. Cole o conteúdo em: Google Sheets > Extensões > Apps Script.
+            // 3. Preencha TELEGRAM_BOT_TOKEN no script e salve.
+            // 4. Implante como Web App (Executar como "Eu", Acesso "Qualquer pessoa").
+            // 5. Substitua a URL abaixo pelo link gerado pelo Google.
             const CONFIG = {
-                webhookUrl: '', // Insira a URL do seu Google Apps Script aqui para ficar 100% seguro!
+                webhookUrl: '', // Cole aqui a URL do Google Apps Script após implantar
                 
-                // Mantenha os campos abaixo vazios no código público. Use apenas localmente se necessário.
+                // Fallback direto (apenas para testes locais — não expor em produção!)
                 telegramBotToken: '', 
                 telegramChatId: '1501131002'
             };
