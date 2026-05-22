@@ -1240,23 +1240,52 @@ if budget_value >= 500.0 and bids_count <= 15:
             
             // Qualification: Faturamento >= R$ 50k (index >= 2) OR Investimento >= R$ 10k (index >= 2)
             const isQualified = (selectedRevenueIndex >= 2 || selectedAdSpendIndex >= 2);
+            const statusQualificacao = isQualified ? "QUALIFICADO" : "NAO_QUALIFICADO";
             
-            // Localized labels for WhatsApp / logging
-            const revenueLabels = ['< R$ 10k', 'R$ 10k - R$ 50k', 'R$ 50k - R$ 100k', '> R$ 100k'];
-            const spendLabels = ['< R$ 5k', 'R$ 5k - R$ 10k', 'R$ 10k - R$ 30k', '> R$ 30k'];
-            const challengeLabels = [
+            // Normalized Portuguese labels for n8n payload matching database specs
+            const revenueLabelsPT = ['Menos de R$ 10k / mês', 'De R$ 10k a R$ 50k / mês', 'De R$ 50k a R$ 100k / mês', 'Mais de R$ 100k / mês'];
+            const spendLabelsPT = ['Menos de R$ 5k / mês', 'De R$ 5k a R$ 10k / mês', 'De R$ 10k a R$ 30k / mês', 'Mais de R$ 30k / mês'];
+            const challengeLabelsPT = [
                 'Perda de Atribuição (iOS14 / Cookies)',
                 'Fadiga de Criativos & CPA Alto',
                 'Automação de Pipelines / CRM Desalinhado',
                 'Extração de Dados / LMS Protegido'
             ];
             
-            const faturamento = revenueLabels[selectedRevenueIndex] || 'N/A';
-            const investimento = spendLabels[selectedAdSpendIndex] || 'N/A';
-            const gargalo = challengeLabels[selectedChallengeIndex] || 'N/A';
+            const faturamento = revenueLabelsPT[selectedRevenueIndex] || 'N/A';
+            const investimento = spendLabelsPT[selectedAdSpendIndex] || 'N/A';
+            const gargalo = challengeLabelsPT[selectedChallengeIndex] || 'N/A';
+
+            // Standard B2B Pipeline JSON payload
+            const payload = {
+                timestamp: new Date().toISOString(),
+                status_qualificacao: statusQualificacao,
+                dados_empresa: {
+                    faturamento: faturamento,
+                    investimento_anuncios: investimento,
+                    gargalo_principal: gargalo
+                },
+                contato: {
+                    nome: name,
+                    whatsapp: whatsapp,
+                    site: website,
+                    email: email
+                }
+            };
+
+            // Dispatch payload to n8n webhook silently in background for both tiers
+            fetch('https://n8n.diego.systems/webhook/lead-triage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).catch(err => {
+                console.warn('Silent telemetric gate closed.', err);
+            });
 
             if (isQualified) {
-                // Qualified payload structure for system log style
+                // Qualified payload structure for system log style WhatsApp message
                 const rawMessage = `Olá Diego, passei pela auditoria de telemetria do site. [Faturamento: ${faturamento}] [Investimento: ${investimento}] [Gargalo: ${gargalo}]. Quero liberar a agenda para o diagnóstico de 5 minutos.`;
                 const encodedMessage = encodeURIComponent(rawMessage);
                 const whatsappUrl = `https://wa.me/5543991652706?text=${encodedMessage}`;
@@ -1264,31 +1293,7 @@ if budget_value >= 500.0 and bids_count <= 15:
                 window.open(whatsappUrl, '_blank');
                 closeQualifyModal();
             } else {
-                // Low Tier Lead: Dispatch silently to n8n webhook and show fallback UI
-                const payload = {
-                    name: name,
-                    whatsapp: whatsapp,
-                    website: website,
-                    email: email,
-                    faturamento: faturamento,
-                    investimento: investimento,
-                    gargalo: gargalo,
-                    topic: triageTopic,
-                    language: currentLang,
-                    timestamp: new Date().toISOString()
-                };
-                
-                fetch('https://n8n.diego.systems/webhook/lead-triage', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                }).catch(err => {
-                    console.warn('Silent telemetric gate closed.', err);
-                });
-                
-                // Hide inputs, progress and show email template instructions fallback screen
+                // Low Tier Lead: Hide progress, inputs and show email template instructions fallback screen
                 document.querySelectorAll(".triage-step").forEach(el => el.classList.add("hidden"));
                 const fallbackEl = document.getElementById("triageFallback");
                 if (fallbackEl) fallbackEl.classList.remove("hidden");
