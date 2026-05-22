@@ -1273,8 +1273,13 @@ if budget_value >= 500.0 and bids_count <= 15:
                 }
             };
 
-            // Dispatch payload to n8n webhook silently in background for both tiers
-            fetch('https://n8n.diego.systems/webhook/lead-triage', {
+            // Determine endpoint dynamically to keep n8n pipelines 100% linear and protect Telegram token
+            const endpoint = isQualified 
+                ? 'https://n8n.diego.systems/webhook/lead-triage' 
+                : 'https://n8n.diego.systems/webhook/lead-triage-unqualified';
+
+            // Dispatch payload to n8n webhook silently in background
+            fetch(endpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -1283,6 +1288,7 @@ if budget_value >= 500.0 and bids_count <= 15:
             }).catch(err => {
                 console.warn('Silent telemetric gate closed.', err);
             });
+
 
             if (isQualified) {
                 // Qualified payload structure for system log style WhatsApp message

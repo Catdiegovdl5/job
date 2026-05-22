@@ -1,5 +1,5 @@
 {
-  "name": "B2B Lead Triage Pipeline (Silent)",
+  "name": "B2B Lead Triage Pipeline (Silent & Secure)",
   "nodes": [
     {
       "parameters": {
@@ -8,13 +8,13 @@
         "responseMode": "onReceived",
         "options": {}
       },
-      "id": "97e6f8fa-848e-4a67-b50a-3c72b22f281e",
-      "name": "Webhook (Trigger)",
+      "id": "qualified-webhook-trigger",
+      "name": "Webhook - Qualified Leads",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        250,
-        300
+        100,
+        150
       ]
     },
     {
@@ -45,13 +45,93 @@
         },
         "options": {}
       },
-      "id": "4b684bc2-8921-4fa3-94c6-2c5e52c8bd6b",
-      "name": "Google Sheets (Data Sink)",
+      "id": "google-sheets-qualified",
+      "name": "Google Sheets (Qualified)",
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4,
       "position": [
-        500,
-        300
+        350,
+        150
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets-cred-placeholder",
+          "name": "Google Sheets Connection"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1501131002",
+        "text": "=⚡ [ALVO TIER A DETECTADO] ⚡\nSTATUS: {{ $json.status_qualificacao }}\n\n👤 Nome: {{ $json.contato.nome }}\n🌐 URL: {{ $json.contato.site }}\n📱 Zap: {{ $json.contato.whatsapp }}\n\n📊 Faturamento: {{ $json.dados_empresa.faturamento }}\n📈 Ads Spend: {{ $json.dados_empresa.investimento_anuncios }}\n🛠️ Gargalo: {{ $json.dados_empresa.gargalo_principal }}",
+        "additionalFields": {}
+      },
+      "id": "telegram-output-node",
+      "name": "Telegram (Output)",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.1,
+      "position": [
+        600,
+        150
+      ],
+      "credentials": {
+        "telegramApi": {
+          "id": "telegram-bot-cred-placeholder",
+          "name": "Telegram @mira262005_bot"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "lead-triage-unqualified",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "unqualified-webhook-trigger",
+      "name": "Webhook - Unqualified Leads",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        100,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "placeholder-google-sheet-id",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nome": "={{ $json.contato.nome }}",
+            "WhatsApp": "={{ $json.contato.whatsapp }}",
+            "E-mail": "={{ $json.contato.email }}",
+            "Faturamento": "={{ $json.dados_empresa.faturamento }}",
+            "Investimento": "={{ $json.dados_empresa.investimento_anuncios }}",
+            "Status": "={{ $json.status_qualificacao }}",
+            "Data/Hora": "={{ $json.timestamp }}"
+          },
+          "matchingColumns": []
+        },
+        "options": {}
+      },
+      "id": "google-sheets-unqualified",
+      "name": "Google Sheets (Unqualified)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        350,
+        380
       ],
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -62,11 +142,33 @@
     }
   ],
   "connections": {
-    "Webhook (Trigger)": {
+    "Webhook - Qualified Leads": {
       "main": [
         [
           {
-            "node": "Google Sheets (Data Sink)",
+            "node": "Google Sheets (Qualified)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets (Qualified)": {
+      "main": [
+        [
+          {
+            "node": "Telegram (Output)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Unqualified Leads": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets (Unqualified)",
             "type": "main",
             "index": 0
           }
