@@ -1273,24 +1273,35 @@ if budget_value >= 500.0 and bids_count <= 15:
                 }
             };
 
-            // Determine endpoint dynamically to keep n8n pipelines 100% linear and protect Telegram token
-            const endpoint = isQualified 
-                ? 'https://n8n.diego.systems/webhook/lead-triage' 
-                : 'https://n8n.diego.systems/webhook/lead-triage-unqualified';
-
-            // Dispatch payload to n8n webhook silently in background
-            fetch(endpoint, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(payload)
-            }).catch(err => {
-                console.warn('Silent telemetric gate closed.', err);
-            });
-
-
             if (isQualified) {
+                // Configuração direta do Telegram (Sem n8n)
+                // Substitua 'SEU_BOT_TOKEN' pelo token do seu @mira262005_bot
+                const TELEGRAM_BOT_TOKEN = 'SEU_BOT_TOKEN';
+                const TELEGRAM_CHAT_ID = '1501131002';
+
+                const telegramMessage = `⚡ [TELEMETRIA DE FUNIL] ⚡\n` +
+                    `STATUS: QUALIFICADO\n\n` +
+                    `👤 Nome: ${name}\n` +
+                    `🌐 URL: ${website}\n` +
+                    `📱 Zap: ${whatsapp}\n\n` +
+                    `📊 Faturamento: ${faturamento}\n` +
+                    `📈 Ads Spend: ${investimento}\n` +
+                    `🛠️ Gargalo: ${gargalo}`;
+
+                // Disparo direto em background para o Telegram
+                fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: telegramMessage
+                    })
+                }).catch(err => {
+                    console.warn('Erro ao enviar dados para o Telegram:', err);
+                });
+
                 // Qualified payload structure for system log style WhatsApp message
                 const rawMessage = `Olá Diego, passei pela auditoria de telemetria do site. [Faturamento: ${faturamento}] [Investimento: ${investimento}] [Gargalo: ${gargalo}]. Quero liberar a agenda para o diagnóstico de 5 minutos.`;
                 const encodedMessage = encodeURIComponent(rawMessage);
