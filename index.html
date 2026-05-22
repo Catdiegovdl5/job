@@ -5,72 +5,90 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diego Santos | Growth Engineer & Performance Architect</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
-                    fontFamily: { sans: ["Inter", "sans-serif"] },
+                    fontFamily: { 
+                        sans: ["Outfit", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"]
+                    },
                     colors: { primary: "#E25B22" }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #0F1115; color: #E5E7EB; }
-        .glass-panel { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); }
+        body { background-color: #06070B; color: #E5E7EB; }
+        .glass-panel { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); backdrop-filter: blur(12px); }
+        .text-glow { text-shadow: 0 0 10px rgba(226, 91, 34, 0.25); }
+        .border-glow:hover { border-color: rgba(226, 91, 34, 0.3); box-shadow: 0 0 15px rgba(226, 91, 34, 0.1); }
+        
+        /* Custom scrollbar for terminals */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(226, 91, 34, 0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(226, 91, 34, 0.6); }
+
         @media print {
             .no-print { display: none !important; }
             body { background-color: #ffffff; color: #000000; }
             .glass-panel { background: none; border: 1px solid #ccc; filter: none; }
             .text-white { color: #000000 !important; }
             .text-gray-400, .text-gray-300 { color: #333333 !important; }
-            .bg-\[\#0F1115\]\/80 { background-color: #ffffff !important; }
         }
     </style>
 </head>
-<body class="antialiased min-h-screen">
+<body class="antialiased min-h-screen selection:bg-primary selection:text-white">
 
-    <header class="border-b border-gray-800 bg-[#0F1115]/80 sticky top-0 z-50 backdrop-blur-md">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-            <div class="font-bold text-xl tracking-tight text-white">
-                DIEGO<span class="text-primary">.DEV</span>
+    <!-- Header Section -->
+    <header class="border-b border-gray-800/80 bg-[#06070B]/90 sticky top-0 z-50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="font-bold text-xl tracking-tight text-white flex items-center gap-2">
+                <span>DIEGO</span><span class="text-primary font-mono font-bold text-lg">.DEV</span>
+                <span class="px-2 py-0.5 rounded bg-green-500/10 border border-green-500/20 text-[10px] text-green-400 font-mono animate-pulse">● ONLINE</span>
             </div>
             <div class="flex items-center gap-4">
-                <div class="text-sm text-gray-400 font-medium translate-target" data-en="Performance Portfolio" data-pt="Portfólio de Performance">Performance Portfolio</div>
-                <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20seu%20portf%C3%B3lio%20de%20cases%20e%20gostaria%20de%20agendar%20uma%20Auditoria%20de%20Rastreamento%20no%20meu%20funil." target="_blank" class="no-print px-3 py-1.5 bg-primary text-white text-xs font-bold rounded hover:bg-orange-600 shadow-[0_0_10px_rgba(226,91,34,0.3)] transition-all duration-300 translate-target" data-en="Request Tracking Audit" data-pt="Auditoria de Rastreamento" data-href-en="https://wa.me/5543991652706?text=Hi%20Diego%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20schedule%20a%20Tracking%20Audit%20for%20my%20business." data-href-pt="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20seu%20portf%C3%B3lio%20de%20cases%20e%20gostaria%20de%20agendar%20uma%20Auditoria%20de%20Rastreamento%20no%20meu%20funil.">Request Tracking Audit</a>
-                <button id="langToggle" class="no-print px-3 py-1 bg-gray-800 hover:bg-gray-700 text-white text-xs font-bold rounded transition border border-gray-700">
+                <div class="hidden sm:block text-xs text-gray-400 font-mono translate-target" data-en="GROWTH_ENGINEER_TELEMETRY" data-pt="TELEMETRIA_ENGENHARIA_GROWTH">GROWTH_ENGINEER_TELEMETRY</div>
+                <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20seu%20portf%C3%B3lio%20de%20cases%20e%20gostaria%20de%20agendar%20uma%20Auditoria%20de%20Rastreamento%20no%20meu%20funil." target="_blank" class="no-print px-3 py-1.5 bg-primary text-white text-xs font-bold rounded hover:bg-orange-600 shadow-[0_0_10px_rgba(226,91,34,0.3)] hover:shadow-[0_0_15px_rgba(226,91,34,0.5)] transition-all duration-300 translate-target" data-en="Request Tracking Audit" data-pt="Auditoria de Rastreamento" data-href-en="https://wa.me/5543991652706?text=Hi%20Diego%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20schedule%20a%20Tracking%20Audit%20for%20my%20business." data-href-pt="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20seu%20portf%C3%B3lio%20de%20cases%20e%20gostaria%20de%20agendar%20uma%20Auditoria%20de%20Rastreamento%20no%20meu%20funil.">Request Tracking Audit</a>
+                <button id="langToggle" class="no-print px-3 py-1 bg-gray-900 hover:bg-gray-800 text-white text-xs font-bold rounded transition border border-gray-800">
                     <span id="langLabel">EN | PT</span>
                 </button>
             </div>
         </div>
     </header>
-    <main class="max-w-6xl mx-auto px-6 py-12 lg:py-20">
+
+    <main class="max-w-7xl mx-auto px-6 py-12 lg:py-20">
         
-        <header class="mb-12 max-w-4xl">
-            <div class="inline-block px-3 py-1 mb-6 text-xs font-semibold tracking-wider text-primary uppercase bg-primary/10 rounded-full border border-primary/20 translate-target" data-en="Conversion & Growth Engineering" data-pt="Engenharia de Conversão & Growth">
-                Conversion & Growth Engineering
+        <!-- Hero Section -->
+        <header class="mb-16 max-w-5xl relative">
+            <div class="absolute -top-20 -left-20 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="inline-block px-3 py-1 mb-6 text-xs font-mono uppercase tracking-wider text-primary bg-primary/10 rounded-full border border-primary/20 translate-target" data-en="Data Infrastructure & Growth Architecture" data-pt="Infraestrutura de Dados & Arquitetura de Growth">
+                Data Infrastructure & Growth Architecture
             </div>
-            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight">
-                <span class="translate-target" data-en="Conversion Architecture &" data-pt="Arquitetura de Conversão &">Conversion Architecture &</span> <span class="text-primary translate-target" data-en="Bulletproof Tracking" data-pt="Rastreamento Blindado">Bulletproof Tracking</span>
+            
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+                <span class="translate-target" data-en="Conversion Funnel &" data-pt="Funil de Conversão &">Conversion Funnel &</span> <span class="text-primary text-glow translate-target" data-en="Bulletproof Tracking Architect" data-pt="Arquiteto de Rastreamento Blindado">Bulletproof Tracking Architect</span>
             </h1>
-            <p class="text-lg md:text-xl text-gray-300 leading-relaxed translate-target" data-en="Engineering high-intent B2B conversion funnels, data pipelines, and automated performance architectures. I bridge the gap between technical infrastructure and marketing operations." data-pt="Desenvolvendo funis de conversão B2B de alta intenção, pipelines de dados e arquiteturas automatizadas de performance. Eu conecto a infraestrutura técnica com operações de marketing.">
-                Engineering high-intent B2B conversion funnels, data pipelines, and automated performance architectures. I bridge the gap between technical infrastructure and marketing operations.
+            
+            <p class="text-lg md:text-xl text-gray-300 leading-relaxed translate-target mb-6" data-en="I engineer data pipelines, recovery infrastructures, and automated systems to solve attribution loss and creative fatigue. Translating complex technical systems into predictable marketing revenue." data-pt="Desenvolvo pipelines de dados, infraestrutura de recuperação e sistemas automatizados para resolver perdas de atribuição e fadiga criativa. Traduzindo infraestrutura técnica complexa em faturamento de marketing previsível.">
+                I engineer data pipelines, recovery infrastructures, and automated systems to solve attribution loss and creative fatigue. Translating complex technical systems into predictable marketing revenue.
             </p>
-            <p class="mt-4 text-lg md:text-xl text-primary font-semibold leading-relaxed translate-target" data-en="Proven results: $0.75 CPL global campaigns, $0.03 CPV creative automation pipelines, and automated knowledge systems." data-pt="Resultados validados: $0.75 CPL em campanhas globais, $0.03 CPV com automação de criativos e sistemas automáticos de conhecimento.">
-                Proven results: $0.75 CPL global campaigns, $0.03 CPV creative automation pipelines, and automated knowledge systems.
-            </p>
-            <div class="mt-8 no-print">
-                <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20seu%20portf%C3%B3lio%20de%20cases%20e%20gostaria%20de%20agendar%20uma%20Auditoria%20de%20Rastreamento%20no%20meu%20funil." target="_blank" class="inline-block px-8 py-4 bg-primary text-white font-extrabold text-sm rounded-full hover:bg-orange-600 shadow-[0_0_20px_rgba(226,91,34,0.4)] hover:shadow-[0_0_30px_rgba(226,91,34,0.7)] transform hover:-translate-y-1 transition-all duration-300 translate-target" data-en="Schedule Tracking Audit" data-pt="Agendar Auditoria de Rastreamento" data-href-en="https://wa.me/5543991652706?text=Hi%20Diego%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20schedule%20a%20Tracking%20Audit%20for%20my%20business." data-href-pt="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20seu%20portf%C3%B3lio%20de%20cases%20e%20gostaria%20de%20agendar%20uma%20Auditoria%20de%20Rastreamento%20no%20meu%20funil.">Schedule Tracking Audit</a>
+            
+            <div class="flex flex-wrap items-center gap-4 no-print mb-8">
+                <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20seu%20portf%C3%B3lio%20de%20cases%20e%20gostaria%20de%20agendar%20uma%20Auditoria%20de%20Rastreamento%20no%20meu%20funil." target="_blank" class="inline-block px-8 py-4 bg-primary text-white font-extrabold text-sm rounded-full hover:bg-orange-600 shadow-[0_0_20px_rgba(226,91,34,0.3)] hover:shadow-[0_0_30px_rgba(226,91,34,0.6)] transform hover:-translate-y-0.5 transition-all duration-300 translate-target" data-en="Schedule Funnel Tracking Audit" data-pt="Agendar Auditoria de Rastreamento" data-href-en="https://wa.me/5543991652706?text=Hi%20Diego%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20schedule%20a%20Tracking%20Audit%20for%20my%20business." data-href-pt="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20seu%20portf%C3%B3lio%20de%20cases%20e%20gostaria%20de%20agendar%20uma%20Auditoria%20de%20Rastreamento%20no%20meu%20funil.">Schedule Funnel Tracking Audit</a>
+                <a href="#projects-grid" class="inline-block px-6 py-4 bg-gray-900 hover:bg-gray-800 text-gray-300 hover:text-white font-bold text-sm rounded-full border border-gray-800/80 transition-all duration-300 translate-target" data-en="Explore 6 Case Studies" data-pt="Explorar 6 Casos de Estudo">Explore 6 Case Studies</a>
             </div>
         </header>
 
         <!-- Trust Badges Section -->
         <div class="mb-16 border-t border-b border-gray-800/60 py-6 bg-gray-900/10 no-print">
             <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
-                <span class="text-xs font-semibold uppercase tracking-wider text-gray-500 translate-target" data-en="Verified Certifications & Credentials" data-pt="Certificações & Credenciais Verificadas">
-                    Verified Certifications & Credentials
+                <span class="text-xs font-mono uppercase tracking-wider text-gray-500 translate-target" data-en="Verified Credentials & Certifications" data-pt="Credenciais & Certificações Verificadas">
+                    Verified Credentials & Certifications
                 </span>
                 <div class="flex flex-wrap justify-center items-center gap-4 md:gap-6">
                     <!-- Microsoft Azure AI Badge -->
@@ -81,7 +99,7 @@
                             <path d="M0 12h11v11H0z" fill="#00a4ef"/>
                             <path d="M12 12h11v11H12z" fill="#ffb900"/>
                         </svg>
-                        <span class="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">Microsoft Certified (Azure AI-900)</span>
+                        <span class="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">Azure AI Certified (AI-900)</span>
                     </div>
                     
                     <!-- Google Analytics 4 Badge -->
@@ -100,419 +118,562 @@
                             <path d="M15.89 2.76a1.35 1.35 0 00-1.9 0L4.9 11.85a1.35 1.35 0 000 1.9l7.35 7.35a1.35 1.35 0 001.9 0l9.1-9.1a1.35 1.35 0 000-1.9L15.89 2.76z" fill="#4285F4"/>
                             <path d="M4.9 11.85l1.9-1.9 7.35 7.35-1.9 1.9-7.35-7.35z" fill="#F4B400"/>
                         </svg>
-                        <span class="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">Google Ads Certified</span>
+                        <span class="text-xs font-bold text-gray-300 group-hover:text-white transition-colors">Google Ads Specialist</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Telemetry Data Infrastructure Showcase (Core Stack) -->
-        <div class="mb-8">
-            <h3 class="text-sm font-mono text-primary font-bold uppercase tracking-widest mb-4 translate-target" data-en="Attribution Architecture" data-pt="Arquitetura de Atribuição">Attribution Architecture</h3>
+        <!-- Telemetry Data Infrastructure Showcase -->
+        <div class="mb-6">
+            <h3 class="text-sm font-mono text-primary font-bold uppercase tracking-widest mb-2 translate-target" data-en="Attribution Telemetry Pipeline" data-pt="Pipeline de Telemetria de Atribuição">Attribution Telemetry Pipeline</h3>
         </div>
-        <div class="glass-panel rounded-2xl overflow-hidden mb-20 relative border border-orange-500/10 shadow-[0_0_30px_rgba(226,91,34,0.05)]">
-            <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
+        <div class="glass-panel rounded-2xl overflow-hidden mb-20 relative border border-orange-500/10 shadow-[0_0_30px_rgba(226,91,34,0.03)]">
+            <div class="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent"></div>
             
-            <div class="p-8 md:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div class="p-8 md:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
                 <!-- Left: Pipeline Technical Details -->
-                <div class="lg:col-span-7 space-y-6">
-                    <div class="inline-block px-3 py-1 text-xs font-mono uppercase tracking-wider text-green-400 bg-green-500/10 rounded-full border border-green-500/20 translate-target" data-en="Bulletproof Attribution" data-pt="Atribuição Blindada">
-                        Bulletproof Attribution
+                <div class="lg:col-span-7 space-y-5">
+                    <div class="inline-block px-3 py-0.5 text-xs font-mono uppercase tracking-wider text-green-400 bg-green-500/10 rounded-full border border-green-500/20 translate-target" data-en="System Architecture" data-pt="Arquitetura do Sistema">
+                        System Architecture
                     </div>
                     
                     <h3 class="text-2xl md:text-3xl font-extrabold text-white leading-tight translate-target" 
-                        data-en="The Invisible Factory: iOS 14+ Bypass & Server-Side Tracking" 
-                        data-pt="A Fábrica Invisível: Bypass iOS 14+ & Rastreamento Server-Side">
-                        The Invisible Factory: iOS 14+ Bypass & Server-Side Tracking
+                        data-en="The Invisible Factory: iOS 14+ Bypass & First-Party Telemetry" 
+                        data-pt="A Fábrica Invisível: Bypass iOS 14+ & Telemetria First-Party">
+                        The Invisible Factory: iOS 14+ Bypass & First-Party Telemetry
                     </h3>
                     
-                    <p class="text-gray-400 leading-relaxed translate-target"
-                       data-en="While standard portfolios focus on static creatives, high-ticket brands buy data accuracy. By bypassing browser adblockers and Apple's Intelligent Tracking Prevention (ITP), my server-side architecture rescues lost conversions, giving Meta and Google algorithms the rich data they need to optimize ROI."
-                       data-pt="Enquanto portfolios amadores focam apenas em criativos estáticos, marcas de alto ticket compram precisão de dados. Ao contornar adblockers de navegadores e as restrições do Apple ITP, minha arquitetura server-side recupera conversões perdidas, dando aos algoritmos do Meta e Google os dados ricos que precisam para otimizar o ROI.">
-                       While standard portfolios focus on static creatives, high-ticket brands buy data accuracy. By bypassing browser adblockers and Apple's Intelligent Tracking Prevention (ITP), my server-side architecture rescues lost conversions, giving Meta and Google algorithms the rich data they need to optimize ROI.
+                    <p class="text-gray-400 text-sm leading-relaxed translate-target"
+                       data-en="Standard portfolios focus only on static creatives. High-performance B2B brands prioritize telemetry. Bypassing browser-side adblockers and cookie restrictions, my server-side framework captures conversion events directly via secure container gateways, recovering 30%+ of otherwise lost attribution signals."
+                       data-pt="Portfólios tradicionais focam apenas em criativos estáticos. Marcas de alta performance priorizam telemetria. Contornando adblockers de navegadores e restrições de cookies, meu framework server-side captura eventos de conversão diretamente via gateways de container seguros, recuperando mais de 30% dos sinais de atribuição perdidos.">
+                        Standard portfolios focus only on static creatives. High-performance B2B brands prioritize telemetry. Bypassing browser-side adblockers and cookie restrictions, my server-side framework captures conversion events directly via secure container gateways, recovering 30%+ of otherwise lost attribution signals.
                     </p>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                        <div class="bg-black/30 p-4 rounded-xl border border-gray-800 hover:border-primary/20 transition-all duration-300">
-                            <div class="text-primary font-mono text-xs mb-1 translate-target" data-en="META CONVERSIONS API" data-pt="META CONVERSIONS API">META CONVERSIONS API</div>
-                            <div class="text-white font-bold text-lg mb-1 translate-target" data-en="8.5/10 Match Score" data-pt="Score de Match 8.5/10">8.5/10 Match Score</div>
-                            <p class="text-gray-400 text-xs translate-target" data-en="Deduplicated server-to-server events direct to Meta Ads Manager." data-pt="Eventos server-to-server dedupados direto no Gerenciador do Meta.">Deduplicated server-to-server events direct to Meta Ads Manager.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                        <div class="bg-black/40 p-4 rounded-xl border border-gray-900 hover:border-primary/10 transition-all duration-300">
+                            <div class="text-primary font-mono text-xs mb-1">CONVERSIONS API</div>
+                            <div class="text-white font-bold text-base mb-1 translate-target" data-en="Match Score: 8.5/10" data-pt="Score de Match: 8.5/10">Match Score: 8.5/10</div>
+                            <p class="text-gray-400 text-xs translate-target" data-en="Clean user parameters mapped directly to Meta Ads endpoints." data-pt="Parâmetros limpos de usuário mapeados direto para os endpoints do Meta.">Clean user parameters mapped directly to Meta Ads endpoints.</p>
                         </div>
-                        <div class="bg-black/30 p-4 rounded-xl border border-gray-800 hover:border-primary/20 transition-all duration-300">
-                            <div class="text-green-400 font-mono text-xs mb-1 translate-target" data-en="CONVERSION ACCURACY" data-pt="PRECISÃO DE CONVERSÃO">CONVERSION ACCURACY</div>
-                            <div class="text-white font-bold text-lg mb-1 translate-target" data-en="+30% Rescued Events" data-pt="+30% Eventos Recuperados">+30% Rescued Events</div>
-                            <p class="text-gray-400 text-xs translate-target" data-en="Conversions bypassed from browser adblockers and Safari ITP." data-pt="Conversões recuperadas de adblockers e do Safari ITP.">Conversions bypassed from browser adblockers and Safari ITP.</p>
+                        <div class="bg-black/40 p-4 rounded-xl border border-gray-900 hover:border-primary/10 transition-all duration-300">
+                            <div class="text-green-400 font-mono text-xs mb-1">DATA RECOVERY</div>
+                            <div class="text-white font-bold text-base mb-1 translate-target" data-en="+30% Signal Accuracy" data-pt="+30% Precisão de Sinal">+30% Signal Accuracy</div>
+                            <p class="text-gray-400 text-xs translate-target" data-en="Events recovered from browser-side blocks and browser constraints." data-pt="Eventos recuperados de bloqueios no navegador e restrições de cookies.">Events recovered from browser-side blocks and browser constraints.</p>
                         </div>
-                        <div class="bg-black/30 p-4 rounded-xl border border-gray-800 hover:border-primary/20 transition-all duration-300">
-                            <div class="text-blue-400 font-mono text-xs mb-1 translate-target" data-en="COOKIE PERSISTENCE" data-pt="PERSISTÊNCIA DE COOKIES">COOKIE PERSISTENCE</div>
-                            <div class="text-white font-bold text-lg mb-1 translate-target" data-en="7-Day Recovery" data-pt="Recuperação de 7 Dias">7-Day Recovery</div>
-                            <p class="text-gray-400 text-xs translate-target" data-en="Extends short browser cookies back to 7+ days under first-party DNS." data-pt="Estende cookies curtos de navegadores para 7+ dias sob DNS first-party.">Extends short browser cookies back to 7+ days under first-party DNS.</p>
+                        <div class="bg-black/40 p-4 rounded-xl border border-gray-900 hover:border-primary/10 transition-all duration-300">
+                            <div class="text-blue-400 font-mono text-xs mb-1">COOKIE LIFETIME</div>
+                            <div class="text-white font-bold text-base mb-1 translate-target" data-en="ITP 7+ Day Resiliency" data-pt="Resiliência ITP de 7+ Dias">ITP 7+ Day Resiliency</div>
+                            <p class="text-gray-400 text-xs translate-target" data-en="Extends ephemeral browser cookies back to standard marketing windows." data-pt="Estende cookies efêmeros de navegadores para janelas padrão de marketing.">Extends ephemeral browser cookies back to standard marketing windows.</p>
                         </div>
-                        <div class="bg-black/30 p-4 rounded-xl border border-gray-800 hover:border-primary/20 transition-all duration-300">
-                            <div class="text-purple-400 font-mono text-xs mb-1 translate-target" data-en="PII COMPLIANCE" data-pt="LGPD & PRIVACIDADE">PII COMPLIANCE</div>
-                            <div class="text-white font-bold text-lg mb-1 translate-target" data-en="Anonymized Pipeline" data-pt="Pipeline Anonimizado">Anonymized Pipeline</div>
-                            <p class="text-gray-400 text-xs translate-target" data-en="Filters and hashes personal data before sending to ad platforms." data-pt="Filtra e hasheia dados sensíveis antes de enviar para as plataformas.">Filters and hashes personal data before sending to ad platforms.</p>
+                        <div class="bg-black/40 p-4 rounded-xl border border-gray-900 hover:border-primary/10 transition-all duration-300">
+                            <div class="text-purple-400 font-mono text-xs mb-1">PRIVACY ROUTING</div>
+                            <div class="text-white font-bold text-base mb-1 translate-target" data-en="GDPR/LGPD Anonymizer" data-pt="Anonimizador GDPR/LGPD">GDPR/LGPD Anonymizer</div>
+                            <p class="text-gray-400 text-xs translate-target" data-en="Hashes personal customer details before database ingestion." data-pt="Realiza hash de dados pessoais sensíveis antes do envio às plataformas.">Hashes personal customer details before database ingestion.</p>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Right: Visual Console / Flow Diagram -->
-                <div class="lg:col-span-5 bg-black/60 rounded-xl p-6 border border-gray-800 font-mono text-xs text-gray-400 relative overflow-hidden h-[360px] flex flex-col justify-between">
-                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="lg:col-span-5 bg-[#030407] rounded-xl p-5 border border-gray-800/80 font-mono text-xs text-gray-400 relative overflow-hidden h-[360px] flex flex-col justify-between shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]">
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
                     <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-green-500/5 rounded-full blur-3xl pointer-events-none"></div>
                     
-                    <div class="flex items-center justify-between border-b border-gray-800 pb-3">
+                    <div class="flex items-center justify-between border-b border-gray-800 pb-2.5">
                         <div class="flex items-center gap-1.5">
-                            <span class="w-3 h-3 rounded-full bg-red-500/70"></span>
-                            <span class="w-3 h-3 rounded-full bg-yellow-500/70"></span>
-                            <span class="w-3 h-3 rounded-full bg-green-500/70"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-red-500/80"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-yellow-500/80"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-green-500/80"></span>
                         </div>
-                        <span class="text-[10px] text-gray-500">pipeline_telemetry.log</span>
+                        <span class="text-[10px] text-gray-600 font-bold">gtm_server_gateway.log</span>
                     </div>
                     
                     <!-- Diagram Flow -->
                     <div class="space-y-4 py-4 flex-grow flex flex-col justify-center">
-                        <!-- Node 1 -->
-                        <div class="flex items-center justify-between bg-gray-900/50 p-2.5 rounded border border-gray-800">
+                        <div class="flex items-center justify-between bg-gray-950/80 p-2.5 rounded border border-gray-900">
                             <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                                <span class="text-gray-300 font-bold">CLIENT BRWS</span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping" style="animation-duration: 3s;"></span>
+                                <span class="text-gray-300 font-bold text-[11px]">CLIENT BROWSER</span>
                             </div>
-                            <span class="text-[10px] text-red-400">Blocked 30% (iOS14)</span>
+                            <span class="text-[10px] text-red-500 font-bold translate-target" data-en="ITP BLOCKED (30%)" data-pt="BLOQUEADO ITP (30%)">ITP BLOCKED (30%)</span>
                         </div>
                         
-                        <!-- Connecting Line 1 -->
                         <div class="flex justify-center h-4 relative">
                             <div class="w-[2px] h-full bg-gradient-to-b from-red-500 to-green-500"></div>
                         </div>
                         
-                        <!-- Node 2 -->
-                        <div class="flex items-center justify-between bg-gray-900/50 p-2.5 rounded border border-primary/30 shadow-[0_0_10px_rgba(226,91,34,0.1)]">
+                        <div class="flex items-center justify-between bg-gray-950/80 p-2.5 rounded border border-primary/20 shadow-[0_0_10px_rgba(226,91,34,0.05)]">
                             <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                                <span class="text-white font-bold">GTM SERVER GATEWAY</span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+                                <span class="text-white font-bold text-[11px]">CONTAINER GATEWAY</span>
                             </div>
-                            <span class="text-[10px] text-green-400">First-Party HTTP</span>
+                            <span class="text-[10px] text-green-400 font-bold font-mono">1ST-PARTY DATA</span>
                         </div>
                         
-                        <!-- Connecting Line 2 -->
                         <div class="flex justify-center h-4 relative">
                             <div class="w-[2px] h-full bg-gradient-to-b from-green-500 to-blue-500"></div>
                         </div>
                         
-                        <!-- Node 3 -->
-                        <div class="flex items-center justify-between bg-gray-900/50 p-2.5 rounded border border-gray-800">
+                        <div class="flex items-center justify-between bg-gray-950/80 p-2.5 rounded border border-gray-900">
                             <div class="flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                                <span class="text-gray-300 font-bold">META CAPI / GA4</span>
+                                <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+                                <span class="text-gray-300 font-bold text-[11px]">CONVERSIONS API (META/GA4)</span>
                             </div>
-                            <span class="text-[10px] text-blue-400">Deduplicated API</span>
+                            <span class="text-[10px] text-blue-400 font-bold font-mono">DEDUPLICATED API</span>
                         </div>
                     </div>
                     
-                    <div class="border-t border-gray-800 pt-3 text-[10px] flex justify-between text-gray-500">
-                        <span>STATUS: OPERATIONAL</span>
-                        <span>ATTRIBUTION WINDOW: BLINDADO</span>
+                    <div class="border-t border-gray-800/80 pt-2.5 text-[9px] flex justify-between text-gray-600">
+                        <span>STATUS: ROUTING ENABLED</span>
+                        <span class="translate-target" data-en="SECURED FIRST PARTY" data-pt="FIRST PARTY ASSEGURADO">SECURED FIRST PARTY</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Section: B2B Case Studies -->
-        <div class="mb-12 border-b border-gray-800 pb-4">
-            <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight translate-target" data-en="Featured B2B Case Studies" data-pt="Casos de Estudo B2B em Destaque">
-                Featured B2B Case Studies
-            </h2>
+        <!-- Section Header -->
+        <div id="projects-grid" class="mb-10 border-b border-gray-800 pb-4 flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+                <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight translate-target" data-en="B2B Growth Engineering Cases" data-pt="Cases de Engenharia de Growth B2B">
+                    B2B Growth Engineering Cases
+                </h2>
+                <p class="text-gray-400 text-sm mt-1 translate-target" data-en="Click tabs on each card to inspect the Technical Specs and Source Blueprints." data-pt="Clique nas abas de cada card para inspecionar os detalhes técnicos e códigos fonte.">
+                    Click tabs on each card to inspect the Technical Specs and Source Blueprints.
+                </p>
+            </div>
+            <div class="text-xs text-gray-500 font-mono">
+                <span class="text-primary font-bold">6</span> <span class="translate-target" data-en="Active Systems Displayed" data-pt="Sistemas Ativos Exibidos">Active Systems Displayed</span>
+            </div>
         </div>
 
-        <!-- Case Study 01: RYZE -->
-        <section class="mb-20">
-            <div class="flex flex-col lg:flex-row justify-between items-start gap-4 mb-6">
-                <div>
-                    <span class="text-xs font-mono text-primary font-bold uppercase tracking-widest">Case 01 / RYZE</span>
-                    <h3 class="text-2xl md:text-3xl font-bold text-white translate-target" data-en="Creative Automation & Video Engineering ($0.03 CPV)" data-pt="Automação Criativa & Engenharia de Vídeo ($0.03 CPV)">
-                        Creative Automation & Video Engineering ($0.03 CPV)
-                    </h3>
-                </div>
-                <div class="flex gap-2">
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-white/5 border border-white/10 rounded-md text-gray-300">Paid Traffic Scale</span>
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-primary/10 border border-primary/20 rounded-md text-primary font-mono">Python / FFmpeg</span>
-                </div>
-            </div>
+        <!-- 6 Cases Responsive Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-20">
             
-            <p class="text-gray-300 leading-relaxed mb-8 translate-target"
-               data-en="To scale paid traffic campaigns without creative fatigue, I engineered a Python-based batch processing pipeline. The system automated reversive chroma-keying for custom backgrounds and executed FFmpeg rendering to remove platform watermarks and scale videos to 4K using bicubic filters. This pipeline drove the cost per video view (CPV) down to $0.03."
-               data-pt="Para escalar campanhas de tráfego pago sem fadiga criativa, projetei um pipeline de processamento em lote baseado em Python. O sistema automatizou o chroma-key reverso para fundos personalizados e executou a renderização via FFmpeg para remover marcas d'água de plataformas e redimensionar vídeos para 4K usando filtros bicúbicos. Esse pipeline reduziu o custo por visualização de vídeo (CPV) para $0.03.">
-                To scale paid traffic campaigns without creative fatigue, I engineered a Python-based batch processing pipeline. The system automated reversive chroma-keying for custom backgrounds and executed FFmpeg rendering to remove platform watermarks and scale videos to 4K using bicubic filters. This pipeline drove the cost per video view (CPV) down to $0.03.
-            </p>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 space-y-6 md:space-y-0">
-                <div class="group relative rounded-xl overflow-hidden glass-panel shadow-lg flex flex-col h-full border border-white/5 hover:border-primary/20 transition-all duration-300">
-                    <div class="aspect-video bg-gray-900 relative">
-                        <video autoplay loop muted playsinline class="w-full h-full object-cover">
-                            <source src="assets/raio_x_dados.mp4" type="video/mp4">
-                            Your browser does not support the video tag.
-                        </video>
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-70 group-hover:opacity-90 transition-opacity"></div>
-                    </div>
-                    <div class="p-6 flex-grow">
-                        <h4 class="text-white font-bold mb-2 translate-target" data-en="Data X-Ray (Tracking/CAPI)" data-pt="Raio-X de Dados (Tracking/CAPI)">Data X-Ray (Tracking/CAPI)</h4>
-                        <p class="text-gray-400 text-sm translate-target" data-en="Macro shot of a high-end smartphone transforming into a waterfall of green binary code, fixing data leaks." data-pt="Macro shot de um smartphone transformando-se em uma cachoeira de código binário verde, corrigindo vazamentos de dados.">Macro shot of a high-end smartphone transforming into a waterfall of green binary code, fixing data leaks.</p>
-                    </div>
-                </div>
-
-                <div class="group relative rounded-xl overflow-hidden glass-panel shadow-lg flex flex-col h-full border border-white/5 hover:border-primary/20 transition-all duration-300">
-                    <div class="aspect-video bg-gray-900 relative">
-                        <img src="assets/planta_baixa.png" alt="Blueprint" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-70 group-hover:opacity-90 transition-opacity"></div>
-                    </div>
-                    <div class="p-6 flex-grow">
-                        <h4 class="text-white font-bold mb-2 translate-target" data-en="Profit Blueprint (Infrastructure)" data-pt="Planta Baixa do Lucro (Infraestrutura)">Profit Blueprint (Infrastructure)</h4>
-                        <p class="text-gray-400 text-sm translate-target" data-en="Isometric 3D blueprint connecting Meta Ads, n8n, and GA4 with clean, architectural precision." data-pt="Planta 3D isométrica conectando Meta Ads, n8n e GA4 com precisão arquitetônica limpa.">Isometric 3D blueprint connecting Meta Ads, n8n, and GA4 with clean, architectural precision.</p>
-                    </div>
-                </div>
-
-                <div class="group relative rounded-xl overflow-hidden glass-panel shadow-lg flex flex-col h-full border border-white/5 hover:border-primary/20 transition-all duration-300">
-                    <div class="aspect-video bg-gray-900 relative">
-                        <img src="assets/dashboard_performance.png" alt="Dashboard" class="w-full h-full object-cover transform transition duration-700 group-hover:scale-105">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-70 group-hover:opacity-90 transition-opacity"></div>
-                    </div>
-                    <div class="p-6 flex-grow">
-                        <h4 class="text-white font-bold mb-2 translate-target" data-en="High Performance Dashboard" data-pt="Dashboard de Alta Performance">High Performance Dashboard</h4>
-                        <p class="text-gray-400 text-sm translate-target" data-en="High-tech digital marketing dashboard focusing on CAPI and Server-Side tracking with deep cyan lighting." data-pt="Dashboard de marketing digital high-tech focando em CAPI e rastreamento Server-Side com iluminação ciano profunda.">High-tech digital marketing dashboard focusing on CAPI and Server-Side tracking with deep cyan lighting.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Case Study 02: Glothub -->
-        <section class="mb-20 border-t border-gray-800/50 pt-16">
-            <div class="flex flex-col lg:flex-row justify-between items-start gap-4 mb-6">
+            <!-- Case Study 01: RYZE -->
+            <div class="glass-panel rounded-2xl p-6 border-glow transition-all duration-300 flex flex-col justify-between">
                 <div>
-                    <span class="text-xs font-mono text-primary font-bold uppercase tracking-widest">Case 02 / Glothub</span>
-                    <h3 class="text-2xl md:text-3xl font-bold text-white translate-target" data-en="Attribution Resolution & Data Leak Fixes ($0.75 CPL)" data-pt="Resolução de Atribuição & Correção de Vazamentos ($0.75 CPL)">
-                        Attribution Resolution & Data Leak Fixes ($0.75 CPL)
-                    </h3>
-                </div>
-                <div class="flex gap-2">
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-white/5 border border-white/10 rounded-md text-gray-300">Affiliate Marketing Funnel</span>
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-primary/10 border border-primary/20 rounded-md text-primary font-mono">GTM / dataLayer</span>
-                </div>
-            </div>
-            
-            <p class="text-gray-300 leading-relaxed mb-8 translate-target"
-               data-en="The campaign suffered from 'hallucinated conversions' optimizing for accidental clicks due to tracking on external affiliate pages. To solve this technical deadlock, I built a Proxy Conversion Strategy in GTM containing retention filters: minimum 30 seconds page view, scroll depth, and explicit outbound clicks. I mapped checkout form fields into a custom dataLayer push, correcting enhanced conversions."
-               data-pt="A campanha sofria com 'conversões alucinadas' que otimizavam cliques acidentais devido ao rastreamento em páginas afiliadas externas. Para resolver este impasse técnico, construí uma Estratégia de Conversão Proxy no GTM contendo filtros de retenção: visualização mínima de 30 segundos, profundidade de rolagem e cliques externos explícitos. Mapeei os campos de checkout em um dataLayer push personalizado, corrigindo as conversões otimizadas.">
-                The campaign suffered from "hallucinated conversions" optimizing for accidental clicks due to tracking on external affiliate pages. To solve this technical deadlock, I built a Proxy Conversion Strategy in GTM containing retention filters: minimum 30 seconds page view, scroll depth, and explicit outbound clicks. I mapped checkout form fields into a custom dataLayer push, correcting enhanced conversions.
-            </p>
-
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                <!-- Left: dataLayer code display -->
-                <div class="lg:col-span-5 bg-black/60 rounded-xl p-6 border border-gray-800 font-mono text-xs flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
-                            <span class="text-[10px] text-gray-500 font-bold">dataLayer_push.js</span>
-                            <span class="text-[10px] text-primary">MANUAL FIELD MAPPING</span>
+                    <!-- Header -->
+                    <div class="flex justify-between items-start gap-4 mb-4">
+                        <div>
+                            <span class="text-[10px] font-mono text-primary font-bold uppercase tracking-widest">Case 01 / Creative Engineering</span>
+                            <h3 class="text-xl font-bold text-white mt-1 translate-target" data-en="Video Automation & Upscaling" data-pt="Automação & Upscaling de Vídeo">Video Automation & Upscaling</h3>
                         </div>
-                        <pre class="text-green-400 overflow-x-auto"><code><span class="text-gray-500">// Triggered on form submit</span>
+                        <span class="px-2 py-0.5 rounded bg-primary/10 border border-primary/20 text-[10px] text-primary font-mono font-bold">$0.03 CPV</span>
+                    </div>
+
+                    <!-- Tabs Selector -->
+                    <div class="flex border-b border-gray-800/80 text-[10px] font-mono mb-4">
+                        <button onclick="switchTab(1, 'overview')" id="tab-1-overview" class="tab-btn-1 py-1.5 px-3 border-b-2 border-primary text-white">Overview</button>
+                        <button onclick="switchTab(1, 'specs')" id="tab-1-specs" class="tab-btn-1 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Specs</button>
+                        <button onclick="switchTab(1, 'code')" id="tab-1-code" class="tab-btn-1 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Code</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div id="content-1-overview" class="tab-content-1 block">
+                        <p class="text-gray-300 text-sm leading-relaxed mb-4 translate-target" 
+                           data-en="To bypass ad platforms' watermark tracking and creative exhaustion, I programmed a Python batch-rendering pipeline. It removes client watermarks, overrides chroma-key backgrounds automatically, and upscales low-res formats to 4K using bicubic filters. Scaled custom creative runs down to $0.03 CPV."
+                           data-pt="Para evitar o rastreamento de marca d'água das plataformas de anúncios e a estafa de criativos, programei um pipeline de renderização em lote em Python. Ele remove marcas d'água de clientes, substitui fundos croma-key de forma automática e faz upscale de formatos para 4K via filtros bicúbicos. Reduziu o custo de visualização (CPV) para $0.03.">
+                            To bypass ad platforms' watermark tracking and creative exhaustion, I programmed a Python batch-rendering pipeline. It removes client watermarks, overrides chroma-key backgrounds automatically, and upscales low-res formats to 4K using bicubic filters. Scaled custom creative runs down to $0.03 CPV.
+                        </p>
+                        <!-- Grid Assets -->
+                        <div class="grid grid-cols-2 gap-3 mt-2">
+                            <div class="aspect-video bg-black/40 border border-gray-900 rounded-lg overflow-hidden relative">
+                                <img src="assets/planta_baixa.png" alt="Blueprint" class="w-full h-full object-cover">
+                                <div class="absolute bottom-1 left-1.5 bg-black/80 px-1.5 py-0.5 rounded text-[8px] font-mono text-gray-400">planta_baixa.png</div>
+                            </div>
+                            <div class="aspect-video bg-black/40 border border-gray-900 rounded-lg overflow-hidden relative">
+                                <img src="assets/dashboard_performance.png" alt="Dashboard" class="w-full h-full object-cover">
+                                <div class="absolute bottom-1 left-1.5 bg-black/80 px-1.5 py-0.5 rounded text-[8px] font-mono text-gray-400">dashboard_performance.png</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="content-1-specs" class="tab-content-1 hidden">
+                        <div class="space-y-2 text-xs font-mono text-gray-400">
+                            <div><span class="text-white font-bold">PIPELINE ARCH:</span> Batch Processing Worker</div>
+                            <div><span class="text-white font-bold">CORE STACK:</span> Python 3.10 / FFmpeg / OpenCV / Regex</div>
+                            <div><span class="text-white font-bold">METRIC VALUE:</span> $0.03 Cost-Per-View (CPV)</div>
+                            <div><span class="text-white font-bold">LOCAL TARGETS:</span></div>
+                            <ul class="list-disc list-inside pl-2 space-y-1">
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/Automating%20Video%20Background%20Replacement.md" class="text-primary hover:underline font-bold">Automating Video Background Replacement.md</a></li>
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/Batch%204K%20Video%20Restoration.md" class="text-primary hover:underline font-bold">Batch 4K Video Restoration.md</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="content-1-code" class="tab-content-1 hidden">
+                        <div class="bg-black/60 rounded-lg p-3 border border-gray-800 font-mono text-[10px] text-green-400 overflow-x-auto">
+                            <pre><code># FFmpeg 4K Bicubic Scaler & Watermark Stripper
+ffmpeg -i input.mp4 -vf "
+  scale=3840:2160:flags=bicubic,
+  delogo=x=10:y=10:w=120:h=40:show=0
+" -c:v libx264 -crf 18 -preset slow output_4k.mp4</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-800/60 flex justify-between items-center text-xs">
+                    <span class="text-gray-500 font-mono">STATUS: OPERATIONAL</span>
+                    <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20analisei%20o%20case%20da%20RYZE%20e%20gostaria%20de%20conversar%20sobre%20automa%C3%A7%C3%A3o%20de%20v%C3%ADdeos." target="_blank" class="text-primary font-bold hover:underline translate-target" data-en="Discuss Automation" data-pt="Conversar sobre Automação">Discuss Automation</a>
+                </div>
+            </div>
+
+            <!-- Case Study 02: Glothub -->
+            <div class="glass-panel rounded-2xl p-6 border-glow transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <!-- Header -->
+                    <div class="flex justify-between items-start gap-4 mb-4">
+                        <div>
+                            <span class="text-[10px] font-mono text-primary font-bold uppercase tracking-widest">Case 02 / Telemetry Diagnostic</span>
+                            <h3 class="text-xl font-bold text-white mt-1 translate-target" data-en="Affiliate Conversion Fix" data-pt="Correção de Atribuição Afiliados">Affiliate Conversion Fix</h3>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-green-500/10 border border-green-500/20 text-[10px] text-green-400 font-mono font-bold">$0.75 CPL</span>
+                    </div>
+
+                    <!-- Tabs Selector -->
+                    <div class="flex border-b border-gray-800/80 text-[10px] font-mono mb-4">
+                        <button onclick="switchTab(2, 'overview')" id="tab-2-overview" class="tab-btn-2 py-1.5 px-3 border-b-2 border-primary text-white">Overview</button>
+                        <button onclick="switchTab(2, 'specs')" id="tab-2-specs" class="tab-btn-2 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Specs</button>
+                        <button onclick="switchTab(2, 'code')" id="tab-2-code" class="tab-btn-2 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Code</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div id="content-2-overview" class="tab-content-2 block">
+                        <p class="text-gray-300 text-sm leading-relaxed mb-4 translate-target" 
+                           data-en="Glothub's Korean affiliate pipeline suffered from 'hallucinated conversions' optimization due to off-domain checkouts. I mapped checkout form fields into a custom dataLayer push and implemented retention triggers in GTM (minimum 30-sec scroll, outbound click filters) to rescue client pixel accuracy, securing leads at $0.75."
+                           data-pt="O funil de afiliados da Glothub sofria de otimizações falsas por 'conversões alucinadas' em domínios externos. Eu mapeei dados cadastrais em um dataLayer push customizado e integrei gatilhos de retenção no GTM (mínimo de 30s de leitura, filtro de cliques externos) para corrigir a inteligência do pixel, reduzindo o CPL para $0.75.">
+                            Glothub's Korean affiliate pipeline suffered from 'hallucinated conversions' optimization due to off-domain checkouts. I mapped checkout form fields into a custom dataLayer push and implemented retention triggers in GTM (minimum 30-sec scroll, outbound click filters) to rescue client pixel accuracy, securing leads at $0.75.
+                        </p>
+                        <!-- Image screenshot -->
+                        <div class="border border-gray-900 rounded-lg overflow-hidden bg-black/40 p-1">
+                            <img src="IMAGENS/case-glothub-meta-ads-2026.png" alt="Glothub Meta Ads" class="w-full h-auto rounded">
+                        </div>
+                    </div>
+
+                    <div id="content-2-specs" class="tab-content-2 hidden">
+                        <div class="space-y-2 text-xs font-mono text-gray-400">
+                            <div><span class="text-white font-bold">DIAGNOSTIC:</span> Affiliate Redirect Loop & Data Leaks</div>
+                            <div><span class="text-white font-bold">CORE STACK:</span> Google Tag Manager / Javascript / Meta API / GA4</div>
+                            <div><span class="text-white font-bold">KPI SECURED:</span> $0.75 CPL Global Campaigns</div>
+                            <div><span class="text-white font-bold">LOCAL TARGETS:</span></div>
+                            <ul class="list-disc list-inside pl-2 space-y-1">
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/portifolio/CASE_STUDY_GLOTHUB.md" class="text-primary hover:underline font-bold">CASE_STUDY_GLOTHUB.md</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="content-2-code" class="tab-content-2 hidden">
+                        <div class="bg-black/60 rounded-lg p-3 border border-gray-800 font-mono text-[10px] text-green-400 overflow-x-auto">
+                            <pre><code>// User Data Injection for Enhanced Conversions
 gtag('set', 'user_data', {
   'email': '{{USER_EMAIL}}',
   'phone_number': '{{USER_PHONE}}'
 });
-
-<span class="text-gray-500">// Custom telemetry triggers</span>
+// Custom Telemetry Event Push
 window.dataLayer = window.dataLayer || [];
 window.dataLayer.push({
   'event': 'warm_lead',
-  'time_on_page': 32.4,
-  'scroll_depth': '75%'
+  'time_on_page': 30
 });</code></pre>
+                        </div>
                     </div>
-                    <div class="border-t border-gray-800 pt-3 mt-4 text-[10px] text-gray-500 translate-target" data-en="Resolves Safari ITP and browser cookie truncation issues." data-pt="Resolve problemas de ITP do Safari e truncamento de cookies de navegadores.">
-                        Resolves Safari ITP and browser cookie truncation issues.
-                    </div>
-                </div>
-
-                <!-- Right: Glothub image screenshot -->
-                <div class="lg:col-span-7 glass-panel rounded-xl overflow-hidden border border-white/5 relative flex items-center justify-center p-2">
-                    <img src="IMAGENS/case-glothub-meta-ads-2026.png" alt="Glothub Meta Ads Results" class="w-full h-full object-cover rounded-lg border border-gray-800">
-                </div>
-            </div>
-        </section>
-
-        <!-- Case Study 03: Autonomous Data Pipeline -->
-        <section class="mb-20 border-t border-gray-800/50 pt-16">
-            <div class="flex flex-col lg:flex-row justify-between items-start gap-4 mb-6">
-                <div>
-                    <span class="text-xs font-mono text-primary font-bold uppercase tracking-widest">Case 03 / Escola do Trabalhador 4.0</span>
-                    <h3 class="text-2xl md:text-3xl font-bold text-white translate-target" data-en="Autonomous Data Pipeline & Extraction (10h to 4m)" data-pt="Pipeline de Dados Autônomo & Extração (10h para 4m)">
-                        Autonomous Data Pipeline & Extraction (10h to 4m)
-                    </h3>
-                </div>
-                <div class="flex gap-2">
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-white/5 border border-white/10 rounded-md text-gray-300">RAG Readiness (LLM Ingestion)</span>
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-primary/10 border border-primary/20 rounded-md text-primary font-mono">Python / Playwright</span>
-                </div>
-            </div>
-            
-            <p class="text-gray-300 leading-relaxed mb-8 translate-target"
-               data-en="Faced with a fragmented educational portal, I architected a hybrid Python extraction pipeline. By controlling a headless Chromium browser through Chrome DevTools Protocol (CDP), the script bypassed short-lived session security and hijacked JSON manifests. A network interceptor captured raw API responses containing dynamic quiz data, while a parallel downloader processed, parsed, and merged DOCX documents into a unified semantic Markdown file optimized for NotebookLM."
-               data-pt="Diante de um portal educacional fragmentado, arquitetei um pipeline híbrido de extração em Python. Controlando um navegador Chromium headless via Chrome DevTools Protocol (CDP), o script contornou a segurança de sessão e interceptou manifestos JSON. Um interceptor de rede capturou respostas brutas de APIs contendo dados de questionários, enquanto um downloader paralelo processou, extraiu e mesclou documentos DOCX em um arquivo Markdown unificado semântico otimizado para o NotebookLM.">
-                Faced with a fragmented educational portal, I architected a hybrid Python extraction pipeline. By controlling a headless Chromium browser through Chrome DevTools Protocol (CDP), the script bypassed short-lived session security and hijacked JSON manifests. A network interceptor captured raw API responses containing dynamic quiz data, while a parallel downloader processed, parsed, and merged DOCX documents into a unified semantic Markdown file optimized for NotebookLM.
-            </p>
-
-            <!-- Timeline/Flowchart Flow visualization in pure Tailwind -->
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 relative">
-                <!-- Step 1 -->
-                <div class="bg-white/5 border border-white/10 p-5 rounded-xl hover:border-primary/40 transition-colors duration-300 flex flex-col justify-between">
-                    <div>
-                        <div class="text-primary font-mono text-[10px] font-bold uppercase mb-2">Step 01</div>
-                        <h4 class="text-white font-bold mb-2 translate-target" data-en="Auth Session" data-pt="Sessão Autenticada">Auth Session</h4>
-                        <p class="text-gray-400 text-[11px] translate-target" data-en="Playwright starts a Chromium instance connected to user credentials." data-pt="Playwright inicia uma instância Chromium conectada às credenciais do usuário.">Playwright starts a Chromium instance connected to user credentials.</p>
-                    </div>
-                    <div class="mt-4 font-mono text-[10px] text-gray-500">Playwright (Python)</div>
                 </div>
                 
-                <!-- Step 2 -->
-                <div class="bg-white/5 border border-white/10 p-5 rounded-xl hover:border-primary/40 transition-colors duration-300 flex flex-col justify-between">
-                    <div>
-                        <div class="text-primary font-mono text-[10px] font-bold uppercase mb-2">Step 02</div>
-                        <h4 class="text-white font-bold mb-2 translate-target" data-en="CDP Hijack" data-pt="Sequestro via CDP">CDP Hijack</h4>
-                        <p class="text-gray-400 text-[11px] translate-target" data-en="Chrome DevTools Protocol connects to bypass authentication session limits." data-pt="Chrome DevTools Protocol conecta para ignorar limites de sessão de login.">Chrome DevTools Protocol connects to bypass authentication session limits.</p>
-                    </div>
-                    <div class="mt-4 font-mono text-[10px] text-gray-500">CDP Protocol</div>
-                </div>
-
-                <!-- Step 3 -->
-                <div class="bg-white/5 border border-white/10 p-5 rounded-xl hover:border-primary/40 transition-colors duration-300 flex flex-col justify-between">
-                    <div>
-                        <div class="text-primary font-mono text-[10px] font-bold uppercase mb-2">Step 03</div>
-                        <h4 class="text-white font-bold mb-2 translate-target" data-en="API Interceptor" data-pt="Interceptor de API">API Interceptor</h4>
-                        <p class="text-gray-400 text-[11px] translate-target" data-en="Listens to network responses and extracts hidden quiz JSON payloads." data-pt="Monitora respostas de rede e extrai payloads JSON ocultos dos quizzes.">Listens to network responses and extracts hidden quiz JSON payloads.</p>
-                    </div>
-                    <div class="mt-4 font-mono text-[10px] text-gray-500">Network Hooks</div>
-                </div>
-
-                <!-- Step 4 -->
-                <div class="bg-white/5 border border-white/10 p-5 rounded-xl hover:border-primary/40 transition-colors duration-300 flex flex-col justify-between">
-                    <div>
-                        <div class="text-primary font-mono text-[10px] font-bold uppercase mb-2">Step 04</div>
-                        <h4 class="text-white font-bold mb-2 translate-target" data-en="Docx Processor" data-pt="Processador DOCX">Docx Processor</h4>
-                        <p class="text-gray-400 text-[11px] translate-target" data-en="Downloads 75+ DOCX support files, parsing strings with Python regex." data-pt="Baixa 75+ arquivos DOCX de apoio, tratando strings com regex em Python.">Downloads 75+ DOCX support files, parsing strings with Python regex.</p>
-                    </div>
-                    <div class="mt-4 font-mono text-[10px] text-gray-500">python-docx / re</div>
-                </div>
-
-                <!-- Step 5 -->
-                <div class="bg-white/5 border border-primary/20 p-5 rounded-xl bg-primary/5 hover:border-primary/50 transition-colors duration-300 flex flex-col justify-between">
-                    <div>
-                        <div class="text-primary font-mono text-[10px] font-bold uppercase mb-2">Step 05</div>
-                        <h4 class="text-white font-bold mb-2 translate-target" data-en="RAG Ready" data-pt="Pronto para RAG">RAG Ready</h4>
-                        <p class="text-gray-400 text-[11px] translate-target" data-en="Aggregates modules and quizzes into a unified 135KB semantic Markdown file." data-pt="Agrega módulos e quizzes em um Markdown semântico unificado de 135KB.">Aggregates modules and quizzes into a unified 135KB semantic Markdown file.</p>
-                    </div>
-                    <div class="mt-4 font-mono text-[10px] text-primary">NotebookLM Ingest</div>
+                <div class="mt-6 pt-4 border-t border-gray-800/60 flex justify-between items-center text-xs">
+                    <span class="text-gray-500 font-mono">STATUS: OPERATIONAL</span>
+                    <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20analisei%20o%20case%20da%20Glothub%20e%20preciso%20de%20ajuda%20para%20corrigir%20rastreamento%20de%20afiliados." target="_blank" class="text-primary font-bold hover:underline translate-target" data-en="Discuss Tracking" data-pt="Discutir Rastreamento">Discuss Tracking</a>
                 </div>
             </div>
-        </section>
 
-        <!-- Case Study 04: Skillshop Automation Assistant -->
-        <section class="mb-20 border-t border-gray-800/50 pt-16">
-            <div class="flex flex-col lg:flex-row justify-between items-start gap-4 mb-6">
+            <!-- Case Study 03: Escola do Trabalhador -->
+            <div class="glass-panel rounded-2xl p-6 border-glow transition-all duration-300 flex flex-col justify-between">
                 <div>
-                    <span class="text-xs font-mono text-primary font-bold uppercase tracking-widest">Case 04 / Automation Lab</span>
-                    <h3 class="text-2xl md:text-3xl font-bold text-white translate-target" data-en="Google Skillshop Certification Automator & AI Solver" data-pt="Automatizador de Certificações Google Skillshop & AI Solver">
-                        Google Skillshop Certification Automator & AI Solver
-                    </h3>
+                    <!-- Header -->
+                    <div class="flex justify-between items-start gap-4 mb-4">
+                        <div>
+                            <span class="text-[10px] font-mono text-primary font-bold uppercase tracking-widest">Case 03 / Data Engineering</span>
+                            <h3 class="text-xl font-bold text-white mt-1 translate-target" data-en="Autonomous Data Pipeline" data-pt="Pipeline de Dados Autônomo">Autonomous Data Pipeline</h3>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-[10px] text-blue-400 font-mono font-bold">10h to 4m</span>
+                    </div>
+
+                    <!-- Tabs Selector -->
+                    <div class="flex border-b border-gray-800/80 text-[10px] font-mono mb-4">
+                        <button onclick="switchTab(3, 'overview')" id="tab-3-overview" class="tab-btn-3 py-1.5 px-3 border-b-2 border-primary text-white">Overview</button>
+                        <button onclick="switchTab(3, 'specs')" id="tab-3-specs" class="tab-btn-3 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Specs</button>
+                        <button onclick="switchTab(3, 'code')" id="tab-3-code" class="tab-btn-3 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Code</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div id="content-3-overview" class="tab-content-3 block">
+                        <p class="text-gray-300 text-sm leading-relaxed mb-4 translate-target" 
+                           data-en="I built a hybrid data extraction engine in Python to structure fragmented LMS contents. By coupling Playwright browser contexts via Chrome DevTools Protocol (CDP), the script intercepted runtime JSON quiz APIs, downloaded 75+ docx attachments, and aggregated everything into unified semantic Markdown formats ready for NotebookLM."
+                           data-pt="Construí um motor de extração em Python para estruturar conteúdos de um portal LMS protegido. Conectando instâncias do Playwright via Chrome DevTools Protocol (CDP), o script interceptou APIs de quiz dinâmicas, baixou mais de 75 arquivos docx de apoio e estruturou tudo em Markdown semântico para ingestão imediata no NotebookLM.">
+                            I built a data extraction engine in Python to structure fragmented LMS contents. By coupling Playwright browser contexts via Chrome DevTools Protocol (CDP), the script intercepted runtime JSON quiz APIs, downloaded 75+ docx attachments, and aggregated everything into unified semantic Markdown formats ready for NotebookLM.
+                        </p>
+                        <!-- Flow steps -->
+                        <div class="bg-black/40 border border-gray-900 rounded-lg p-3 text-[10px] font-mono space-y-1 text-gray-400">
+                            <div class="flex justify-between"><span class="text-gray-500">1. Playwright Init</span> <span class="text-green-400">[CONNECTED_CDP]</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">2. Network Listener</span> <span class="text-green-400">[JSON_INTERCEPTED]</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">3. Docx Parser Worker</span> <span class="text-green-400">[75_FILES_MERGED]</span></div>
+                            <div class="flex justify-between"><span class="text-gray-500">4. Target Output</span> <span class="text-primary font-bold">[135KB_MD_READY]</span></div>
+                        </div>
+                    </div>
+
+                    <div id="content-3-specs" class="tab-content-3 hidden">
+                        <div class="space-y-2 text-xs font-mono text-gray-400">
+                            <div><span class="text-white font-bold">PIPELINE TASK:</span> LMS Knowledge Consolidation (RAG)</div>
+                            <div><span class="text-white font-bold">CORE STACK:</span> Python / Playwright CDP / python-docx / BeautifulSoup</div>
+                            <div><span class="text-white font-bold">TIME PERFORMANCE:</span> reduced extraction cycle from 10 hours to 4 minutes</div>
+                            <div><span class="text-white font-bold">LOCAL TARGETS:</span></div>
+                            <ul class="list-disc list-inside pl-2 space-y-1">
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/portifolio/CASE_STUDY_DATA_ENGINEERING.md" class="text-primary hover:underline font-bold">CASE_STUDY_DATA_ENGINEERING.md</a></li>
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/portifolio/PORTFOLIO_CASE_STUDY.md" class="text-primary hover:underline font-bold">PORTFOLIO_CASE_STUDY.md</a></li>
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/portifolio/PORTFOLIO_CASE_STUDY2.md" class="text-primary hover:underline font-bold">PORTFOLIO_CASE_STUDY2.md</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="content-3-code" class="tab-content-3 hidden">
+                        <div class="bg-black/60 rounded-lg p-3 border border-gray-800 font-mono text-[10px] text-green-400 overflow-x-auto">
+                            <pre><code># Capturing JSON Quiz responses dynamic network intercept
+page.on("response", lambda response: 
+  handle_quiz_json(response) 
+  if "/api/v1/questions" in response.url 
+  else None
+)</code></pre>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex gap-2">
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-white/5 border border-white/10 rounded-md text-gray-300">Credentials Validation</span>
-                    <span class="px-2.5 py-1 text-xs font-semibold bg-primary/10 border border-primary/20 rounded-md text-primary font-mono">CDP / Gemini 2.0</span>
+                
+                <div class="mt-6 pt-4 border-t border-gray-800/60 flex justify-between items-center text-xs">
+                    <span class="text-gray-500 font-mono">STATUS: OPERATIONAL</span>
+                    <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20seu%20case%20de%20Data%20Pipeline%20e%20gostaria%20de%20automatizar%20a%20extra%C3%A7%C3%A3o%20de%20dados%20no%20meu%20sistema." target="_blank" class="text-primary font-bold hover:underline translate-target" data-en="Discuss Pipelines" data-pt="Discutir Pipelines">Discuss Pipelines</a>
                 </div>
             </div>
-            
-            <p class="text-gray-300 leading-relaxed mb-8 translate-target"
-               data-en="To automate Google Ads and GA4 credentials verification, I built a hybrid automation agent. By connecting to Brave Browser via Chrome DevTools Protocol (CDP), the script traverses nested iframe sandboxes of the Docebo LMS, extracts dynamic questions, and uses the Gemini 2.0 Flash API to resolve them. If DOM access is blocked, it automatically takes a viewport screenshot and submits it to Gemini's multimodal vision model for real-time resolution."
-               data-pt="Para automatizar a verificação de credenciais do Google Ads e GA4, desenvolvi um agente de automação híbrido. Conectando-se ao Brave Browser via Chrome DevTools Protocol (CDP), o script percorre sandboxes de iframes aninhados do Docebo LMS, extrai perguntas dinâmicas e usa a API do Gemini 2.0 Flash para resolvê-las. Se o acesso ao DOM for bloqueado, ele tira um print da tela automaticamente e o envia ao modelo multimodal do Gemini para resolução em tempo real.">
-                To automate Google Ads and GA4 credentials verification, I built a hybrid automation agent. By connecting to Brave Browser via Chrome DevTools Protocol (CDP), the script traverses nested iframe sandboxes of the Docebo LMS, extracts dynamic questions, and uses the Gemini 2.0 Flash API to resolve them. If DOM access is blocked, it automatically takes a viewport screenshot and submits it to Gemini's multimodal vision model for real-time resolution.
-            </p>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-                <!-- Left: dataLayer/code display -->
-                <div class="lg:col-span-5 bg-black/60 rounded-xl p-6 border border-gray-800 font-mono text-xs flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between border-b border-gray-800 pb-3 mb-4">
-                            <span class="text-[10px] text-gray-500 font-bold">gemini_vision_solver.py</span>
-                            <span class="text-[10px] text-primary">MULTIMODAL CDP HOOK</span>
+            <!-- Case Study 04: Google Skillshop -->
+            <div class="glass-panel rounded-2xl p-6 border-glow transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <!-- Header -->
+                    <div class="flex justify-between items-start gap-4 mb-4">
+                        <div>
+                            <span class="text-[10px] font-mono text-primary font-bold uppercase tracking-widest">Case 04 / Automation Agent</span>
+                            <h3 class="text-xl font-bold text-white mt-1 translate-target" data-en="Skillshop Solver & Automator" data-pt="Automador Google Skillshop">Skillshop Solver & Automator</h3>
                         </div>
-                        <pre class="text-green-400 overflow-x-auto"><code><span class="text-gray-500"># Fallback: Capture & solve via Vision</span>
-page.screenshot(path=SCREENSHOT_PATH)
-with open(SCREENSHOT_PATH, "rb") as f:
+                        <span class="px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20 text-[10px] text-purple-400 font-mono font-bold">95% Success</span>
+                    </div>
+
+                    <!-- Tabs Selector -->
+                    <div class="flex border-b border-gray-800/80 text-[10px] font-mono mb-4">
+                        <button onclick="switchTab(4, 'overview')" id="tab-4-overview" class="tab-btn-4 py-1.5 px-3 border-b-2 border-primary text-white">Overview</button>
+                        <button onclick="switchTab(4, 'specs')" id="tab-4-specs" class="tab-btn-4 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Specs</button>
+                        <button onclick="switchTab(4, 'code')" id="tab-4-code" class="tab-btn-4 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Code</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div id="content-4-overview" class="tab-content-4 block">
+                        <p class="text-gray-300 text-sm leading-relaxed mb-4 translate-target" 
+                           data-en="To automate Google Ads and GA4 certifications audits, I coded a solver agent. Connected to Brave via CDP port 9222, the scraper pierces nested LMS ExceedLMS iframes to extract exam options. If DOM blocking is active, it screenshots the viewport and queries Gemini 2.0 Flash Vision for real-time correct option index lookup."
+                           data-pt="Para automatizar auditorias de certificações Google Ads e GA4, desenvolvi um agente solucionador. Conectado ao Brave via porta CDP 9222, o script perfura iframes aninhados do ExceedLMS para extrair opções. Se houver bloqueio de DOM, tira print e consulta o Gemini 2.0 Flash Vision em tempo real para obter a alternativa correta.">
+                            To automate Google Ads and GA4 certifications audits, I coded a solver agent. Connected to Brave via CDP port 9222, the scraper pierces nested LMS ExceedLMS iframes to extract exam options. If DOM blocking is active, it screenshots the viewport and queries Gemini 2.0 Flash Vision for real-time correct option index lookup.
+                        </p>
+                        <!-- Performance indicators -->
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <div class="bg-black/30 border border-gray-900 rounded p-2 text-center">
+                                <span class="block text-[8px] text-gray-500 font-mono">SOLVE SPEED</span>
+                                <span class="text-white text-xs font-bold font-mono">&lt; 1.5s / q</span>
+                            </div>
+                            <div class="bg-black/30 border border-gray-900 rounded p-2 text-center">
+                                <span class="block text-[8px] text-gray-500 font-mono">ACCURACY RATE</span>
+                                <span class="text-green-400 text-xs font-bold font-mono">95% avg</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="content-4-specs" class="tab-content-4 hidden">
+                        <div class="space-y-2 text-xs font-mono text-gray-400">
+                            <div><span class="text-white font-bold">AGENT CLASS:</span> Multi-Modal Scraping & Solver</div>
+                            <div><span class="text-white font-bold">CORE STACK:</span> Playwright CDP / Gemini 2.0 Flash API / Base64 Vision</div>
+                            <div><span class="text-white font-bold">BYPASS PROTOCOL:</span> Automatic Screenshot & Vision OCR fallback</div>
+                            <div><span class="text-white font-bold">LOCAL TARGETS:</span></div>
+                            <ul class="list-disc list-inside pl-2 space-y-1">
+                                <li><a href="file:///C:/Users/99196/OneDrive/Documentos/poupar%20tempo/skillshop_assistant.py" class="text-primary hover:underline font-bold">skillshop_assistant.py</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="content-4-code" class="tab-content-4 hidden">
+                        <div class="bg-black/60 rounded-lg p-3 border border-gray-800 font-mono text-[10px] text-green-400 overflow-x-auto">
+                            <pre><code># Gemini Vision Fallback block for iframe blocks
+page.screenshot(path="exam_screenshot.png")
+with open("exam_screenshot.png", "rb") as f:
     b64_image = base64.b64encode(f.read()).decode()
-
 response = gemini.generate_content({
-    "inline_data": {
-        "mime_type": "image/png",
-        "data": b64_image
-    },
-    "text": "Identify correct option from official Google Docs."
+    "inline_data": {"mime_type": "image/png", "data": b64_image},
+    "text": "Identify correct option using Google Docs references."
 })</code></pre>
-                    </div>
-                    <div class="border-t border-gray-800 pt-3 mt-4 text-[10px] text-gray-500 translate-target" data-en="Integrates Gemini-2.0-Flash with Playwright CDP connection." data-pt="Integra Gemini-2.0-Flash com conexão Playwright CDP.">
-                        Integrates Gemini-2.0-Flash with Playwright CDP connection.
+                        </div>
                     </div>
                 </div>
-
-                <!-- Right: timeline metrics -->
-                <div class="lg:col-span-7 flex flex-col justify-between bg-white/5 border border-white/10 rounded-xl p-6">
-                    <div class="space-y-4">
-                        <div class="flex items-start gap-4">
-                            <div class="bg-primary/20 text-primary font-mono text-xs px-2.5 py-1 rounded">01</div>
-                            <div>
-                                <h4 class="text-white font-bold text-sm translate-target" data-en="CDP Port Injection" data-pt="Injeção de Porta CDP">CDP Port Injection</h4>
-                                <p class="text-gray-400 text-xs translate-target" data-en="Connects script to Brave Browser running debugging on port 9222." data-pt="Conecta o script ao Brave Browser executando depuração na porta 9222.">Connects script to Brave Browser running debugging on port 9222.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4">
-                            <div class="bg-primary/20 text-primary font-mono text-xs px-2.5 py-1 rounded">02</div>
-                            <div>
-                                <h4 class="text-white font-bold text-sm translate-target" data-en="Iframe Piercing" data-pt="Perfuração de Iframes">Iframe Piercing</h4>
-                                <p class="text-gray-400 text-xs translate-target" data-en="Recursively crawls nested exam frames on ExceedLMS sandbox." data-pt="Varre recursivamente frames do exame hospedados no sandbox ExceedLMS.">Recursively crawls nested exam frames on ExceedLMS sandbox.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4">
-                            <div class="bg-primary/20 text-primary font-mono text-xs px-2.5 py-1 rounded">03</div>
-                            <div>
-                                <h4 class="text-white font-bold text-sm translate-target" data-en="Dynamic DOM Extraction" data-pt="Extração Dinâmica de DOM">Dynamic DOM Extraction</h4>
-                                <p class="text-gray-400 text-xs translate-target" data-en="Extracts question strings and filters answers through custom CSS targets." data-pt="Extrai strings de perguntas e filtra alternativas via alvos CSS personalizados.">Extracts question strings and filters answers through custom CSS targets.</p>
-                            </div>
-                        </div>
-                        <div class="flex items-start gap-4">
-                            <div class="bg-primary/20 text-primary font-mono text-xs px-2.5 py-1 rounded">04</div>
-                            <div>
-                                <h4 class="text-white font-bold text-sm translate-target" data-en="Gemini API Reasoning" data-pt="Raciocínio via API Gemini">Gemini API Reasoning</h4>
-                                <p class="text-gray-400 text-xs translate-target" data-en="Queries Google certification database for 100% correct matching index." data-pt="Consulta a base de dados de certificação do Google para correspondência 100% correta.">Queries Google certification database for 100% correct matching index.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mt-6 border-t border-gray-800/80 pt-4 flex items-center justify-between">
-                        <span class="text-xs text-gray-500 font-mono translate-target" data-en="Automation speed: <1.5s per question" data-pt="Velocidade da automação: <1.5s por questão">Automation speed: &lt;1.5s per question</span>
-                        <span class="text-xs text-green-400 font-bold translate-target" data-en="Average Exam Score: 95%" data-pt="Média de Acertos no Exame: 95%">Average Exam Score: 95%</span>
-                    </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-800/60 flex justify-between items-center text-xs">
+                    <span class="text-gray-500 font-mono">STATUS: OPERATIONAL</span>
+                    <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20achei%20interessante%20o%20seu%20automador%20do%20Skillshop.%20Quero%20saber%20como%20aplicar%20IA%20no%20meu%20neg%C3%B3cio." target="_blank" class="text-primary font-bold hover:underline translate-target" data-en="Discuss AI Automation" data-pt="Falar de Automação com IA">Discuss AI Automation</a>
                 </div>
             </div>
-        </section>
+
+            <!-- Case Study 05: Lead Refinery -->
+            <div class="glass-panel rounded-2xl p-6 border-glow transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <!-- Header -->
+                    <div class="flex justify-between items-start gap-4 mb-4">
+                        <div>
+                            <span class="text-[10px] font-mono text-primary font-bold uppercase tracking-widest">Case 05 / Outbound Lead Machine</span>
+                            <h3 class="text-xl font-bold text-white mt-1 translate-target" data-en="Maps Scraper & Data Leak Auditor" data-pt="Scraper de Leads & Auditor de Pixels">Maps Scraper & Data Leak Auditor</h3>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-yellow-500/10 border border-yellow-500/20 text-[10px] text-yellow-400 font-mono font-bold">100% Automated</span>
+                    </div>
+
+                    <!-- Tabs Selector -->
+                    <div class="flex border-b border-gray-800/80 text-[10px] font-mono mb-4">
+                        <button onclick="switchTab(5, 'overview')" id="tab-5-overview" class="tab-btn-5 py-1.5 px-3 border-b-2 border-primary text-white">Overview</button>
+                        <button onclick="switchTab(5, 'specs')" id="tab-5-specs" class="tab-btn-5 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Specs</button>
+                        <button onclick="switchTab(5, 'code')" id="tab-5-code" class="tab-btn-5 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Code</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div id="content-5-overview" class="tab-content-5 block">
+                        <p class="text-gray-300 text-sm leading-relaxed mb-4 translate-target" 
+                           data-en="I built a B2B prospecting tool (`scraper.py`) that crawls Google Maps places within S-Tier high-ticket niches. The script checks site contents to audit if the business is running browser-side Meta tracking pixels but lacks Server-Side Conversions API (CAPI) markers. Identified leaks export to CSV to feed an outbound cadences flow in n8n and Apollo.io."
+                           data-pt="Desenvolvi um minerador B2B (`scraper.py`) que varre locais do Google Maps para nichos de alto ticket. O script lê as páginas desses leads para checar se eles rodam pixels de navegador mas estão sem as chaves da API de Conversões Server-Side (CAPI), indicando perda de sinal. Alvos qualificados são salvos em CSV e integrados a fluxos outbound no n8n e Apollo.io.">
+                            I built a B2B prospecting tool (`scraper.py`) that crawls Google Maps places within S-Tier high-ticket niches. The script checks site contents to audit if the business is running browser-side Meta tracking pixels but lacks Server-Side Conversions API (CAPI) markers. Identified leaks export to CSV to feed an outbound cadences flow in n8n and Apollo.io.
+                        </p>
+                        <!-- Simulated Scraper output -->
+                        <div class="bg-black/60 rounded-lg p-2.5 border border-gray-800 font-mono text-[9px] text-gray-400 space-y-1 max-h-[85px] overflow-y-auto">
+                            <div><span class="text-blue-400">[FINDING]</span> Med Spa Los Angeles... website found.</div>
+                            <div><span class="text-yellow-400">[AUDIT]</span> Pixel: <span class="text-green-400">YES</span> | Server-Side: <span class="text-red-400">NO</span></div>
+                            <div class="text-red-400 font-bold">[DATA LEAK DETECTED!] Saving to leads_qualificados.csv</div>
+                        </div>
+                    </div>
+
+                    <div id="content-5-specs" class="tab-content-5 hidden">
+                        <div class="space-y-2 text-xs font-mono text-gray-400">
+                            <div><span class="text-white font-bold">SYSTEM TYPE:</span> Automated Lead Mining & Diagnostics</div>
+                            <div><span class="text-white font-bold">CORE STACK:</span> Playwright Python / Headless Browser / CSV / regex</div>
+                            <div><span class="text-white font-bold">PIPELINE INTEGRATION:</span> CSV Exports -> n8n Webhooks -> Apollo.io enrichment</div>
+                            <div><span class="text-white font-bold">LOCAL TARGETS:</span></div>
+                            <ul class="list-disc list-inside pl-2 space-y-1">
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/freelancer/outbound_machine/scraper.py" class="text-primary hover:underline font-bold">scraper.py</a></li>
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/freelancer/outbound_machine/leads_qualificados.csv" class="text-primary hover:underline font-bold">leads_qualificados.csv</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="content-5-code" class="tab-content-5 hidden">
+                        <div class="bg-black/60 rounded-lg p-3 border border-gray-800 font-mono text-[10px] text-green-400 overflow-x-auto">
+                            <pre><code># Data Leak Detector (Checking Browser Pixel without Server clues)
+has_pixel = bool(re.search(r'fbevents\.js|fbq\(', html, re.I))
+has_capi = bool(re.search(r'googletagmanager\.com/gtm\.js|fb_capis', html, re.I))
+leaking_data = has_pixel and not has_capi
+if leaking_data:
+    results.append({'Name': name, 'Leaking': True})</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-800/60 flex justify-between items-center text-xs">
+                    <span class="text-gray-500 font-mono">STATUS: OPERATIONAL</span>
+                    <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20gostaria%20de%20estruturar%20um%20pipeline%20de%20prospec%C3%A7%C3%A3o%20de%20leads%20com%20IA%20no%20meu%20funil." target="_blank" class="text-primary font-bold hover:underline translate-target" data-en="Discuss Lead Pipelines" data-pt="Discutir Funil de Leads">Discuss Lead Pipelines</a>
+                </div>
+            </div>
+
+            <!-- Case Study 06: Opportunity Sniper -->
+            <div class="glass-panel rounded-2xl p-6 border-glow transition-all duration-300 flex flex-col justify-between">
+                <div>
+                    <!-- Header -->
+                    <div class="flex justify-between items-start gap-4 mb-4">
+                        <div>
+                            <span class="text-[10px] font-mono text-primary font-bold uppercase tracking-widest">Case 06 / Market Opportunities</span>
+                            <h3 class="text-xl font-bold text-white mt-1 translate-target" data-en="Indeed & Workana Sniper Radars" data-pt="Radares Sniper Indeed & Workana">Indeed & Workana Sniper Radars</h3>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20 text-[10px] text-cyan-400 font-mono font-bold">Elite Filters</span>
+                    </div>
+
+                    <!-- Tabs Selector -->
+                    <div class="flex border-b border-gray-800/80 text-[10px] font-mono mb-4">
+                        <button onclick="switchTab(6, 'overview')" id="tab-6-overview" class="tab-btn-6 py-1.5 px-3 border-b-2 border-primary text-white">Overview</button>
+                        <button onclick="switchTab(6, 'specs')" id="tab-6-specs" class="tab-btn-6 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Specs</button>
+                        <button onclick="switchTab(6, 'code')" id="tab-6-code" class="tab-btn-6 py-1.5 px-3 border-b-2 border-transparent text-gray-400 hover:text-white">Code</button>
+                    </div>
+
+                    <!-- Tab Contents -->
+                    <div id="content-6-overview" class="tab-content-6 block">
+                        <p class="text-gray-300 text-sm leading-relaxed mb-4 translate-target" 
+                           data-en="I built two specialized radars for automated job hunting: `workana_sniper.py` filters projects with budgets >= 500 BRL and < 15 active bids in GTM/CAPI categories to secure low-competition elite contracts. `indeed_farmer.py` coordinates Playwright CDP sessions to monitor and target easy-apply SDR/Tech vacancies, routing tailored pitches."
+                           data-pt="Desenvolvi dois radares automatizados para captação de oportunidades: o `workana_sniper.py` filtra projetos com orçamento >= 500 BRL e < 15 propostas nas tags de GTM/CAPI, assegurando contratos de baixa concorrência. O `indeed_farmer.py` coordena instâncias CDP para monitorar vagas de SDR/dados e enviar pitches customizados.">
+                            I built two specialized radars for automated job hunting: `workana_sniper.py` filters projects with budgets >= 500 BRL and < 15 active bids in GTM/CAPI categories to secure low-competition elite contracts. `indeed_farmer.py` coordinates Playwright CDP sessions to monitor and target easy-apply SDR/Tech vacancies, routing tailored pitches.
+                        </p>
+                        <!-- Radar list visualization -->
+                        <div class="bg-black/40 border border-gray-900 rounded-lg p-3 text-[10px] font-mono space-y-1 text-gray-400">
+                            <div class="flex justify-between"><span>Workana filter threshold:</span> <span class="text-white font-bold">&gt;= 500 BRL, &lt;= 15 Bids</span></div>
+                            <div class="flex justify-between"><span>Indeed active keywords:</span> <span class="text-white font-bold">SDR, Analyst, GTM, CAPI</span></div>
+                            <div class="flex justify-between"><span>Response pitch routing:</span> <span class="text-primary font-bold">Microsoft/Google credentials pitch</span></div>
+                        </div>
+                    </div>
+
+                    <div id="content-6-specs" class="tab-content-6 hidden">
+                        <div class="space-y-2 text-xs font-mono text-gray-400">
+                            <div><span class="text-white font-bold">RADAR CLASS:</span> Market Scrapers & Automated SDR Pitches</div>
+                            <div><span class="text-white font-bold">CORE STACK:</span> Selenium WebDriver / Playwright CDP / headless Chrome</div>
+                            <div><span class="text-white font-bold">FILTERS APPLIED:</span> Low-Competition (bids <= 15) & Budget Thresholds</div>
+                            <div><span class="text-white font-bold">LOCAL TARGETS:</span></div>
+                            <ul class="list-disc list-inside pl-2 space-y-1">
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/freelancer/workana_sniper.py" class="text-primary hover:underline font-bold">workana_sniper.py</a></li>
+                                <li><a href="file:///c:/Users/99196/OneDrive/Documentos/freelancer/indeed_farmer.py" class="text-primary hover:underline font-bold">indeed_farmer.py</a></li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div id="content-6-code" class="tab-content-6 hidden">
+                        <div class="bg-black/60 rounded-lg p-3 border border-gray-800 font-mono text-[10px] text-green-400 overflow-x-auto">
+                            <pre><code># Selenium Workana sniper elite targets parser
+if budget_value >= 500.0 and bids_count <= 15:
+    elite_targets.append({
+        'title': project_title,
+        'budget': budget_str,
+        'link': project_link
+    })</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 pt-4 border-t border-gray-800/60 flex justify-between items-center text-xs">
+                    <span class="text-gray-500 font-mono">STATUS: OPERATIONAL</span>
+                    <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20quero%20conversar%20sobre%20monitoramento%20e%20radares%20de%20vagas%20de%20alta%20relev%C3%A2ncia." target="_blank" class="text-primary font-bold hover:underline translate-target" data-en="Discuss Radars" data-pt="Discutir Radares">Discuss Radars</a>
+                </div>
+            </div>
+
+        </div>
+
     </main>
 
-    <footer class="py-12 text-center border-t border-gray-800 mt-16">
-        <h3 class="text-2xl font-bold text-white mb-4 translate-target" data-en="Ready to Scale Your Project?" data-pt="Pronto para Escalar seu Projeto?">Ready to Scale Your Project?</h3>
-        <p class="text-gray-400 mb-8 translate-target" data-en="Currently accepting select performance-driven partnerships for 2026." data-pt="Atualmente aceitando parcerias selecionadas orientadas a performance para 2026.">Currently accepting select performance-driven partnerships for 2026.</p>
-        <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20o%20seu%20portf%C3%B3lio%20de%20cases%20e%20quero%20agendar%20uma%20Auditoria%20de%20Rastreamento%20gratuita." target="_blank" class="no-print inline-block px-8 py-3 bg-primary text-white font-bold rounded-full hover:bg-orange-600 shadow-[0_0_15px_rgba(226,91,34,0.3)] hover:shadow-[0_0_25px_rgba(226,91,34,0.6)] transform hover:-translate-y-1 transition-all duration-300 translate-target" data-en="Schedule Tracking Audit" data-pt="Agendar Auditoria de Rastreamento" data-href-en="https://wa.me/5543991652706?text=Hi%20Diego%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20schedule%20a%20Tracking%20Audit%20for%20my%20business." data-href-pt="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20o%20seu%20portf%C3%B3lio%20de%20cases%20e%20quero%20agendar%20uma%20Auditoria%20de%20Rastreamento%20gratuita.">Schedule Tracking Audit</a>
-            <a href="#" class="no-print inline-block px-8 py-3 bg-gray-800 hover:bg-gray-700 text-white font-bold rounded-full border border-gray-700 transform hover:-translate-y-1 transition-all duration-300 translate-target" data-en="Download PDF" data-pt="Baixar PDF">Download PDF</a>
+    <!-- Footer Section -->
+    <footer class="py-16 text-center border-t border-gray-900 bg-gray-950/20 mt-20">
+        <div class="max-w-4xl mx-auto px-6">
+            <h3 class="text-2xl font-bold text-white mb-4 translate-target" data-en="Ready to Audit Your Tracking Pipeline?" data-pt="Pronto para Auditar seu Fluxo de Rastreamento?">Ready to Audit Your Tracking Pipeline?</h3>
+            <p class="text-gray-400 mb-8 max-w-xl mx-auto text-sm translate-target" data-en="Stop conversions leakages and feed Google and Meta algorithms with bulletproof first-party data. Now scheduling data audits for 2026." data-pt="Estanque vazamentos de conversão e alimente os algoritmos do Google e Meta com dados first-party blindados. Agendando auditorias de dados para 2026.">Stop conversions leakages and feed Google and Meta algorithms with bulletproof first-party data. Now scheduling data audits for 2026.</p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20o%20seu%20portf%C3%B3lio%20de%20cases%20e%20quero%20agendar%20uma%20Auditoria%20de%20Rastreamento%20gratuita." target="_blank" class="no-print inline-block px-8 py-3.5 bg-primary text-white font-extrabold text-sm rounded-full hover:bg-orange-600 shadow-[0_0_15px_rgba(226,91,34,0.3)] hover:shadow-[0_0_25px_rgba(226,91,34,0.5)] transform hover:-translate-y-0.5 transition-all duration-300 translate-target" data-en="Schedule Free Audit" data-pt="Agendar Auditoria de Rastreamento" data-href-en="https://wa.me/5543991652706?text=Hi%20Diego%2C%20I%20saw%20your%20portfolio%20and%20would%20like%20to%20schedule%20a%20Tracking%20Audit%20for%20my%20business." data-href-pt="https://wa.me/5543991652706?text=Ol%C3%A1%20Diego%2C%20vi%20o%20seu%20portf%C3%B3lio%20de%20cases%20e%20quero%20agendar%20uma%20Auditoria%20de%20Rastreamento%20gratuita.">Schedule Free Audit</a>
+                <a href="file:///c:/Users/99196/OneDrive/Documentos/Diego_Santos_Growth_Engineer.pdf" class="no-print inline-block px-8 py-3.5 bg-gray-900 hover:bg-gray-800 text-white font-bold text-sm rounded-full border border-gray-800 transform hover:-translate-y-0.5 transition-all duration-300 translate-target" data-en="Open CV (PDF)" data-pt="Abrir Currículo (PDF)">Open CV (PDF)</a>
+            </div>
+            <p class="text-xs text-gray-600 mt-12 font-mono">DIEGO SANTOS © 2026. ALL RIGHTS SECURED UNDER FIRST-PARTY TELEMETRY.</p>
         </div>
     </footer>
 
+    <!-- Interactive JS Functionality -->
     <script>
+        // Language Switcher Logic
         let currentLang = "en";
         const langToggleBtn = document.getElementById("langToggle");
         const langLabel = document.getElementById("langLabel");
@@ -521,10 +682,10 @@ response = gemini.generate_content({
         function updateTexts() {
             textElements.forEach(el => {
                 if (currentLang === "en") {
-                    if (el.dataset.en) el.innerText = el.dataset.en;
+                    if (el.dataset.en) el.innerHTML = el.dataset.en;
                     if (el.dataset.hrefEn) el.setAttribute("href", el.dataset.hrefEn);
                 } else if (currentLang === "pt") {
-                    if (el.dataset.pt) el.innerText = el.dataset.pt;
+                    if (el.dataset.pt) el.innerHTML = el.dataset.pt;
                     if (el.dataset.hrefPt) el.setAttribute("href", el.dataset.hrefPt);
                 }
             });
@@ -536,7 +697,29 @@ response = gemini.generate_content({
             updateTexts();
         });
 
+        // Initialize Languages
         updateTexts();
+
+        // Card Tab Switcher Logic
+        function switchTab(caseNum, tabName) {
+            // Hide all tab panels for this case
+            document.querySelectorAll(`.tab-content-${caseNum}`).forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            // Reset state on all buttons for this case
+            document.querySelectorAll(`.tab-btn-${caseNum}`).forEach(el => {
+                el.classList.remove('border-primary', 'text-white');
+                el.classList.add('border-transparent', 'text-gray-400');
+            });
+            
+            // Show target panel
+            document.getElementById(`content-${caseNum}-${tabName}`).classList.remove('hidden');
+            document.getElementById(`content-${caseNum}-${tabName}`).classList.add('block');
+            // Highlight target button
+            document.getElementById(`tab-${caseNum}-${tabName}`).classList.remove('border-transparent', 'text-gray-400');
+            document.getElementById(`tab-${caseNum}-${tabName}`).classList.add('border-primary', 'text-white');
+        }
     </script>
 </body>
 </html>
