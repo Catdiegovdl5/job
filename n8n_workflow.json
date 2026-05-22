@@ -1,5 +1,5 @@
 {
-  "name": "B2B Lead Triage Pipeline",
+  "name": "B2B Lead Triage Pipeline (Silent)",
   "nodes": [
     {
       "parameters": {
@@ -19,46 +19,44 @@
     },
     {
       "parameters": {
-        "dataType": "string",
-        "value1": "={{ $json.status_qualificacao }}",
-        "rules": {
-          "rules": [
-            {
-              "value2": "QUALIFICADO"
-            },
-            {
-              "value2": "NAO_QUALIFICADO"
-            }
-          ]
-        }
-      },
-      "id": "e98e986a-72ef-4573-b3c1-b0db4d2c8be3",
-      "name": "Switch",
-      "type": "n8n-nodes-base.switch",
-      "typeVersion": 1,
-      "position": [
-        480,
-        300
-      ]
-    },
-    {
-      "parameters": {
-        "chatId": "1501131002",
-        "text": "=⚡ [TELEMETRIA DE FUNIL] ⚡\nSTATUS: {{ $json.status_qualificacao }}\n\n👤 Nome: {{ $json.contato.nome }}\n🌐 URL: {{ $json.contato.site }}\n📱 Zap: {{ $json.contato.whatsapp }}\n\n📊 Faturamento: {{ $json.dados_empresa.faturamento }}\n📈 Ads Spend: {{ $json.dados_empresa.investimento_anuncios }}\n🛠️ Gargalo: {{ $json.dados_empresa.gargalo_principal }}",
-        "additionalFields": {}
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "placeholder-google-sheet-id",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Nome": "={{ $json.contato.nome }}",
+            "WhatsApp": "={{ $json.contato.whatsapp }}",
+            "E-mail": "={{ $json.contato.email }}",
+            "Faturamento": "={{ $json.dados_empresa.faturamento }}",
+            "Investimento": "={{ $json.dados_empresa.investimento_anuncios }}",
+            "Status": "={{ $json.status_qualificacao }}",
+            "Data/Hora": "={{ $json.timestamp }}"
+          },
+          "matchingColumns": []
+        },
+        "options": {}
       },
       "id": "4b684bc2-8921-4fa3-94c6-2c5e52c8bd6b",
-      "name": "Telegram (Output)",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.1,
+      "name": "Google Sheets (Data Sink)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
       "position": [
-        720,
+        500,
         300
       ],
       "credentials": {
-        "telegramApi": {
-          "id": "telegram-bot-cred-placeholder",
-          "name": "Telegram @mira262005_bot"
+        "googleSheetsOAuth2Api": {
+          "id": "google-sheets-cred-placeholder",
+          "name": "Google Sheets Connection"
         }
       }
     }
@@ -68,25 +66,7 @@
       "main": [
         [
           {
-            "node": "Switch",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Switch": {
-      "main": [
-        [
-          {
-            "node": "Telegram (Output)",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Telegram (Output)",
+            "node": "Google Sheets (Data Sink)",
             "type": "main",
             "index": 0
           }
