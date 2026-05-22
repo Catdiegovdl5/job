@@ -1273,19 +1273,35 @@ if budget_value >= 500.0 and bids_count <= 15:
                 }
             };
 
-            // CONFIGURAÇÃO DE SEGURANÇA E NOTIFICAÇÃO
-            // Para evitar expor o token do seu bot e garantir que NENHUM dado de cliente vaze ou seja perdido:
-            // 1. Crie um Google Apps Script e publique como Web App.
-            // 2. Substitua 'DIRECT_TELEGRAM' abaixo pela URL gerada pelo Google (ex: https://script.google.com/macros/s/.../exec).
+            // CONFIGURAÇÃO DE SEGURANÇA E NOTIFICAÇÃO (100% GRATUITO E SEGURO)
+            // Para não expor seu token do Telegram no navegador e salvar os dados em uma Planilha Google:
+            // 1. Crie uma Planilha Google, vá em Extensões > Apps Script.
+            // 2. Cole o código fornecido no repositório (com o token e chat_id protegidos no servidor do Google).
+            // 3. Publique como Web App (Executar como "Eu", Acesso "Qualquer um").
+            // 4. Substitua a URL abaixo pelo link gerado (ex: https://script.google.com/macros/s/.../exec).
             const CONFIG = {
-                webhookUrl: 'DIRECT_TELEGRAM', 
-                telegramBotToken: '7724330024:AAFtoSLgXVDlvNmeyPCVMnkWIqbk4wvLSVg',
+                webhookUrl: '', // Insira a URL do seu Google Apps Script aqui para ficar 100% seguro!
+                
+                // Mantenha os campos abaixo vazios no código público. Use apenas localmente se necessário.
+                telegramBotToken: '', 
                 telegramChatId: '1501131002'
             };
 
             const statusTelemetria = isQualified ? "QUALIFICADO" : "NÃO QUALIFICADO (LOW-TIER)";
 
-            if (CONFIG.webhookUrl === 'DIRECT_TELEGRAM') {
+            if (CONFIG.webhookUrl) {
+                // Envio seguro para o intermediário Google Apps Script (Não expõe o token e salva na planilha)
+                fetch(CONFIG.webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                }).catch(err => {
+                    console.warn('Erro ao enviar dados para o gateway seguro:', err);
+                });
+            } else if (CONFIG.telegramBotToken) {
                 const telegramMessage = `⚡ [TELEMETRIA DE FUNIL] ⚡\n` +
                     `STATUS: ${statusTelemetria}\n\n` +
                     `👤 Nome: ${name}\n` +
@@ -1296,7 +1312,7 @@ if budget_value >= 500.0 and bids_count <= 15:
                     `📈 Ads Spend: ${investimento}\n` +
                     `🛠️ Gargalo: ${gargalo}`;
 
-                // Disparo direto em background para o Telegram (Útil para testes, mas expõe o token)
+                // Disparo direto em background para o Telegram (Exposto - Apenas para testes!)
                 fetch(`https://api.telegram.org/bot${CONFIG.telegramBotToken}/sendMessage`, {
                     method: 'POST',
                     headers: {
@@ -1310,17 +1326,7 @@ if budget_value >= 500.0 and bids_count <= 15:
                     console.warn('Erro ao enviar dados para o Telegram:', err);
                 });
             } else {
-                // Envio seguro para o intermediário Google Apps Script (Não expõe o token e salva na planilha)
-                fetch(CONFIG.webhookUrl, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
-                }).catch(err => {
-                    console.warn('Erro ao enviar dados para o gateway seguro:', err);
-                });
+                console.warn('Configuração de telemetria ausente. Insira o webhookUrl do seu Apps Script no arquivo index.html.');
             }
 
             if (isQualified) {
