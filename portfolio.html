@@ -1273,35 +1273,55 @@ if budget_value >= 500.0 and bids_count <= 15:
                 }
             };
 
-            // Configuração direta do Telegram (Sem n8n)
-            const TELEGRAM_BOT_TOKEN = '7724330024:AAFtoSLgXVDlvNmeyPCVMnkWIqbk4wvLSVg';
-            const TELEGRAM_CHAT_ID = '1501131002';
+            // CONFIGURAÇÃO DE SEGURANÇA E NOTIFICAÇÃO
+            // Para evitar expor o token do seu bot e garantir que NENHUM dado de cliente vaze ou seja perdido:
+            // 1. Crie um Google Apps Script e publique como Web App.
+            // 2. Substitua 'DIRECT_TELEGRAM' abaixo pela URL gerada pelo Google (ex: https://script.google.com/macros/s/.../exec).
+            const CONFIG = {
+                webhookUrl: 'DIRECT_TELEGRAM', 
+                telegramBotToken: '7724330024:AAFtoSLgXVDlvNmeyPCVMnkWIqbk4wvLSVg',
+                telegramChatId: '1501131002'
+            };
 
             const statusTelemetria = isQualified ? "QUALIFICADO" : "NÃO QUALIFICADO (LOW-TIER)";
 
-            const telegramMessage = `⚡ [TELEMETRIA DE FUNIL] ⚡\n` +
-                `STATUS: ${statusTelemetria}\n\n` +
-                `👤 Nome: ${name}\n` +
-                `📧 Email: ${email}\n` +
-                `🌐 URL: ${website}\n` +
-                `📱 Zap: ${whatsapp}\n\n` +
-                `📊 Faturamento: ${faturamento}\n` +
-                `📈 Ads Spend: ${investimento}\n` +
-                `🛠️ Gargalo: ${gargalo}`;
+            if (CONFIG.webhookUrl === 'DIRECT_TELEGRAM') {
+                const telegramMessage = `⚡ [TELEMETRIA DE FUNIL] ⚡\n` +
+                    `STATUS: ${statusTelemetria}\n\n` +
+                    `👤 Nome: ${name}\n` +
+                    `📧 Email: ${email}\n` +
+                    `🌐 URL: ${website}\n` +
+                    `📱 Zap: ${whatsapp}\n\n` +
+                    `📊 Faturamento: ${faturamento}\n` +
+                    `📈 Ads Spend: ${investimento}\n` +
+                    `🛠️ Gargalo: ${gargalo}`;
 
-            // Disparo direto em background para o Telegram
-            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    chat_id: TELEGRAM_CHAT_ID,
-                    text: telegramMessage
-                })
-            }).catch(err => {
-                console.warn('Erro ao enviar dados para o Telegram:', err);
-            });
+                // Disparo direto em background para o Telegram (Útil para testes, mas expõe o token)
+                fetch(`https://api.telegram.org/bot${CONFIG.telegramBotToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        chat_id: CONFIG.telegramChatId,
+                        text: telegramMessage
+                    })
+                }).catch(err => {
+                    console.warn('Erro ao enviar dados para o Telegram:', err);
+                });
+            } else {
+                // Envio seguro para o intermediário Google Apps Script (Não expõe o token e salva na planilha)
+                fetch(CONFIG.webhookUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                }).catch(err => {
+                    console.warn('Erro ao enviar dados para o gateway seguro:', err);
+                });
+            }
 
             if (isQualified) {
                 // Qualified payload structure for system log style WhatsApp message
