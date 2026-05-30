@@ -20,28 +20,59 @@
             }
         }
     </script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <style>
-        body { background-color: #06070B; color: #E5E7EB; }
-        .glass-panel { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); backdrop-filter: blur(12px); }
-        .text-glow { text-shadow: 0 0 10px rgba(226, 91, 34, 0.25); }
-        .border-glow:hover { border-color: rgba(226, 91, 34, 0.3); box-shadow: 0 0 15px rgba(226, 91, 34, 0.1); }
+        body { background-color: #000000; color: #E5E7EB; margin: 0; min-height: 100vh; position: relative; overflow-x: hidden; }
+        
+        /* Antigravity Dynamic Background Glow */
+        #glow-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: -2;
+            background: radial-gradient(circle 800px at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(226, 91, 34, 0.12), transparent 80%);
+            transition: background 0.1s ease;
+        }
+
+        /* Noise Texture */
+        #noise-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: -1; opacity: 0.05;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Premium Vercel/Stripe Glassmorphism */
+        .glass-panel { 
+            background: rgba(10, 10, 10, 0.65); 
+            border: 1px solid rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(24px); 
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+        
+        .text-glow { text-shadow: 0 0 20px rgba(226, 91, 34, 0.5); }
+        .border-glow { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+        .border-glow:hover { border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 0 30px rgba(226, 91, 34, 0.15); transform: translateY(-3px); }
         
         /* Custom scrollbar for terminals */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-        ::-webkit-scrollbar-thumb { background: rgba(226, 91, 34, 0.3); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(226, 91, 34, 0.6); }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.8); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(226, 91, 34, 0.8); }
 
         @media print {
             .no-print { display: none !important; }
             body { background-color: #ffffff; color: #000000; }
-            .glass-panel { background: none; border: 1px solid #ccc; filter: none; }
+            .glass-panel { background: none; border: 1px solid #ccc; filter: none; transform: none !important; }
             .text-white { color: #000000 !important; }
             .text-gray-400, .text-gray-300 { color: #333333 !important; }
+            #glow-bg, #noise-bg { display: none; }
         }
     </style>
 </head>
 <body class="antialiased min-h-screen selection:bg-primary selection:text-white">
+    <!-- Efeitos de Fundo (Antigravity & Noise) -->
+    <div id="glow-bg"></div>
+    <div id="noise-bg"></div>
 
     <!-- Header Section -->
     <header class="border-b border-gray-800/80 bg-[#06070B]/90 sticky top-0 z-50 backdrop-blur-md">
@@ -1537,6 +1568,43 @@ def match_markets(kalshi_data, poly_data):
             document.getElementById(`tab-${caseNum}-${tabName}`).classList.remove('border-transparent', 'text-gray-400');
             document.getElementById(`tab-${caseNum}-${tabName}`).classList.add('border-primary', 'text-white');
         }
+        // --------------------------------------------------------
+        // NOVO DESIGN PREMIUM: Antigravity Glow & Animações 3D
+        // --------------------------------------------------------
+        
+        // 1. Antigravity Mouse Glow Effect
+        document.addEventListener("mousemove", (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            document.documentElement.style.setProperty('--mouse-x', `${x}px`);
+            document.documentElement.style.setProperty('--mouse-y', `${y}px`);
+        });
+
+        // 2. Aplicar animações do AOS dinamicamente
+        document.querySelector('header.max-w-5xl').setAttribute('data-aos', 'fade-up');
+        document.querySelectorAll('.glass-panel').forEach((el, index) => {
+            el.setAttribute('data-aos', 'fade-up');
+            el.setAttribute('data-aos-delay', (index % 3) * 100);
+            
+            // 3. Aplicar efeito 3D (Tilt) nos cartões de projetos (excluir modais)
+            if(!el.closest('.fixed')) {
+                el.setAttribute('data-tilt', '');
+                el.setAttribute('data-tilt-max', '2');
+                el.setAttribute('data-tilt-speed', '400');
+                el.setAttribute('data-tilt-glare', 'true');
+                el.setAttribute('data-tilt-max-glare', '0.05');
+            }
+        });
     </script>
+    <!-- Bibliotecas de Animação -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ 
+            duration: 800, 
+            once: true,
+            offset: 50 
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
 </body>
 </html>
