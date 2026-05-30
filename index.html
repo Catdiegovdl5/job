@@ -197,6 +197,82 @@
             </div>
         </header>
 
+        <!-- Interative ROAS / Attribution Loss Calculator -->
+        <div class="glass-panel rounded-2xl p-6 lg:p-8 mb-16 no-print border-glow relative overflow-hidden" data-aos="fade-up">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none -translate-y-1/2 translate-x-1/3"></div>
+            
+            <div class="flex flex-col lg:flex-row gap-8 items-center">
+                
+                <!-- Left Side: Inputs -->
+                <div class="w-full lg:w-1/2 z-10">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 rounded bg-primary/20 flex items-center justify-center border border-primary/30 shadow-[0_0_15px_rgba(16,185,129,0.2)]">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-white translate-target" data-en="Tracking Loss Calculator" data-pt="Calculadora de Vazamento de ROAS">Tracking Loss Calculator</h3>
+                    </div>
+                    
+                    <p class="text-sm text-gray-400 mb-6 translate-target" data-en="Input your current monthly ad spend to see how much revenue you are losing due to iOS14+ restrictions and missing server-side events." data-pt="Insira seu investimento mensal em tráfego para ver quanto faturamento você está perdendo devido ao bloqueio do iOS14 e falta de Server-Side Tracking.">
+                        Input your current monthly ad spend to see how much revenue you are losing due to iOS14+ restrictions and missing server-side events.
+                    </p>
+
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-mono text-gray-300 translate-target" data-en="Monthly Ad Spend (R$)" data-pt="Investimento Mensal (R$)">Monthly Ad Spend (R$)</label>
+                                <span class="text-xs font-mono text-primary font-bold" id="val-spend">R$ 50.000</span>
+                            </div>
+                            <input type="range" id="input-spend" min="5000" max="500000" step="5000" value="50000" class="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-primary">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-2">
+                                <label class="text-xs font-mono text-gray-300 translate-target" data-en="Current ROAS" data-pt="ROAS Atual">Current ROAS</label>
+                                <span class="text-xs font-mono text-primary font-bold" id="val-roas">3.0x</span>
+                            </div>
+                            <input type="range" id="input-roas" min="1" max="10" step="0.5" value="3.0" class="w-full h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer accent-primary">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Outputs -->
+                <div class="w-full lg:w-1/2 bg-[#000000]/50 rounded-xl p-6 border border-gray-800/80 z-10 shadow-inner">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Box 1 -->
+                        <div class="bg-red-500/5 border border-red-500/20 rounded-lg p-4">
+                            <span class="text-[10px] uppercase font-mono text-red-400 tracking-wider flex items-center gap-2 mb-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                <span class="translate-target" data-en="Untracked Revenue" data-pt="Faturamento Perdido">Untracked Revenue</span>
+                            </span>
+                            <div class="text-2xl font-bold text-white tracking-tight" id="out-lost">R$ 45.000</div>
+                            <div class="text-[10px] text-gray-500 mt-1 translate-target" data-en="~30% invisible to Pixel" data-pt="~30% invisível ao Pixel">~30% invisible to Pixel</div>
+                        </div>
+                        
+                        <!-- Box 2 -->
+                        <div class="bg-primary/5 border border-primary/20 rounded-lg p-4 relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-gradient-to-r from-transparent via-primary/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+                            <span class="text-[10px] uppercase font-mono text-primary tracking-wider flex items-center gap-2 mb-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                <span class="translate-target" data-en="Potential Recovery" data-pt="Recuperação Potencial">Potential Recovery</span>
+                            </span>
+                            <div class="text-2xl font-bold text-white text-glow tracking-tight" id="out-recovered">R$ 38.250</div>
+                            <div class="text-[10px] text-primary/70 mt-1 translate-target" data-en="With Server-Side API" data-pt="Com API Server-Side">With Server-Side API</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-6 border-t border-gray-800/80">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <span class="text-xs font-mono text-gray-400 block mb-1 translate-target" data-en="True ROAS (Projected)" data-pt="ROAS Real (Projetado)">True ROAS (Projected)</span>
+                                <div class="text-3xl font-extrabold text-white" id="out-trueroas">3.76x</div>
+                            </div>
+                            <button onclick="openQualifyModal('calculator')" class="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded text-xs font-bold text-white transition-all translate-target cursor-pointer" data-en="Fix Tracking Now" data-pt="Corrigir Tracking Agora">Fix Tracking Now</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
         <!-- Infinite Marquee -->
         <div class="marquee-container no-print mb-16" data-aos="fade-in">
             <div class="marquee-content">
@@ -1763,7 +1839,48 @@ def match_markets(kalshi_data, poly_data):
             }
         }, 800);
 
-        // 3. Aplicar animações do AOS dinamicamente
+        // 3. Calculadora Interativa de ROAS
+        const inputSpend = document.getElementById('input-spend');
+        const inputRoas = document.getElementById('input-roas');
+        const valSpend = document.getElementById('val-spend');
+        const valRoas = document.getElementById('val-roas');
+        const outLost = document.getElementById('out-lost');
+        const outRecovered = document.getElementById('out-recovered');
+        const outTrueRoas = document.getElementById('out-trueroas');
+
+        function formatBRL(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 }).format(value).replace('R$', 'R$ ');
+        }
+
+        function calculateROAS() {
+            if(!inputSpend) return;
+            const spend = parseFloat(inputSpend.value);
+            const roas = parseFloat(inputRoas.value);
+            
+            valSpend.innerText = formatBRL(spend);
+            valRoas.innerText = roas.toFixed(1) + 'x';
+
+            // Assumindo que o ROAS visível é 70% do real (30% perdido para bloqueadores)
+            const visibleRevenue = spend * roas;
+            const trueRevenue = visibleRevenue / 0.70;
+            const lostRevenue = trueRevenue - visibleRevenue;
+            
+            // API de Conversão recupera ~85% desse "blind spot"
+            const recoveredRevenue = lostRevenue * 0.85;
+            const newTrueRoas = (visibleRevenue + recoveredRevenue) / spend;
+
+            outLost.innerText = formatBRL(lostRevenue);
+            outRecovered.innerText = formatBRL(recoveredRevenue);
+            outTrueRoas.innerText = newTrueRoas.toFixed(2) + 'x';
+        }
+
+        if(inputSpend) {
+            inputSpend.addEventListener('input', calculateROAS);
+            inputRoas.addEventListener('input', calculateROAS);
+            calculateROAS(); // Chama na inicialização
+        }
+
+        // 4. Aplicar animações do AOS dinamicamente
         document.querySelector('header.max-w-5xl').setAttribute('data-aos', 'fade-up');
         document.querySelectorAll('.glass-panel').forEach((el, index) => {
             el.setAttribute('data-aos', 'fade-up');
