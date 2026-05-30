@@ -15,7 +15,7 @@
                         sans: ["Outfit", "sans-serif"],
                         mono: ["JetBrains Mono", "monospace"]
                     },
-                    colors: { primary: "#E25B22" }
+                    colors: { primary: "#10B981" }
                 }
             }
         }
@@ -24,12 +24,12 @@
     <style>
         body { background-color: #000000; color: #E5E7EB; margin: 0; min-height: 100vh; position: relative; overflow-x: hidden; }
         
-        /* Antigravity Dynamic Background Glow */
+        /* Antigravity Dynamic Background Glow (Emerald) */
         #glow-bg {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
             pointer-events: none; z-index: -2;
-            background: radial-gradient(circle 800px at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(226, 91, 34, 0.12), transparent 80%);
+            background: radial-gradient(circle 800px at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(16, 185, 129, 0.08), transparent 80%);
             transition: background 0.1s ease;
         }
 
@@ -40,24 +40,44 @@
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* Premium Vercel/Stripe Glassmorphism */
+        /* Premium Vercel/Stripe Glassmorphism (Onyx) */
         .glass-panel { 
-            background: rgba(10, 10, 10, 0.65); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
+            background: rgba(9, 9, 11, 0.7); 
+            border: 1px solid rgba(255, 255, 255, 0.06); 
             backdrop-filter: blur(24px); 
             -webkit-backdrop-filter: blur(24px);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
         
-        .text-glow { text-shadow: 0 0 20px rgba(226, 91, 34, 0.5); }
+        .text-glow { text-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
         .border-glow { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .border-glow:hover { border-color: rgba(255, 255, 255, 0.25); box-shadow: 0 0 30px rgba(226, 91, 34, 0.15); transform: translateY(-3px); }
+        .border-glow:hover { border-color: rgba(16, 185, 129, 0.4); box-shadow: 0 0 30px rgba(16, 185, 129, 0.15); transform: translateY(-3px); }
         
-        /* Custom scrollbar for terminals */
+        /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: rgba(0,0,0,0.8); }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(226, 91, 34, 0.8); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.8); }
+
+        /* Custom Magnetic Cursor */
+        .custom-cursor {
+            position: fixed;
+            top: 0; left: 0;
+            width: 30px; height: 30px;
+            border: 1px solid rgba(16, 185, 129, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s, height 0.3s, background-color 0.3s;
+            mix-blend-mode: screen;
+        }
+        .custom-cursor.hovering {
+            width: 60px; height: 60px;
+            background-color: rgba(16, 185, 129, 0.1);
+            border-color: rgba(16, 185, 129, 0.5);
+        }
+        @media (pointer: coarse) { .custom-cursor { display: none; } }
 
         @media print {
             .no-print { display: none !important; }
@@ -69,7 +89,10 @@
         }
     </style>
 </head>
-<body class="antialiased min-h-screen selection:bg-primary selection:text-white">
+<body class="antialiased min-h-screen selection:bg-primary selection:text-white cursor-none">
+    <!-- Custom Cursor -->
+    <div class="custom-cursor" id="custom-cursor"></div>
+    
     <!-- Efeitos de Fundo (Antigravity & Noise) -->
     <div id="glow-bg"></div>
     <div id="noise-bg"></div>
@@ -101,7 +124,7 @@
                 Data Infrastructure & Growth Architecture
             </div>
             
-            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-6 leading-tight tracking-tight scramble-target">
                 <span class="translate-target" data-en="Conversion Funnel &" data-pt="Funil de Conversão &">Conversion Funnel &</span> <span class="text-primary text-glow translate-target" data-en="Bulletproof Tracking Architect" data-pt="Arquiteto de Rastreamento Blindado">Bulletproof Tracking Architect</span>
             </h1>
             
@@ -1572,15 +1595,96 @@ def match_markets(kalshi_data, poly_data):
         // NOVO DESIGN PREMIUM: Antigravity Glow & Animações 3D
         // --------------------------------------------------------
         
-        // 1. Antigravity Mouse Glow Effect
+        // 1. Antigravity Mouse Glow Effect & Custom Cursor
+        const cursor = document.getElementById('custom-cursor');
         document.addEventListener("mousemove", (e) => {
             const x = e.clientX;
             const y = e.clientY;
             document.documentElement.style.setProperty('--mouse-x', `${x}px`);
             document.documentElement.style.setProperty('--mouse-y', `${y}px`);
+            
+            if(cursor) {
+                cursor.style.left = `${x}px`;
+                cursor.style.top = `${y}px`;
+            }
         });
 
-        // 2. Aplicar animações do AOS dinamicamente
+        // Efeito Magnético no Hover
+        document.querySelectorAll('a, button, .border-glow').forEach(el => {
+            el.addEventListener('mouseenter', () => cursor?.classList.add('hovering'));
+            el.addEventListener('mouseleave', () => cursor?.classList.remove('hovering'));
+        });
+
+        // 2. Efeito Text Scramble (Decodificador Hacker)
+        class TextScramble {
+            constructor(el) {
+                this.el = el;
+                this.chars = '!<>-_\\\\/[]{}—=+*^?#________';
+                this.update = this.update.bind(this);
+            }
+            setText(newText) {
+                const oldText = this.el.innerText;
+                const length = Math.max(oldText.length, newText.length);
+                const promise = new Promise((resolve) => this.resolve = resolve);
+                this.queue = [];
+                for (let i = 0; i < length; i++) {
+                    const from = oldText[i] || '';
+                    const to = newText[i] || '';
+                    const start = Math.floor(Math.random() * 40);
+                    const end = start + Math.floor(Math.random() * 40);
+                    this.queue.push({ from, to, start, end });
+                }
+                cancelAnimationFrame(this.frameRequest);
+                this.frame = 0;
+                this.update();
+                return promise;
+            }
+            update() {
+                let output = '';
+                let complete = 0;
+                for (let i = 0, n = this.queue.length; i < n; i++) {
+                    let { from, to, start, end, char } = this.queue[i];
+                    if (this.frame >= end) {
+                        complete++;
+                        output += to;
+                    } else if (this.frame >= start) {
+                        if (!char || Math.random() < 0.28) {
+                            char = this.randomChar();
+                            this.queue[i].char = char;
+                        }
+                        output += `<span class="text-primary opacity-70">${char}</span>`;
+                    } else {
+                        output += from;
+                    }
+                }
+                this.el.innerHTML = output;
+                if (complete === this.queue.length) {
+                    this.resolve();
+                } else {
+                    this.frameRequest = requestAnimationFrame(this.update);
+                    this.frame++;
+                }
+            }
+            randomChar() {
+                return this.chars[Math.floor(Math.random() * this.chars.length)];
+            }
+        }
+
+        // Aplicar Scramble
+        setTimeout(() => {
+            const heroTitle = document.querySelector('.scramble-target');
+            if(heroTitle) {
+                const originalHTML = heroTitle.innerHTML;
+                const originalText = heroTitle.innerText;
+                heroTitle.innerHTML = '';
+                const fx = new TextScramble(heroTitle);
+                fx.setText(originalText).then(() => {
+                    heroTitle.innerHTML = originalHTML; // Restaura os spans coloridos
+                });
+            }
+        }, 800);
+
+        // 3. Aplicar animações do AOS dinamicamente
         document.querySelector('header.max-w-5xl').setAttribute('data-aos', 'fade-up');
         document.querySelectorAll('.glass-panel').forEach((el, index) => {
             el.setAttribute('data-aos', 'fade-up');
