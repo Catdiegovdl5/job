@@ -8,21 +8,15 @@
  * 1. Abra sua planilha Google Sheets (ou crie uma nova).
  * 2. Vá em: Extensões > Apps Script
  * 3. Cole TODO este código substituindo o código padrão.
- * 4. Preencha as configurações abaixo (TELEGRAM_BOT_TOKEN).
- * 5. Salve (Ctrl+S) e clique em "Implantar" > "Nova Implantação".
- * 6. Tipo: "App da Web". Executar como: "Eu". Acesso: "Qualquer pessoa".
- * 7. Copie a URL gerada e cole no index.html em CONFIG.webhookUrl.
- *
- * SEGURANÇA: O token do Telegram fica APENAS no servidor do Google.
- * O código público do portfólio nunca expõe credenciais.
+ * 4. Salve (Ctrl+S) e clique em "Implantar" > "Nova Implantação".
+ * 5. Tipo: "App da Web". Executar como: "Eu". Acesso: "Qualquer pessoa".
+ * 6. Copie a URL gerada e cole no index.html em CONFIG.webhookUrl.
  * =======================================================================
  */
 
 // =====================================================================
 // CONFIGURAÇÕES — PREENCHA AQUI
 // =====================================================================
-const TELEGRAM_BOT_TOKEN = '7724330024:AAFtoSLgXVDlvNmeyPCVMnkWIqbk4wvLSVg'; // @mira262005_bot
-const TELEGRAM_CHAT_ID   = '1501131002';      // Seu chat_id já configurado
 const SHEET_NAME         = 'Leads';           // Nome da aba na planilha
 
 // =====================================================================
@@ -40,9 +34,6 @@ function doPost(e) {
 
     // Salva na planilha
     saveToSheet(payload);
-
-    // Envia notificação no Telegram
-    sendTelegramNotification(payload);
 
     return buildResponse(true, 'Lead processado com sucesso!');
 
@@ -143,71 +134,7 @@ function saveToSheet(payload) {
   console.log('Lead salvo na planilha com sucesso:', nome);
 }
 
-// =====================================================================
-// ENVIAR NOTIFICAÇÃO VIA TELEGRAM
-// =====================================================================
-function sendTelegramNotification(payload) {
-  if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN === 'SEU_TOKEN_AQUI') {
-    console.warn('Token do Telegram não configurado. Configure TELEGRAM_BOT_TOKEN.');
-    return;
-  }
 
-  const status      = payload.status_qualificacao || 'N/A';
-  const nome        = payload.contato?.nome || '(sem nome)';
-  const email       = payload.contato?.email || '(sem email)';
-  const whatsapp    = payload.contato?.whatsapp || '(sem WhatsApp)';
-  const site        = payload.contato?.site || '(sem site)';
-  const faturamento = payload.dados_empresa?.faturamento || 'N/A';
-  const investimento= payload.dados_empresa?.investimento_anuncios || 'N/A';
-  const gargalo     = payload.dados_empresa?.gargalo_principal || 'N/A';
-  const agora       = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-
-  // Ícone e título baseado no status
-  const iconeStatus    = status === 'QUALIFICADO' ? '🟢✅' : '🟡⚠️';
-  const tituloStatus   = status === 'QUALIFICADO'
-    ? '🔥 LEAD QUALIFICADO — ACIONAR AGORA!'
-    : '📋 Lead Registrado (Low-Tier)';
-
-  const mensagem = `${iconeStatus} *${tituloStatus}*\n\n` +
-    `⏰ *Horário:* ${agora}\n` +
-    `📊 *STATUS:* \`${status}\`\n\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n` +
-    `👤 *Nome:* ${nome}\n` +
-    `📧 *Email:* ${email}\n` +
-    `📱 *WhatsApp:* ${whatsapp}\n` +
-    `🌐 *Site:* ${site}\n\n` +
-    `━━━━━━━━━━━━━━━━━━━━\n` +
-    `💰 *Faturamento:* ${faturamento}\n` +
-    `📈 *Investimento Ads:* ${investimento}\n` +
-    `🛠️ *Gargalo:* ${gargalo}\n\n` +
-    `📝 _Lead salvo automaticamente no Google Sheets._`;
-
-  const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-
-  const options = {
-    method: 'post',
-    contentType: 'application/json',
-    payload: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
-      text: mensagem,
-      parse_mode: 'Markdown'
-    }),
-    muteHttpExceptions: true
-  };
-
-  try {
-    const response = UrlFetchApp.fetch(url, options);
-    const result   = JSON.parse(response.getContentText());
-
-    if (result.ok) {
-      console.log('Notificação Telegram enviada com sucesso!');
-    } else {
-      console.error('Erro Telegram API:', JSON.stringify(result));
-    }
-  } catch (err) {
-    console.error('Erro ao enviar para Telegram:', err.toString());
-  }
-}
 
 // =====================================================================
 // HELPER — Resposta padronizada JSON
