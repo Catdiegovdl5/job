@@ -243,27 +243,8 @@
             .case-item { flex-direction: column; align-items: flex-start; -webkit-mask-image: none; padding: 20px 0; } 
             .case-metric { text-align: left; } 
             .nav-links a { display: none; } 
-            #cursor-pet { display: none !important; }
         }
 
-        /* Black Hole Cursor */
-        #cursor-pet {
-            position: fixed; top: 0; left: 0;
-            width: 45px; height: 45px;
-            border-radius: 50%;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-            backdrop-filter: invert(1) grayscale(1) blur(1px);
-            -webkit-backdrop-filter: invert(1) grayscale(1) blur(1px);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.6), 0 0 8px rgba(0,0,0,0.4);
-            background: radial-gradient(circle, rgba(0,0,0,0.4) 10%, transparent 70%);
-            animation: pulseBlackHole 2s ease-in-out infinite alternate;
-        }
-        @keyframes pulseBlackHole {
-            0% { transform: translate(-50%, -50%) scale(0.9); box-shadow: inset 0 0 5px rgba(0,0,0,0.4), 0 0 5px rgba(0,0,0,0.2); }
-            100% { transform: translate(-50%, -50%) scale(1.1); box-shadow: inset 0 0 15px rgba(0,0,0,0.8), 0 0 15px rgba(0,0,0,0.5); }
-        }
     </style>
 </head>
 <body>
@@ -748,13 +729,13 @@ window.addEventListener('load', () => {
         const ty = tgY + Math.sin(angle) * radius;
         teleportEyes.style.left = `${tx}px`;
         teleportEyes.style.top = `${ty}px`;
-        teleportEyes.style.opacity = Math.random() > 0.1 ? '1' : '0';
+        teleportEyes.style.opacity = Math.random() > 0.6 ? '0.15' : '0'; // Discreto: opacidade 15%, aparece menos vezes
         
         clearTimeout(hideEyeTimeout);
         hideEyeTimeout = setTimeout(() => { 
             if(!isAngry) teleportEyes.style.opacity = '0'; 
-        }, Math.random() * 500 + 800);
-    }, 1500);
+        }, Math.random() * 400 + 400); // Fica menos tempo na tela
+    }, 3000); // Intervalo maior de tentativa de aparição
 
     function updateEyes() {
         eyeElements.forEach(eye => {
@@ -777,24 +758,8 @@ window.addEventListener('load', () => {
         realMx = e.clientX; realMy = e.clientY;
     });
 
-    // Buraco Negro Cursor (Substituindo Aranha)
-    const cursorPet = document.createElement('div');
-    cursorPet.id = 'cursor-pet';
-    document.body.appendChild(cursorPet);
-
-    let petX = W/2, petY = H/2;
-
-    // Cursor Loop for Eyes Tracker & Black Hole
+    // Cursor Loop for Eyes Tracker
     function loopCursor() {
-        let dx = tgX - petX;
-        let dy = tgY - petY;
-        
-        petX += dx * 0.15; // Suavidade magnética do buraco negro
-        petY += dy * 0.15;
-        
-        cursorPet.style.left = `${petX}px`;
-        cursorPet.style.top = `${petY}px`;
-
         updateEyes();
         requestAnimationFrame(loopCursor);
     }
