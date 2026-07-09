@@ -204,33 +204,185 @@
         /* ─────────────────────────────────────────────
            CERTIFICADOS - GRID PESO-PESADO
         ───────────────────────────────────────────── */
-        .terminal-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 50px; }
+        /* ─────────────────────────────────────────────
+           CERTIFICATES 3D CARD SYSTEM
+        ───────────────────────────────────────────── */
+        .terminal-list { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
+            gap: 30px; 
+            margin-top: 50px; 
+            perspective: 1200px;
+        }
+        
+        /* Card wrapper for 3D flip */
+        .cert-card-wrap {
+            perspective: 1000px;
+            min-height: 280px;
+        }
+        
         .term-item { 
             display: flex; flex-direction: column; justify-content: space-between; 
-            padding: 40px; border: 1px solid rgba(255,255,255,0.05); background: rgba(10,10,10,0.6); 
-            transition: all 0.4s cubic-bezier(.25,.46,.45,.94); position: relative; overflow: hidden;
+            padding: 40px; border: 1px solid rgba(255,255,255,0.07);
+            background: linear-gradient(135deg, rgba(10,0,0,0.95) 0%, rgba(20,5,5,0.9) 100%);
+            transition: transform 0.15s ease-out, box-shadow 0.4s ease, border-color 0.4s ease;
+            position: relative; overflow: hidden;
             cursor: pointer;
-            min-height: 260px;
+            min-height: 280px;
+            transform-style: preserve-3d;
+            will-change: transform;
+            border-radius: 2px;
         }
-        .term-item::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,0,0,0.1), transparent); transition: left 0.5s; z-index: 1; }
-        .term-item:hover::before { left: 100%; }
-        .term-item:hover { border-color: var(--blood); box-shadow: 0 10px 40px rgba(255,0,0,0.15), inset 0 0 20px rgba(255,0,0,0.05); transform: translateY(-5px) scale(1.02); background: #050000; z-index: 10; }
         
-        .term-id { font-family: 'Courier New', monospace; color: var(--blood); font-size: 0.85rem; letter-spacing: 0.2em; margin-bottom: 20px; display: inline-block; border-bottom: 1px solid rgba(255,0,0,0.3); padding-bottom: 5px; }
-        .term-title { font-family: var(--f-head); font-size: clamp(1.8rem, 3vw, 2.5rem); line-height: 1.1; color: var(--text-bright); z-index: 2; position: relative; text-transform: uppercase; margin-bottom: 20px; transition: all 0.3s; }
-        .term-item:hover .term-title { text-shadow: 3px 3px 0px rgba(255,0,0,0.6), -3px -3px 0px rgba(0,255,255,0.4); color: #fff; }
+        /* Holographic shimmer overlay */
+        .term-item::before { 
+            content: ''; 
+            position: absolute; inset: 0;
+            background: linear-gradient(
+                105deg,
+                transparent 40%,
+                rgba(255, 0, 0, 0.08) 45%,
+                rgba(255, 100, 100, 0.12) 50%,
+                rgba(255, 0, 60, 0.08) 55%,
+                transparent 60%
+            );
+            background-size: 300% 300%;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .term-item:hover::before { 
+            opacity: 1;
+            animation: holoShimmer 1.5s linear infinite;
+        }
+        @keyframes holoShimmer {
+            0% { background-position: 200% 0%; }
+            100% { background-position: -200% 0%; }
+        }
         
-        .term-item > div:nth-of-type(2) { font-family: 'Courier New', monospace; color: var(--text-dim) !important; font-size: 0.8rem; letter-spacing: 0.1em; z-index: 2; position: relative; margin-top: auto; opacity: 0.6; }
-        .term-item:hover > div:nth-of-type(2) { opacity: 1; color: var(--blood) !important; }
+        /* Scan line effect */
+        .term-item::after {
+            content: '';
+            position: absolute; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(255,0,0,0.6), rgba(255,255,255,0.4), rgba(255,0,0,0.6), transparent);
+            z-index: 2;
+            opacity: 0;
+            top: -2px;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            box-shadow: 0 0 10px rgba(255,0,0,0.8), 0 0 20px rgba(255,0,0,0.4);
+        }
+        .term-item:hover::after {
+            opacity: 1;
+            animation: scanLine 1.2s linear infinite;
+        }
+        @keyframes scanLine {
+            0% { top: -2px; }
+            100% { top: 102%; }
+        }
+
+        .term-item:hover { 
+            border-color: rgba(139, 0, 0, 0.8);
+            box-shadow: 
+                0 25px 60px rgba(139,0,0,0.25),
+                0 0 0 1px rgba(255,0,0,0.15),
+                inset 0 0 30px rgba(139,0,0,0.08);
+            z-index: 10;
+        }
+        
+        /* Corner decoration */
+        .term-item .corner {
+            position: absolute;
+            width: 14px; height: 14px;
+            pointer-events: none;
+            z-index: 3;
+            transition: all 0.4s ease;
+        }
+        .term-item .corner-tl { top: 8px; left: 8px; border-top: 1px solid var(--blood); border-left: 1px solid var(--blood); }
+        .term-item .corner-tr { top: 8px; right: 8px; border-top: 1px solid var(--blood); border-right: 1px solid var(--blood); }
+        .term-item .corner-bl { bottom: 8px; left: 8px; border-bottom: 1px solid var(--blood); border-left: 1px solid var(--blood); }
+        .term-item .corner-br { bottom: 8px; right: 8px; border-bottom: 1px solid var(--blood); border-right: 1px solid var(--blood); }
+        .term-item:hover .corner { width: 20px; height: 20px; }
+
+        .term-id { 
+            font-family: 'Courier New', monospace; color: var(--blood); 
+            font-size: 0.75rem; letter-spacing: 0.25em; margin-bottom: 15px; 
+            display: inline-block; padding-bottom: 5px; 
+            z-index: 2; position: relative;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        .term-item:hover .term-id { opacity: 1; }
+        
+        .term-title { 
+            font-family: var(--f-head); 
+            font-size: clamp(1.6rem, 2.5vw, 2.2rem); 
+            line-height: 1.1; color: var(--text-bright); 
+            z-index: 2; position: relative; 
+            text-transform: uppercase; margin-bottom: 20px; 
+            transition: all 0.3s; 
+        }
+        .term-item:hover .term-title { 
+            text-shadow: 2px 2px 0px rgba(255,0,0,0.5), -1px -1px 0px rgba(0,200,255,0.3); 
+        }
+        
+        /* Issuer label */
+        .cert-issuer { 
+            font-family: 'Courier New', monospace; 
+            color: var(--text-dim) !important; 
+            font-size: 0.75rem; letter-spacing: 0.15em; 
+            z-index: 2; position: relative; 
+            margin-top: auto; opacity: 0.5; 
+            transition: all 0.3s;
+            border-top: 1px solid rgba(255,255,255,0.04);
+            padding-top: 15px;
+        }
+        .term-item:hover .cert-issuer { opacity: 1; color: var(--blood) !important; border-top-color: rgba(139,0,0,0.3); }
         .cert-preview { display: none !important; }
+        
+        /* Cert header with logo */
+        .cert-header { 
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 15px; 
+            z-index: 2; position: relative;
+        }
+        .cert-logo { 
+            height: 28px; width: auto; max-width: 80px; 
+            object-fit: contain; 
+            filter: grayscale(1) brightness(0.6);
+            opacity: 0.4; 
+            transition: all 0.4s ease;
+        }
+        .term-item:hover .cert-logo { 
+            opacity: 0.9; 
+            filter: grayscale(1) contrast(2) brightness(1.5) drop-shadow(0 0 8px rgba(255,0,0,0.7));
+        }
+        
+        /* Depth number decoration */
+        .cert-depth-num {
+            position: absolute; bottom: 15px; right: 20px;
+            font-family: var(--f-head); font-size: 5rem;
+            color: rgba(255,255,255,0.02);
+            line-height: 1;
+            pointer-events: none;
+            z-index: 0;
+            transition: all 0.4s ease;
+            user-select: none;
+        }
+        .term-item:hover .cert-depth-num {
+            color: rgba(139,0,0,0.08);
+        }
 
         footer { text-align: center; padding: 100px 0; position: relative; z-index: 10; }
         @media (max-width: 768px) { 
             .case-item { flex-direction: column; align-items: flex-start; -webkit-mask-image: none; padding: 20px 0; } 
             .case-metric { text-align: left; } 
             .nav-links a { display: none; } 
+            .terminal-list { grid-template-columns: 1fr; }
+            .term-item { transform: none !important; }
         }
-
 
         /* GLOBAL SHATTER CLICK EFFECT */
         .global-shatter {
@@ -955,6 +1107,49 @@ window.addEventListener('load', () => {
             gsap.to(img, { rotateX: 0, rotateY: 0, duration: 0.5, ease: "power2.out" });
         });
     });
+
+    // ─────────────────────────────────────────────
+    // 3D CERTIFICATE CARD TILT SYSTEM
+    // ─────────────────────────────────────────────
+    const certCards = document.querySelectorAll('.term-item');
+    
+    // Inject corner decorations and depth number into each card
+    let certIndex = 0;
+    certCards.forEach(card => {
+        certIndex++;
+        ['corner corner-tl', 'corner corner-tr', 'corner corner-bl', 'corner corner-br'].forEach(cls => {
+            const c = document.createElement('span');
+            c.className = cls;
+            card.appendChild(c);
+        });
+        const depthNum = document.createElement('span');
+        depthNum.className = 'cert-depth-num';
+        depthNum.textContent = String(certIndex).padStart(2, '0');
+        card.appendChild(depthNum);
+        
+        const issuerDiv = card.querySelector('div[style*="color:var(--text-dim)"]');
+        if (issuerDiv) issuerDiv.classList.add('cert-issuer');
+    });
+
+    // 3D Tilt on mousemove (skip on mobile)
+    if (window.matchMedia('(pointer: fine)').matches) {
+        certCards.forEach(card => {
+            const strength = 12;
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const cx = rect.width / 2;
+                const cy = rect.height / 2;
+                const rotY = ((x - cx) / cx) * strength;
+                const rotX = -((y - cy) / cy) * strength;
+                card.style.transform = `perspective(800px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.03, 1.03, 1.03)`;
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+            });
+        });
+    }
 });
 </script>
 </body>
