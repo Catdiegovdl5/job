@@ -17,6 +17,13 @@
     <script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js" defer></script>
 
     <style>
+        
+        /* SPA TABS */
+        .tab-content { display: none; opacity: 0; pointer-events: none; transition: opacity 0.5s ease-in-out; }
+        .tab-content.tab-active { display: block; opacity: 1; pointer-events: auto; animation: fadeUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
+        .active-tab { color: var(--text-bright); text-shadow: var(--glow); border-bottom: 1px solid var(--text-bright); }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
         /* ─────────────────────────────────────────────
            RESET & SHADOW THEME
         ───────────────────────────────────────────── */
@@ -54,11 +61,8 @@
             cursor: pointer;
         }
         
-        body.heavy-glitch {
-            animation: screen-tear 0.2s infinite;
-        }
-        @keyframes screen-tear {
-            0% { filter: hue-rotate(0deg) contrast(1); transform: translateX(0); }
+        
+        
             25% { filter: hue-rotate(90deg) contrast(2) invert(0.2); transform: translateX(-5px); }
             50% { filter: hue-rotate(-90deg) contrast(3); transform: translateX(5px); }
             75% { filter: hue-rotate(180deg) contrast(1); transform: translateY(-5px); }
@@ -267,11 +271,11 @@
 <header>
     <div class="logo">DG<span class="blood-dot">.</span></div>
     <nav class="nav-links">
-        <a href="#work" class="link-glow interact-snd">ARQUIVOS</a>
-        <a href="#stats" class="link-glow interact-snd">TELEMETRIA</a>
-        <button id="btn-audio" class="btn-audio active">[ SILENCIAR AURA ]</button>
-        <button id="btn-pulse" class="btn-audio">[ PULSAR SISTEMA ]</button>
-    </nav>
+            <a href="#" data-target="tab-home" class="link-glow interact-snd tab-link active-tab">[ INÍCIO ]</a>
+            <a href="#" data-target="tab-engenharia" class="link-glow interact-snd tab-link">[ PROJETOS ]</a>
+            <a href="#" data-target="tab-qualificacao" class="link-glow interact-snd tab-link">[ CERTIFICADOS ]</a>
+            <button id="btn-pulse" class="btn-audio interact-snd">[ PULSAR SISTEMA ]</button>
+        </nav>
 </header>
 
 <main>
@@ -636,6 +640,10 @@
             </a>
 </div>
 </section>
+    <div class="next-step-wrap wrap" style="text-align: center; padding-bottom: 100px;">
+        <button data-target="tab-home" class="tab-link btn-audio interact-snd" style="font-size: 1rem; padding: 15px 30px; letter-spacing: 0.2em; background: transparent; color: var(--text-bright); border: 1px solid var(--blood); cursor: pointer; text-transform: uppercase;">[ RETORNAR AO INÍCIO ]</button>
+    </div>
+</div>
 
 </main>
 
@@ -851,95 +859,40 @@ window.addEventListener('load', () => {
     document.querySelectorAll('.interact-snd').forEach(el => { el.addEventListener('mouseenter', AudioEngine.playHoverSound); });
 
     // ─────────────────────────────────────────────
-    // THE HIJACK SEQUENCE (SURPRISE!)
-    // ─────────────────────────────────────────────
+    // OVERLAY INIT E TABS LOGIC
     const overlay = document.getElementById('enter-overlay');
+    overlay.querySelector('.system-warning').textContent = '[ INICIAR SESSÃO ]';
     
-    function preventScroll(e) { e.preventDefault(); }
-    
-    function strikeTarget(selector) {
-        return new Promise(resolve => {
-            const target = document.querySelector(selector);
-            if(!target) return resolve();
-            
-            // Move cursor to target
-            const rect = target.getBoundingClientRect();
-            tgX = rect.left + rect.width / 2;
-            tgY = rect.top + rect.height / 2;
-
-            let resolved = false;
-            const completeAction = () => {
-                if(resolved) return;
-                resolved = true;
-                
-                // Update tgY based on new scroll position
-                const newRect = target.getBoundingClientRect();
-                tgY = newRect.top + newRect.height / 2;
-                
-                // SHATTER!
-                setTimeout(() => {
-                    const shatter = target.querySelector('.shatter-glass');
-                    if(shatter) {
-                        shatter.style.opacity = '1';
-                        gsap.to(shatter, {opacity: 0, duration: 1.5, delay: 0.2, ease: "power2.in"});
-                    }
-                    AudioEngine.playShatterSound();
-                    document.body.classList.add('heavy-glitch');
-                    setTimeout(() => document.body.classList.remove('heavy-glitch'), 150);
-                    setTimeout(resolve, 800); // Pause before next move
-                }, 500); // Time for cursor to "arrive"
-            };
-
-            // Scroll to target
-            lenis.scrollTo(target, { 
-                offset: -100, 
-                duration: 1.5, 
-                onComplete: completeAction 
-            });
-            
-            // Failsafe: Libera a trava caso a rolagem falhe em celulares
-            setTimeout(completeAction, 2500);
-        });
-    }
-
-    overlay.addEventListener('click', async () => {
+    overlay.addEventListener('click', () => {
         overlay.style.opacity = '0';
         setTimeout(() => overlay.style.display = 'none', 1000);
-        
-        AudioEngine.init(); // Starts drone
-        
-        // Wait a bit, let them think it's normal
-        setTimeout(async () => {
-            isHijacked = true;
-            window.addEventListener('wheel', preventScroll, {passive: false});
-            window.addEventListener('touchmove', preventScroll, {passive: false});
-            document.body.style.pointerEvents = 'none';
-            document.body.classList.add('heavy-glitch');
-            setTimeout(() => document.body.classList.remove('heavy-glitch'), 300);
+        AudioEngine.init();
+    });
+
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabLinks.forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetId = link.getAttribute('data-target');
             
-            // The Automated Tour Strikes
-            const allCases = document.querySelectorAll('.case-item');
-            for(let i=0; i<allCases.length; i++) {
-                if(allCases[i].id) {
-                    await strikeTarget('#' + allCases[i].id);
-                }
-            }
+            tabContents.forEach(content => content.classList.remove('tab-active'));
+            document.querySelectorAll('.nav-links .tab-link').forEach(navLink => navLink.classList.remove('active-tab'));
             
-            // Final blow: WhatsApp Button
-            await strikeTarget('#btn-invocar');
+            const targetTab = document.getElementById(targetId);
+            if(targetTab) targetTab.classList.add('tab-active');
             
-            // Return Control
-            document.body.classList.add('heavy-glitch');
-            setTimeout(() => {
-                document.body.classList.remove('heavy-glitch');
-                isHijacked = false;
-                tgX = realMx; tgY = realMy;
-                window.removeEventListener('wheel', preventScroll);
-                window.removeEventListener('touchmove', preventScroll);
-                document.body.style.pointerEvents = 'auto';
-            }, 300);
-            
-        }, 1500);
+            const headerLink = document.querySelector(`.nav-links .tab-link[data-target="${targetId}"]`);
+            if(headerLink) headerLink.classList.add('active-tab');
+
+            // Reset Scroll
+            window.scrollTo(0, 0);
+            if(typeof lenis !== 'undefined') lenis.scrollTo(0, {immediate: true});
+
+            // Audio Effect
+            if(AudioEngine.playSound) AudioEngine.playSound(300, 'sine', 0.1);
+        });
     });
 
     // Global Click to Shatter
