@@ -75,14 +75,7 @@
         /* ─────────────────────────────────────────────
            ENTER OVERLAY (For Audio Unlock)
         ───────────────────────────────────────────── */
-        #enter-overlay {
-            position: fixed; inset: 0; z-index: 100000;
-            background: #000; display: flex; flex-direction: column;
-            align-items: center; justify-content: center;
-            cursor: pointer; transition: opacity 1s, visibility 1s;
-        }
-        #enter-overlay p { margin-top: 20px; font-family: var(--f-body); font-weight: 800; letter-spacing: 0.3em; font-size: 0.8rem; color: var(--text-dim); animation: pulse 1s infinite; }
-        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
 
         /* ─────────────────────────────────────────────
            BACKGROUND ATMOSPHERE
@@ -253,10 +246,7 @@
 </head>
 <body>
 
-<div id="enter-overlay">
-    <h1 class="display glow" style="font-size:3rem;">INICIAR CONEXÃO</h1>
-    <p>[ CLIQUE PARA PERMITIR ACESSO ]</p>
-</div>
+
 
 <!-- Atmosphere -->
 <canvas id="ash-canvas"></canvas>
@@ -896,7 +886,7 @@ window.addEventListener('load', () => {
 
     // Global Click to Shatter
     window.addEventListener('mousedown', (e) => {
-        if (e.target.id === 'enter-overlay' || document.body.style.pointerEvents === 'none') return;
+        if (document.body.style.pointerEvents === 'none') return;
         
         const shatter = document.createElement('div');
         shatter.className = 'global-shatter';
