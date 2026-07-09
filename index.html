@@ -9,7 +9,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- GSAP & Lenis -->
     <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
@@ -292,53 +292,79 @@
         }
 
         .flip-id {
-            font-family: 'Courier New', monospace;
-            font-size: 0.65rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 600;
             letter-spacing: 0.2em;
             color: rgba(139,0,0,0.8);
             z-index: 2;
+            text-transform: uppercase;
+        }
+
+        /* Front top row: category icon + ID side by side */
+        .flip-front-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 2;
+            margin-bottom: 4px;
+        }
+
+        /* Category icon badge */
+        .flip-cat-icon {
+            font-size: 1.4rem;
+            line-height: 1;
+            filter: drop-shadow(0 0 8px rgba(255,0,0,0.5));
+            transition: transform 0.3s ease;
+        }
+        .flip-card:hover .flip-cat-icon {
+            transform: scale(1.15) rotate(-5deg);
         }
 
         .flip-logo-wrap {
             flex: 1;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
-            padding: 10px 0;
+            justify-content: center;
+            padding: 14px 0;
             z-index: 2;
         }
 
         .flip-logo {
-            height: 36px;
-            max-width: 110px;
+            height: 44px;
+            max-width: 130px;
             object-fit: contain;
-            filter: grayscale(1) brightness(0.5);
+            filter: grayscale(1) brightness(0.4);
             transition: all 0.4s ease;
         }
         .flip-card:hover .flip-logo {
-            filter: grayscale(0) brightness(1.2) drop-shadow(0 0 12px rgba(255,80,80,0.7));
+            filter: grayscale(0) brightness(1.2) drop-shadow(0 0 14px rgba(255,80,80,0.8));
+            transform: scale(1.05);
         }
 
         .flip-title {
-            font-family: var(--f-head);
-            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            font-family: 'Inter', sans-serif;
+            font-size: clamp(0.85rem, 1.8vw, 1.1rem);
+            font-weight: 700;
             color: var(--text-bright);
-            line-height: 1.1;
-            letter-spacing: 0.05em;
+            line-height: 1.2;
+            letter-spacing: 0.03em;
             z-index: 2;
             transition: text-shadow 0.3s;
         }
         .flip-card:hover .flip-title {
-            text-shadow: 0 0 20px rgba(255,0,0,0.6), 0 0 40px rgba(255,0,0,0.2);
+            text-shadow: 0 0 16px rgba(255,0,0,0.6), 0 0 32px rgba(255,0,0,0.2);
         }
 
         .flip-issuer {
-            font-family: 'Courier New', monospace;
-            font-size: 0.65rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 500;
             color: var(--text-muted);
-            letter-spacing: 0.15em;
-            margin-top: 10px;
+            letter-spacing: 0.12em;
+            margin-top: 6px;
             z-index: 2;
+            text-transform: uppercase;
         }
 
         .flip-hint {
@@ -379,32 +405,50 @@
         }
 
         .flip-back-title {
-            font-family: var(--f-head);
-            font-size: 1.1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 700;
             color: var(--blood);
-            letter-spacing: 0.08em;
-            line-height: 1.2;
-            text-shadow: 0 0 15px rgba(255,0,0,0.4);
+            letter-spacing: 0.06em;
+            line-height: 1.3;
+            text-shadow: 0 0 12px rgba(255,0,0,0.4);
             z-index: 2;
+            margin-bottom: 10px;
         }
 
-        .flip-desc {
-            font-family: var(--f-body);
-            font-size: 0.78rem;
-            color: var(--text-dim);
-            text-transform: none;
-            line-height: 1.6;
+        /* Skill tags container */
+        .flip-skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
             flex: 1;
-            padding: 12px 0;
+            align-content: flex-start;
+            padding: 4px 0;
             z-index: 2;
+        }
+        .flip-skill-tag {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.58rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            padding: 3px 8px;
+            border: 1px solid rgba(139,0,0,0.5);
+            color: rgba(255,255,255,0.8);
+            background: rgba(139,0,0,0.12);
+            border-radius: 2px;
+            text-transform: uppercase;
+            white-space: nowrap;
         }
 
         .flip-back-issuer {
-            font-family: 'Courier New', monospace;
-            font-size: 0.6rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.58rem;
+            font-weight: 500;
             color: rgba(139,0,0,0.6);
             letter-spacing: 0.15em;
             z-index: 2;
+            text-transform: uppercase;
+            margin-top: 8px;
         }
 
         .flip-btn {
@@ -895,337 +939,433 @@
         <h2 class="display fade-in glitch-hover interact-snd" style="font-size: clamp(2.5rem, 6vw, 6rem); margin-bottom: 20px;">ARQUIVOS_CERTIFICADOS<span class="blood-dot">.</span></h2>
         <p style="color: var(--text-muted); margin-bottom: 50px;">[ REGISTROS DE QUALIFICAÇÃO TÉCNICA E ENGENHARIA ]</p>
 
-        <h3 class="cert-cat-title">[ INTELIGÊNCIA ARTIFICIAL ]</h3>
+        <h3 class="cert-cat-title"><span class="cat-icon">&#x1F916;</span> [ INTELIGÊNCIA ARTIFICIAL ]</h3>
         <div class="flip-grid">
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MICROSOFT_AI_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_01 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/microsoft.com" class="flip-logo" alt="MICROSOFT" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">VISÃO COMPUTACIONAL</div>
                         <div class="flip-issuer">MICROSOFT // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MICROSOFT_AI_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_01 ]</span>
+                        </div>
                         <div class="flip-back-title">VISÃO COMPUTACIONAL</div>
-                        <p class="flip-desc">Fundamentos de Computer Vision com Azure Cognitive Services.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Computer Vision</span><span class="flip-skill-tag">Azure Cognitive</span><span class="flip-skill-tag">Image Recognition</span></div>
                         <div class="flip-back-issuer">MICROSOFT // 2024</div>
-                        <a href="./certificados/01_Microsoft_Visao_Computacional.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/01_Microsoft_Visao_Computacional.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MICROSOFT_AI_02 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_02 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/microsoft.com" class="flip-logo" alt="MICROSOFT" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">PROCESSAMENTO DE LINGUAGEM NATURAL</div>
                         <div class="flip-issuer">MICROSOFT // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MICROSOFT_AI_02 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_02 ]</span>
+                        </div>
                         <div class="flip-back-title">PROCESSAMENTO DE LINGUAGEM NATURAL</div>
-                        <p class="flip-desc">NLP com Azure: análise de sentimentos, extração de entidades e tradução automática.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">NLP</span><span class="flip-skill-tag">Azure Text Analytics</span><span class="flip-skill-tag">Sentiment Analysis</span></div>
                         <div class="flip-back-issuer">MICROSOFT // 2024</div>
-                        <a href="./certificados/02_Microsoft_Processamento_de_Linguagem_Natural.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/02_Microsoft_Processamento_de_Linguagem_Natural.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MICROSOFT_AI_03 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_03 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/microsoft.com" class="flip-logo" alt="MICROSOFT" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">MINERAÇÃO DE CONHECIMENTO</div>
                         <div class="flip-issuer">MICROSOFT // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MICROSOFT_AI_03 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_03 ]</span>
+                        </div>
                         <div class="flip-back-title">MINERAÇÃO DE CONHECIMENTO</div>
-                        <p class="flip-desc">Azure Cognitive Search: indexação inteligente e busca semântica em dados não estruturados.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Azure Cognitive Search</span><span class="flip-skill-tag">Semantic Search</span><span class="flip-skill-tag">AI Indexing</span></div>
                         <div class="flip-back-issuer">MICROSOFT // 2024</div>
-                        <a href="./certificados/03_Microsoft_Mineracao_de_Conhecimento.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/03_Microsoft_Mineracao_de_Conhecimento.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MICROSOFT_AI_04 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_04 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/microsoft.com" class="flip-logo" alt="MICROSOFT" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">VISÃO GERAL DA IA GENERATIVA</div>
                         <div class="flip-issuer">MICROSOFT // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MICROSOFT_AI_04 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_04 ]</span>
+                        </div>
                         <div class="flip-back-title">VISÃO GERAL DA IA GENERATIVA</div>
-                        <p class="flip-desc">Fundamentos de LLMs, prompt engineering e deployment de modelos generativos no Azure.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">LLMs</span><span class="flip-skill-tag">Prompt Engineering</span><span class="flip-skill-tag">Generative AI</span><span class="flip-skill-tag">Azure OpenAI</span></div>
                         <div class="flip-back-issuer">MICROSOFT // 2024</div>
-                        <a href="./certificados/04_Microsoft_Visao_Geral_da_IA_Generativa.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/04_Microsoft_Visao_Geral_da_IA_Generativa.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MICROSOFT_AI_05 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_05 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/microsoft.com" class="flip-logo" alt="MICROSOFT" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">IA GENERATIVA NO AZURE</div>
                         <div class="flip-issuer">MICROSOFT // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MICROSOFT_AI_05 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_05 ]</span>
+                        </div>
                         <div class="flip-back-title">IA GENERATIVA NO AZURE</div>
-                        <p class="flip-desc">Integração de serviços de IA generativa do Azure em aplicações de produção.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Azure AI Studio</span><span class="flip-skill-tag">Model Deployment</span><span class="flip-skill-tag">RAG</span><span class="flip-skill-tag">API Integration</span></div>
                         <div class="flip-back-issuer">MICROSOFT // 2024</div>
-                        <a href="./certificados/09_Microsoft_Visao_Geral_da_IA_no_Azure.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/09_Microsoft_Visao_Geral_da_IA_no_Azure.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MICROSOFT_AI_06 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_06 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/microsoft.com" class="flip-logo" alt="MICROSOFT" onerror="this.style.display='none'">
                         </div>
-                        <div class="flip-title">IA PARA PEQUENOS E MÉDIOS NEGÓCIOS</div>
+                        <div class="flip-title">IA PARA PEQUENOS NEGÓCIOS</div>
                         <div class="flip-issuer">MICROSOFT // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MICROSOFT_AI_06 ]</span>
-                        <div class="flip-back-title">IA PARA PEQUENOS E MÉDIOS NEGÓCIOS</div>
-                        <p class="flip-desc">Estratégias práticas de adoção de IA para maximizar eficiência operacional em PMEs.</p>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F916;</span>
+                            <span class="flip-id">[ MICROSOFT_AI_06 ]</span>
+                        </div>
+                        <div class="flip-back-title">IA PARA PEQUENOS NEGÓCIOS</div>
+                        <div class="flip-skills"><span class="flip-skill-tag">IA Aplicada</span><span class="flip-skill-tag">Automação de Processos</span><span class="flip-skill-tag">Copilot</span><span class="flip-skill-tag">PMEs</span></div>
                         <div class="flip-back-issuer">MICROSOFT // 2024</div>
-                        <a href="./certificados/08_Microsoft_IA_para_PMEs.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/08_Microsoft_IA_para_PMEs.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
         </div>
-        <h3 class="cert-cat-title">[ ANÁLISE DE DADOS ]</h3>
+        <h3 class="cert-cat-title"><span class="cat-icon">&#x1F4CA;</span> [ ANÁLISE DE DADOS ]</h3>
         <div class="flip-grid">
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MICROSOFT_DATA_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4CA;</span>
+                            <span class="flip-id">[ MICROSOFT_DATA_01 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/microsoft.com" class="flip-logo" alt="MICROSOFT" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">ANÁLISE DE DADOS AVANÇADA</div>
                         <div class="flip-issuer">MICROSOFT // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MICROSOFT_DATA_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4CA;</span>
+                            <span class="flip-id">[ MICROSOFT_DATA_01 ]</span>
+                        </div>
                         <div class="flip-back-title">ANÁLISE DE DADOS AVANÇADA</div>
-                        <p class="flip-desc">Power Query, DAX avançado e modelagem de dados para análise empresarial com Excel.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Power Query</span><span class="flip-skill-tag">DAX</span><span class="flip-skill-tag">Excel Avançado</span><span class="flip-skill-tag">Modelagem de Dados</span></div>
                         <div class="flip-back-issuer">MICROSOFT // 2024</div>
-                        <a href="./certificados/05_Microsoft_Analisando_Dados_com_o_Excel.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/05_Microsoft_Analisando_Dados_com_o_Excel.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ ESCOLA_DATA_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4CA;</span>
+                            <span class="flip-id">[ ESCOLA_DATA_01 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/educacao.sp.gov.br" class="flip-logo" alt="ESCOLA DO TRABALHADOR" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">INTRODUÇÃO À ANÁLISE DE DADOS</div>
                         <div class="flip-issuer">ESCOLA DO TRABALHADOR // 2026</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ ESCOLA_DATA_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4CA;</span>
+                            <span class="flip-id">[ ESCOLA_DATA_01 ]</span>
+                        </div>
                         <div class="flip-back-title">INTRODUÇÃO À ANÁLISE DE DADOS</div>
-                        <p class="flip-desc">Fundamentos de análise de dados: coleta, limpeza, visualização e interpretação de resultados.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Análise Exploratória</span><span class="flip-skill-tag">Limpeza de Dados</span><span class="flip-skill-tag">Visualização</span></div>
                         <div class="flip-back-issuer">ESCOLA DO TRABALHADOR // 2026</div>
-                        <a href="./certificados/Certificate analise de dados.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/Certificate analise de dados.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
         </div>
-        <h3 class="cert-cat-title">[ MARKETING E PERFORMANCE ]</h3>
+        <h3 class="cert-cat-title"><span class="cat-icon">&#x1F4C8;</span> [ MARKETING E PERFORMANCE ]</h3>
         <div class="flip-grid">
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ GOOGLE_CERT_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_01 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/google.com" class="flip-logo" alt="GOOGLE" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">GOOGLE ANALYTICS IQ</div>
                         <div class="flip-issuer">GOOGLE // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ GOOGLE_CERT_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_01 ]</span>
+                        </div>
                         <div class="flip-back-title">GOOGLE ANALYTICS IQ</div>
-                        <p class="flip-desc">Individual Qualification em GA4: rastreamento avançado, funis de conversão e relatórios.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">GA4</span><span class="flip-skill-tag">Funis de Conversão</span><span class="flip-skill-tag">Audiências</span><span class="flip-skill-tag">Relatórios</span></div>
                         <div class="flip-back-issuer">GOOGLE // 2024</div>
-                        <a href="./certificados/Certificação do Google Analytics.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/Certificação do Google Analytics.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ GOOGLE_CERT_02 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_02 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/google.com" class="flip-logo" alt="GOOGLE" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">GOOGLE ADS: REDE DE PESQUISA</div>
                         <div class="flip-issuer">GOOGLE // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ GOOGLE_CERT_02 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_02 ]</span>
+                        </div>
                         <div class="flip-back-title">GOOGLE ADS: REDE DE PESQUISA</div>
-                        <p class="flip-desc">Campanhas de busca pagas: lances, qualidade de anúncio e otimização de ROI em pesquisa.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Search Ads</span><span class="flip-skill-tag">Smart Bidding</span><span class="flip-skill-tag">Qualidade de Anúncio</span><span class="flip-skill-tag">ROI</span></div>
                         <div class="flip-back-issuer">GOOGLE // 2024</div>
-                        <a href="./certificados/Certificação em rede de Pesquisa do Google Ads.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/Certificação em rede de Pesquisa do Google Ads.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ GOOGLE_CERT_03 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_03 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/google.com" class="flip-logo" alt="GOOGLE" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">GOOGLE ADS: REDE DE DISPLAY</div>
                         <div class="flip-issuer">GOOGLE // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ GOOGLE_CERT_03 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_03 ]</span>
+                        </div>
                         <div class="flip-back-title">GOOGLE ADS: REDE DE DISPLAY</div>
-                        <p class="flip-desc">Criação e otimização de campanhas display: segmentação por audiência e remarketing.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Display Ads</span><span class="flip-skill-tag">Remarketing</span><span class="flip-skill-tag">Segmentação de Audiência</span></div>
                         <div class="flip-back-issuer">GOOGLE // 2024</div>
-                        <a href="./certificados/Certificação em Display do Google Ads.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/Certificação em Display do Google Ads.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ GOOGLE_CERT_04 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_04 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/google.com" class="flip-logo" alt="GOOGLE" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">GOOGLE ADS: CAMPANHAS DE VÍDEO</div>
                         <div class="flip-issuer">GOOGLE // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ GOOGLE_CERT_04 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_04 ]</span>
+                        </div>
                         <div class="flip-back-title">GOOGLE ADS: CAMPANHAS DE VÍDEO</div>
-                        <p class="flip-desc">YouTube Ads: formatos de vídeo, segmentação demográfica e otimização de CPV.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">YouTube Ads</span><span class="flip-skill-tag">CPV</span><span class="flip-skill-tag">Formatos de Vídeo</span><span class="flip-skill-tag">Brand Safety</span></div>
                         <div class="flip-back-issuer">GOOGLE // 2024</div>
-                        <a href="./certificados/Certificação em campanhas de vídeo no Google Ads.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/Certificação em campanhas de vídeo no Google Ads.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ GOOGLE_CERT_05 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_05 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/google.com" class="flip-logo" alt="GOOGLE" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">GOOGLE ADS: MÉTRICAS</div>
                         <div class="flip-issuer">GOOGLE // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ GOOGLE_CERT_05 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4C8;</span>
+                            <span class="flip-id">[ GOOGLE_CERT_05 ]</span>
+                        </div>
                         <div class="flip-back-title">GOOGLE ADS: MÉTRICAS</div>
-                        <p class="flip-desc">Mensuração de campanhas: atribuição, métricas de conversão e otimização baseada em dados.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Atribuição</span><span class="flip-skill-tag">ROAS</span><span class="flip-skill-tag">Mensuração</span><span class="flip-skill-tag">Conversão Offline</span></div>
                         <div class="flip-back-issuer">GOOGLE // 2024</div>
-                        <a href="./certificados/Certificação em métricas do Google Ads.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/Certificação em métricas do Google Ads.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
         </div>
-        <h3 class="cert-cat-title">[ DESENVOLVIMENTO WEB ]</h3>
+        <h3 class="cert-cat-title"><span class="cat-icon">&#x1F4BB;</span> [ DESENVOLVIMENTO WEB ]</h3>
         <div class="flip-grid">
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MICROSOFT_DEV_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4BB;</span>
+                            <span class="flip-id">[ MICROSOFT_DEV_01 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/microsoft.com" class="flip-logo" alt="MICROSOFT" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">DESENVOLVIMENTO WEB (HTML/CSS/JS)</div>
                         <div class="flip-issuer">MICROSOFT // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MICROSOFT_DEV_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4BB;</span>
+                            <span class="flip-id">[ MICROSOFT_DEV_01 ]</span>
+                        </div>
                         <div class="flip-back-title">DESENVOLVIMENTO WEB (HTML/CSS/JS)</div>
-                        <p class="flip-desc">Construção de sites interativos do zero com HTML5, CSS3 e JavaScript moderno.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">HTML5</span><span class="flip-skill-tag">CSS3</span><span class="flip-skill-tag">JavaScript</span><span class="flip-skill-tag">Layouts Responsivos</span></div>
                         <div class="flip-back-issuer">MICROSOFT // 2024</div>
-                        <a href="./certificados/06_Microsoft_Crie_um_Site_HTML_CSS_JS.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/06_Microsoft_Crie_um_Site_HTML_CSS_JS.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
         </div>
-        <h3 class="cert-cat-title">[ VENDAS E EDUCAÇÃO FINANCEIRA ]</h3>
+        <h3 class="cert-cat-title"><span class="cat-icon">&#x1F4B0;</span> [ VENDAS E EDUCAÇÃO FINANCEIRA ]</h3>
         <div class="flip-grid">
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MICROSOFT_FIN_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4B0;</span>
+                            <span class="flip-id">[ MICROSOFT_FIN_01 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/microsoft.com" class="flip-logo" alt="MICROSOFT" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">EDUCAÇÃO FINANCEIRA COM EXCEL</div>
                         <div class="flip-issuer">MICROSOFT // 2024</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MICROSOFT_FIN_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4B0;</span>
+                            <span class="flip-id">[ MICROSOFT_FIN_01 ]</span>
+                        </div>
                         <div class="flip-back-title">EDUCAÇÃO FINANCEIRA COM EXCEL</div>
-                        <p class="flip-desc">Gestão financeira pessoal com Excel: orçamento, planejamento e análise de investimentos.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Orçamento Pessoal</span><span class="flip-skill-tag">Planejamento</span><span class="flip-skill-tag">Excel Financeiro</span></div>
                         <div class="flip-back-issuer">MICROSOFT // 2024</div>
-                        <a href="./certificados/01. Educação Financeira Usando o Excel - Módulo 1 - Nosso Relacionamento com Dinheiro.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/01. Educação Financeira Usando o Excel - Módulo 1 - Nosso Relacionamento com Dinheiro.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
             <div class="flip-card">
                 <div class="flip-card-inner">
                     <div class="flip-front">
-                        <span class="flip-id">[ MEETIME_SDR_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4B0;</span>
+                            <span class="flip-id">[ MEETIME_SDR_01 ]</span>
+                        </div>
                         <div class="flip-logo-wrap">
                             <img src="https://logo.clearbit.com/meetime.com.br" class="flip-logo" alt="MEETIME" onerror="this.style.display='none'">
                         </div>
                         <div class="flip-title">CERTIFICADO SDR</div>
                         <div class="flip-issuer">MEETIME // 2026</div>
-                        <div class="flip-hint">↻ HOVER PARA DETALHES</div>
+                        <div class="flip-hint">&#x21BB; HOVER PARA DETALHES</div>
                     </div>
                     <div class="flip-back">
-                        <span class="flip-id">[ MEETIME_SDR_01 ]</span>
+                        <div class="flip-front-top">
+                            <span class="flip-cat-icon">&#x1F4B0;</span>
+                            <span class="flip-id">[ MEETIME_SDR_01 ]</span>
+                        </div>
                         <div class="flip-back-title">CERTIFICADO SDR</div>
-                        <p class="flip-desc">Sales Development Representative: prospecção ativa, cold calling e qualificação de leads B2B.</p>
+                        <div class="flip-skills"><span class="flip-skill-tag">Prospecção Ativa</span><span class="flip-skill-tag">Cold Calling</span><span class="flip-skill-tag">BANT</span><span class="flip-skill-tag">CRM</span><span class="flip-skill-tag">SDR</span></div>
                         <div class="flip-back-issuer">MEETIME // 2026</div>
-                        <a href="./certificados/Diego Antonio de jesus santos - 2026-07-08.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO → ]</a>
+                        <a href="./certificados/Diego Antonio de jesus santos - 2026-07-08.pdf" target="_blank" class="flip-btn">[ ABRIR CERTIFICADO &#x2192; ]</a>
                     </div>
                 </div>
             </div>
