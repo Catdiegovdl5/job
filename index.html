@@ -62,12 +62,7 @@
         }
         
         
-        
-            25% { filter: hue-rotate(90deg) contrast(2) invert(0.2); transform: translateX(-5px); }
-            50% { filter: hue-rotate(-90deg) contrast(3); transform: translateX(5px); }
-            75% { filter: hue-rotate(180deg) contrast(1); transform: translateY(-5px); }
-            100% { filter: hue-rotate(0deg) contrast(1); transform: translateX(0); }
-        }
+
 
         ::selection { background: var(--text-bright); color: var(--bg); }
         ::-webkit-scrollbar { width: 0; }
@@ -83,13 +78,7 @@
         #ash-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(circle at 50% 30%, #0a0a0a 0%, #000000 70%); }
         .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none; box-shadow: inset 0 0 200px rgba(0,0,0,1), inset 0 0 400px rgba(0,0,0,1); }
 
-        /* ─────────────────────────────────────────────
-            pointer-events: none; z-index: 10000;
-            transform: translate(-50%, -50%); will-change: transform;
-            transition: opacity 0.2s, background 0.2s, box-shadow 0.2s;
-            opacity: 0.5;
-        }
-        @media (pointer: coarse) { #cursor-glow, #cursor-dot { display: none; } }
+
 
         /* ─────────────────────────────────────────────
            TYPOGRAPHY & UTILS
@@ -242,6 +231,13 @@
             .nav-links a { display: none; } 
         }
 
+
+        /* GLOBAL SHATTER CLICK EFFECT */
+        .global-shatter {
+            position: fixed; pointer-events: none; z-index: 9999;
+            width: 60px; height: 60px; border: 2px solid var(--blood);
+            border-radius: 50%; opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -264,11 +260,13 @@
             <a href="#" data-target="tab-home" class="link-glow interact-snd tab-link active-tab">[ INÍCIO ]</a>
             <a href="#" data-target="tab-engenharia" class="link-glow interact-snd tab-link">[ PROJETOS ]</a>
             <a href="#" data-target="tab-qualificacao" class="link-glow interact-snd tab-link">[ CERTIFICADOS ]</a>
+            <button id="btn-audio" class="btn-audio interact-snd">[ ATIVAR AURA ]</button>
             <button id="btn-pulse" class="btn-audio interact-snd">[ PULSAR SISTEMA ]</button>
         </nav>
 </header>
 
 <main>
+<div id="tab-home" class="tab-content tab-active">
     <!-- HERO -->
     <section class="sec-vh wrap">
         <h1 class="display glow glitch-hover interact-snd" style="margin-bottom: -2vw;">ENGENHARIA DE</h1>
@@ -301,6 +299,13 @@
         </div>
     </section>
 
+
+    <div class="next-step-wrap wrap" style="text-align: center; padding: 80px 0;">
+        <button data-target="tab-engenharia" class="tab-link btn-audio interact-snd" style="font-size: 1rem; padding: 15px 30px; letter-spacing: 0.2em; background: transparent; color: var(--text-bright); border: 1px solid var(--blood); cursor: pointer; text-transform: uppercase; font-family: var(--f-body); font-weight: 800;">[ AVANÇAR PARA PROJETOS -> ]</button>
+    </div>
+</div>
+
+    <div id="tab-engenharia" class="tab-content">
     <!-- CASES -->
     <section id="work" class="wrap sec-py">
         <h2 class="display fade-in glitch-hover interact-snd" style="font-size: clamp(3rem, 8vw, 8rem); margin-bottom: 50px;">OPERAÇÕES_COMPROVADAS<span class="blood-dot">.</span></h2>
@@ -428,6 +433,13 @@
         </div>
     </section>
 
+
+    <div class="next-step-wrap wrap" style="text-align: center; padding: 80px 0;">
+        <button data-target="tab-qualificacao" class="tab-link btn-audio interact-snd" style="font-size: 1rem; padding: 15px 30px; letter-spacing: 0.2em; background: transparent; color: var(--text-bright); border: 1px solid var(--blood); cursor: pointer; text-transform: uppercase; font-family: var(--f-body); font-weight: 800;">[ AVANÇAR PARA CERTIFICADOS -> ]</button>
+    </div>
+</div>
+
+    <div id="tab-qualificacao" class="tab-content">
     <!-- CERTIFICADOS -->
     <section id="certificados" class="wrap sec-py">
         <h2 class="display fade-in glitch-hover interact-snd" style="font-size: clamp(2.5rem, 6vw, 6rem); margin-bottom: 20px;">ARQUIVOS_CERTIFICADOS<span class="blood-dot">.</span></h2>
@@ -632,6 +644,11 @@
 </section>
     <div class="next-step-wrap wrap" style="text-align: center; padding-bottom: 100px;">
         <button data-target="tab-home" class="tab-link btn-audio interact-snd" style="font-size: 1rem; padding: 15px 30px; letter-spacing: 0.2em; background: transparent; color: var(--text-bright); border: 1px solid var(--blood); cursor: pointer; text-transform: uppercase;">[ RETORNAR AO INÍCIO ]</button>
+    </div>
+</div>
+
+    <div class="next-step-wrap wrap" style="text-align: center; padding: 80px 0;">
+        <button data-target="tab-home" class="tab-link btn-audio interact-snd" style="font-size: 1rem; padding: 15px 30px; letter-spacing: 0.2em; background: transparent; color: var(--text-bright); border: 1px solid var(--blood); cursor: pointer; text-transform: uppercase; font-family: var(--f-body); font-weight: 800;">[ RETORNAR AO INÍCIO ]</button>
     </div>
 </div>
 
