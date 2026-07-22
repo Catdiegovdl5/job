@@ -1,0 +1,14 @@
+Análise recebida.
+
+O cenário é claro: você atua forte com **Inteligência Artificial, Automação, Criação de Conteúdo, Edição de Vídeo, Marketing Digital, Desenvolvimento Web e Estratégia de Mídia Social**. As plataformas alvo são **Workana, Upwork e 99Freelas**. O destino dos alertas é o seu **Telegram** (configurado com o bot @mira262005_bot e o token fornecido).
+
+Para colocar esse sistema em produção, utilizarei uma arquitetura Python rodando de forma ininterrupta (em Docker ou cloud). O motor de extração fará o web scraping estratégico dessas 3 plataformas, focando em projetos que exigem suas skills específicas.
+
+Para refinarmos a automação e evitarmos ruído no seu Telegram, defina os parâmetros finais de filtragem:
+1. Qual o orçamento mínimo (budget) que justifica o alerta? (Ex: acima de R$ 500 no Workana / $100 no Upwork).
+2. Existe algum idioma restritivo além de Português e Inglês?
+3. Há algum tipo de projeto que você **NÃO** quer receber de forma alguma?
+
+Passe esses 3 pontos e o script de extração e alerta começa a ser codificado.
+
+Diego

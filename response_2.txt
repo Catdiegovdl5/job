@@ -1,0 +1,13 @@
+Arquitetura analisada.
+
+O Upwork via RSS (feedparser) é uma tática excelente, rápida e não sofre ban. A lógica de filtros para orçamento, idiomas e "Shadow Ban" de palavras-chave também está perfeitamente alinhada para não enviar lixo para o seu Telegram.
+
+Porém, a extração com `requests` e `BeautifulSoup` no Workana vai colidir com o Cloudflare em menos de 48 horas. Eles utilizam bloqueio ativo de fingerprint e a injeção de Headers simples não sustenta o robô a longo prazo.
+
+A solução definitiva que utilizo para raspar o Workana (como já estruturado no meu arsenal base de automação web) não depende de Requests. O motor deve escalar para conectar via protocolo CDP (Chrome DevTools Protocol) em uma instância ativa do Brave Browser. Isso cria um fingerprint indetectável porque o scraping ocorre diretamente na camada de rede de um navegador real logado.
+
+Instale e rode o seu bot com a versão atual para validar a entrega dos alertas no Telegram. Assim que o Cloudflare derrubar o acesso do Workana, faremos a transição imediata do motor de extração para Playwright conectado via CDP, assumindo o controle total sem acionar os gatilhos antibot.
+
+Mantenha o monitoramento.
+
+Diego

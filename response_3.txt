@@ -1,0 +1,14 @@
+Status alinhado.
+
+O setup de dependências está correto. No entanto, minha função como Arquiteto de Automação é projetar o ecossistema e fornecer a estratégia. A execução e inserção de tokens de segurança (Telegram Bot Token e Chat ID) devem ser realizadas estritamente por você no seu ambiente local. Não rodo scripts de validação de clientes ou insiro credenciais em código alheio.
+
+Insira as chaves, inicie o motor no seu PowerShell e confirme o recebimento do primeiro lote de projetos no Telegram.
+
+Para fechar a arquitetura da V1 com nível enterprise, falta apenas um elemento: **Deduplicação Persistente**.
+A automação vai rodar a cada 20 minutos. Se um projeto ficar ativo por 3 horas, o seu feedparser ou o requests vão extrair o mesmo link 9 vezes, inundando o seu Telegram com alertas repetidos.
+
+A solução imediata é implementar um banco de dados leve (`sqlite3`) ou até um arquivo JSON (`vagas_enviadas.json`) para armazenar os IDs das vagas já disparadas. O script deve consultar essa base antes do envio do `requests.post` para o Telegram. Se o ID constar na base, ele pula.
+
+Valide o fluxo de envio e instale a barreira de repetição. Assim que o Cloudflare barrar o Workana, viramos a chave para o CDP.
+
+Diego
